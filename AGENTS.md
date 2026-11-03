@@ -185,13 +185,13 @@ Este harness no asume ningún país, idioma o marco regulatorio por defecto — 
 
 ## Comandos de proyecto
 
-Aún no hay código ni `package.json`: los comandos no están definidos y no se deben inventar. Cuando existan, registrarlos aquí; el comando único de verificación (lint + tests + build) debe ser el mismo que corre en CI.
+`npm run verify` es el comando único de verificación (lint + typecheck + tests + build) y el mismo que correrá CI.
 
 ```bash
-<comando de test>
-<comando de lint>
-<comando de build/dev>
-<comando único de verificación: lint + tests + build>
+npm test             # tests
+npm run lint         # lint (Biome)
+npm run build        # build
+npm run verify       # verificación única: lint + typecheck + tests + build
 ```
 
 ## Equipo de subagentes especializados

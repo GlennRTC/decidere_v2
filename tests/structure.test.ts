@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 
 const read = (path: string): string =>
   readFileSync(new URL(path, import.meta.url), "utf8");
@@ -50,4 +52,18 @@ test("verify chains lint, typecheck, test and build with &&", () => {
 
 test("test runs through the workspaces", () => {
   assert.ok(pkg().scripts.test.includes("--workspaces"));
+});
+
+test("init.sh exits 0 and says so when apps/api is not scaffolded", {
+  skip: existsSync(new URL("../apps/api", import.meta.url)),
+}, () => {
+  const result = spawnSync(
+    "bash",
+    [fileURLToPath(new URL("../scripts/init.sh", import.meta.url))],
+    {
+      encoding: "utf8",
+    },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.includes("apps/api"), result.stdout);
 });

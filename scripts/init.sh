@@ -13,6 +13,11 @@ if [ ! -f package.json ]; then
   exit 0
 fi
 
+if [ ! -f apps/api/package.json ]; then
+  echo "init.sh: apps/api not scaffolded yet -- API skeleton pending (feature F032). Nothing to start."
+  exit 0
+fi
+
 echo "== 1. dependencies =="
 npm install
 
