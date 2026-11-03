@@ -4,7 +4,7 @@
 
 ## Intent
 
-Break the Decidere MVP (sepsis/infection alerts in the ED, Colombia, public demo with synthetic data) into small, verifiable features ordered by dependency, starting with a vertical slice of the central flow: `POST /v1/messages` → mapper → rules engine → certainty → response. WebApp, rule-evaluation viewer and analytics come after.
+Break the Decidere MVP (sepsis/infection alerts in the ED, public demo with synthetic data; first deployment and reference market: Colombia, but the design does not depend on any one jurisdiction) into small, verifiable features ordered by dependency, starting with a vertical slice of the central flow: `POST /v1/messages` → mapper → rules engine → certainty → response. WebApp, rule-evaluation viewer and analytics come after.
 
 ## Decisions (user)
 
@@ -67,7 +67,7 @@ Everything in AGENTS.md "Fuera del alcance". Also: no rule editor in the app, no
 ## Open (clinician or lawyer)
 
 - Operational definition of "suspected infection"; whether qSOFA ≥ 2 alone is critical; τ and margin bands; PaCO2/bands in SIRS; excluded populations.
-- Data residency and international transfer (Law 1581); email of staff as personal data; whether a demo with clinical alerts is already SaMD.
+- Data residency and international transfer under the legal framework of each deployment (first one: Colombia, Law 1581); email of staff as personal data; whether a demo with clinical alerts is already SaMD.
 - Whether to downgrade is out: resolved. Remaining: what "confirm" means for the "requires confirmation" flag and who may act on it.
 
 ## Left to the builder

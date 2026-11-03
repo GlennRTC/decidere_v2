@@ -197,7 +197,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "DIVIDIDA en F054, F055. | Notas previas: DECIDIDO 2026-11-03: Supabase Postgres. Pendientes: región/residencia de datos (Ley 1581) y regla de tests sobre la base de datos."
+      "notes": "DIVIDIDA en F054, F055. | Notas previas: DECIDIDO 2026-11-03: Supabase Postgres. Pendientes: región/residencia de datos (marco legal de cada despliegue; primero: Ley 1581) y regla de tests sobre la base de datos."
     },
     {
       "id": "F013",
@@ -351,7 +351,7 @@
       "acceptance_criteria": [
         "Login y logout funcionales con usuarios demo",
         "Cada rol ve solo sus secciones; verificado en el navegador",
-        "Todos los textos de UI en el idioma del producto (Colombia: español)"
+        "Todos los textos de UI en el idioma del producto (idioma del despliegue; primero español)"
       ],
       "status": "failing",
       "priority": "P1",
@@ -436,12 +436,12 @@
       "priority": "P2",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 47. Precondiciones: F052, F053, F063/F064 según prioridad, F026, F065, y reglas aprobadas o banner explícito. Esqueleto temprano en F034. | Notas previas: Residencia de datos (Ley 1581) pendiente de decidir. Usar devops-sre."
+      "notes": "Orden 47. Precondiciones: F052, F053, F063/F064 según prioridad, F026, F065, y reglas aprobadas o banner explícito. Esqueleto temprano en F034. | Notas previas: Residencia de datos (marco legal de cada despliegue; primero: Ley 1581) pendiente de decidir. Usar devops-sre."
     },
     {
       "id": "F028",
-      "title": "Registro de requisitos previos a uso clínico (SaMD, INVIMA/FDA) y limitaciones del MVP",
-      "description": "Documento corto que declara que el MVP no es apto para uso clínico, que un software de alerta de sepsis probablemente es SaMD ante FDA e INVIMA, y lista las limitaciones conocidas (conformidad no es validación clínica, independencia de etiquetadores, <100 seeds).",
+      "title": "Registro de requisitos previos a uso clínico (SaMD, autoridades regulatorias aplicables) y limitaciones del MVP",
+      "description": "Documento corto que declara que el MVP no es apto para uso clínico, que un software de alerta de sepsis probablemente es SaMD ante las autoridades regulatorias aplicables (p. ej. FDA, INVIMA), y lista las limitaciones conocidas (conformidad no es validación clínica, independencia de etiquetadores, <100 seeds).",
       "acceptance_criteria": [
         "Documento en docs/ revisado por clinical-safety-compliance-reviewer",
         "Las limitaciones coinciden con las del reporte de F020"
@@ -542,7 +542,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 6. Parte de F027. Residencia de datos (Ley 1581) requiere criterio legal. Aprobación del usuario antes de cada despliegue."
+      "notes": "Orden 6. Parte de F027. Residencia de datos (marco legal de cada despliegue; primero: Ley 1581) requiere criterio legal. Aprobación del usuario antes de cada despliegue."
     },
     {
       "id": "F035",
@@ -932,7 +932,7 @@
       "priority": "P2",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 35. Nueva (UX). El email del personal es dato personal (Ley 1581): consultar a un abogado."
+      "notes": "Orden 35. Nueva (UX). El email del personal es dato personal (marco legal aplicable; primero: Ley 1581): consultar a un abogado."
     },
     {
       "id": "F061",
@@ -1007,7 +1007,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 46. Parte de F028. La clasificación regulatoria INVIMA/FDA queda en F028."
+      "notes": "Orden 46. Parte de F028. La clasificación regulatoria ante las autoridades aplicables (p. ej. INVIMA, FDA) queda en F028."
     },
     {
       "id": "F066",

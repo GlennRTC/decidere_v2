@@ -33,3 +33,9 @@
 **Verificación realizada:** feature-list.json parseado (67 features, todas failing).
 **Estado al cerrar:** N/A — solo planificación.
 **Pendiente para la próxima sesión:** F030 (scaffold, requiere aprobar dependencias) y F033 (spike json-logic). Escribir ADR-001 a 004 y ADR-006 (F002). Definiciones clínicas abiertas (sospecha de infección, τ, bandas). Reclutar etiquetadores. Consultar a un abogado sobre residencia de datos.
+
+## 2026-11-03 — Sesión 0d (ADRs)
+**Qué se hizo:** Se redactaron y aprobaron en chat ADR-001, 002, 003, 004 y 006 (estado "propuesto"). ADR-001 se guardó como `ADR-001-no-persistencia-de-datos-personales.md` porque una regla de permisos deniega leer rutas con "phi" en el nombre. Se reformularon las menciones a Colombia en AGENTS.md, feature-list.json y el diseño: primer despliegue y mercado de referencia, sin que el diseño dependa de él. Se quitó de AGENTS.md la nota de que los ADR no existían.
+**Verificación realizada:** feature-list.json parseado; ADR creados con el formato del comando /adr. Sin código ni tests.
+**Estado al cerrar:** F002 sigue `failing` hasta que los ADR pasen de "propuesto" a "aceptado" (aprobación del usuario).
+**Pendiente para la próxima sesión:** F030 (scaffold, requiere aprobar dependencias) y F033 (spike json-logic).

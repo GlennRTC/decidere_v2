@@ -9,7 +9,7 @@
 Sistema que alerta al médico de urgencias cuando un paciente presenta una condición que requiere intervención (en el MVP: sepsis o cuadro infeccioso) y explica por qué alertó. El médico atiende varios pacientes a la vez; el sistema prioriza por gravedad y muestra siempre la regla que disparó y los valores que la sustentan.
 
 - **Usuarios**: primarios, médicos de urgencias y enfermeros de turno. Secundarios, equipo clínico revisor (casos ambiguos) y administrador de la demo.
-- **Mercado**: Colombia (INVIMA como referencia regulatoria; ver "Región/mercado").
+- **Mercado**: el diseño no depende de una jurisdicción; primer despliegue y mercado de referencia: Colombia (INVIMA como referencia regulatoria; ver "Región/mercado").
 - **Hito objetivo**: un sistema de prueba recibe los seeds (decenas de casos sintéticos), clasifica todos, y el reporte automático compara contra el gold standard según las métricas de abajo.
 
 ### Flujo central (el único que debe funcionar de punta a punta)
@@ -102,7 +102,7 @@ decidere-mvp/
 - **ADR-003**: la certeza se calcula de forma determinística, sin LLM ni costo por token.
 - **ADR-004**: la API es el único punto de entrada y el motor no hace I/O.
 
-> Los ADR-001 a 004 están resumidos aquí pero aún no existen como archivos en `docs/adr/` (solo la plantilla). Pendiente: redactarlos con `/adr`.
+> Los ADR-001 a 004, ADR-005 y ADR-006 están en `docs/adr/` con estado "propuesto" hasta su aprobación.
 
 ## Protocolo de inicio de sesión (léelo primero, cada vez)
 
@@ -148,7 +148,7 @@ Una feature está terminada solo si se cumple todo:
 - Se persisten: interpretación, variables clínicas sin identificadores, mapeos, revisiones, versión de reglas.
 - Tiempo: solo offsets relativos en minutos; nunca fechas exactas ni texto libre (riesgo de reidentificación).
 - Multi-tenant: todo query/job corre con scope de un solo tenant, nunca cruza tenants.
-- Residencia de datos y marco legal aplicable: Colombia (Ley 1581 de 2012 como marco de protección de datos). Un software de alerta de sepsis probablemente califica como dispositivo médico (SaMD) ante FDA e INVIMA: no bloquea una demo con datos sintéticos, pero es requisito previo a cualquier uso clínico. Residencia concreta de Vercel/Supabase: decisión pendiente.
+- Residencia de datos y marco legal aplicable: dependen de la jurisdicción de cada despliegue; primer despliegue: Colombia (Ley 1581 de 2012 como marco de protección de datos). Un software de alerta de sepsis probablemente califica como dispositivo médico (SaMD) ante FDA e INVIMA: no bloquea una demo con datos sintéticos, pero es requisito previo a cualquier uso clínico. Residencia concreta de Vercel/Supabase: decisión pendiente.
 
 ### Certeza y derivación a revisión (determinística)
 
@@ -179,7 +179,7 @@ Si la certeza cae bajo un umbral configurable, el caso va a revisión clínica. 
 
 Este harness no asume ningún país, idioma o marco regulatorio por defecto — el dominio (salud digital) es el mismo en cualquier región, pero la ley de protección de datos, el idioma del producto, y los patrones de residencia de datos NO lo son. Regla para todos los agentes:
 
-- **Si este `AGENTS.md` (sección anterior) o el usuario especifica una región/mercado concreto**, todos los agentes deben adaptarse a esa jurisdicción: marco legal (HIPAA, GDPR, LGPD, Ley 1581 de Colombia, u otro), idioma del producto, convenciones de formato (fecha, teléfono, identificadores nacionales), y requisitos de residencia de datos. Para este proyecto: Colombia (ver "Reglas no negociables de dominio").
+- **Si este `AGENTS.md` (sección anterior) o el usuario especifica una región/mercado concreto**, todos los agentes deben adaptarse a esa jurisdicción: marco legal (HIPAA, GDPR, LGPD, Ley 1581 de Colombia, u otro), idioma del producto, convenciones de formato (fecha, teléfono, identificadores nacionales), y requisitos de residencia de datos. Para este proyecto: primer despliegue en Colombia (ver "Reglas no negociables de dominio"); el diseño no depende de ella y puede operar en varias jurisdicciones con reglas de compliance/residencia por tenant.
 - **Si no se ha especificado ninguna**, ningún agente debe asumir una por defecto (ni Estados Unidos/HIPAA, ni ninguna otra) — se trata como una decisión de producto pendiente y se señala explícitamente en vez de inventar un marco legal o un idioma.
 - Un mismo proyecto puede operar en varias jurisdicciones a la vez (ej. clientes en dos países con leyes distintas) — en ese caso el diseño debe soportar reglas de compliance/residencia por tenant, no una sola regla global.
 
