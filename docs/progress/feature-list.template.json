@@ -1,0 +1,21 @@
+{
+  "_readme": "Copia este archivo a docs/progress/feature-list.json al iniciar el proyecto (el .template.json no se edita). Formato JSON a propósito -- el modelo edita JSON con más cuidado que Markdown. Regla no negociable: solo se edita 'status' y 'notes' de una feature existente; nunca se borra o edita un test para forzar 'passing'. Toda feature nueva descubierta durante el trabajo se agrega con status 'failing', nunca se implementa sin registrar.",
+  "project": "<nombre del proyecto>",
+  "created": "<YYYY-MM-DD>",
+  "features": [
+    {
+      "id": "F001",
+      "title": "<título corto y verificable, no vago>",
+      "description": "<qué debe hacer, desde la perspectiva del usuario real -- médico, operador, paciente>",
+      "acceptance_criteria": [
+        "<criterio verificable 1>",
+        "<criterio verificable 2>"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": ""
+    }
+  ]
+}
