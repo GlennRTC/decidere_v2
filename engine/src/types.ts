@@ -49,3 +49,30 @@ export class RuleError extends Error {
     this.path = path;
   }
 }
+
+export type Input = Readonly<Record<string, unknown>>;
+export type TraceEntry =
+  | {
+      id: string;
+      kind: "leaf";
+      result: Tri;
+      observed: number | null;
+      op: Op;
+      threshold: number;
+      unit: string;
+      label: string;
+      reason?: "missing" | "invalid";
+    }
+  | { id: string; kind: "all" | "any" | "not"; result: Tri }
+  | {
+      id: string;
+      kind: "atLeast";
+      result: Tri;
+      t: number;
+      u: number;
+      f: number;
+      min: number;
+      max: number;
+    };
+export type RuleResult = { rule_id: string; result: Tri; trace: TraceEntry[] };
+export type RuleSetResult = { rules: RuleResult[]; fired: string[] };
