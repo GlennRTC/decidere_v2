@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!docs",
+      "!.claude",
+      "!.superpowers",
+      "!package-lock.json",
+      "!**/*.md"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": { "noUnusedVariables": "error" }
+    }
+  },
+  "formatter": { "enabled": true, "indentStyle": "space" }
+}

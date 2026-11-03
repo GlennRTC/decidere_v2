@@ -127,7 +127,7 @@ Si estás retomando este proyecto sin contexto de una sesión anterior, sigue es
 
 Una feature está terminada solo si se cumple todo:
 
-- [ ] Verificación: el comando único de verificación (lint + tests + build; ver "Comandos de proyecto") pasa. El mismo comando corre en CI.
+- [ ] Verificación: el comando único de verificación (lint + typecheck + tests + build; ver "Comandos de proyecto") pasa. El mismo comando corre en CI.
 - [ ] Criterios de aceptación de la feature verificados con evidencia (salida del comando, no "debería funcionar").
 - [ ] `feature-list.json` actualizado (`passing` solo si lo verificaste) y `PROGRESS.md` con lo hecho y lo pendiente.
 - [ ] Si toca datos de paciente: revisión con `/clinical-review` o el agente `clinical-safety-compliance-reviewer`.
@@ -185,13 +185,14 @@ Este harness no asume ningún país, idioma o marco regulatorio por defecto — 
 
 ## Comandos de proyecto
 
-Aún no hay código ni `package.json`: los comandos no están definidos y no se deben inventar. Cuando existan, registrarlos aquí; el comando único de verificación (lint + tests + build) debe ser el mismo que corre en CI.
+`npm run verify` es el comando único de verificación (lint + typecheck + tests + build) y el mismo que correrá CI.
 
 ```bash
-<comando de test>
-<comando de lint>
-<comando de build/dev>
-<comando único de verificación: lint + tests + build>
+npm ci               # instalar dependencias desde el lockfile
+npm test             # tests
+npm run lint         # lint (Biome)
+npm run build        # build
+npm run verify       # verificación única: lint + typecheck + tests + build
 ```
 
 ## Equipo de subagentes especializados

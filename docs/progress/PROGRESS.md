@@ -39,3 +39,11 @@
 **Verificación realizada:** feature-list.json parseado; ADR creados con el formato del comando /adr. Sin código ni tests.
 **Estado al cerrar:** F002 sigue `failing` hasta que los ADR pasen de "propuesto" a "aceptado" (aprobación del usuario).
 **Pendiente para la próxima sesión:** F030 (scaffold, requiere aprobar dependencias) y F033 (spike json-logic).
+
+## 2026-11-03 — Sesión 1 (F030: monorepo y comando único de verificación)
+**Feature(s) trabajada(s):** F030 — Monorepo con workspaces y comando único de verificación
+**Qué se hizo:** Plan en `docs/superpowers/plans/2026-11-03-f030-monorepo-verify.md`, ejecutado con un subagente por tarea y revisión por tarea más revisión final. Workspaces (`apps/*`, `packages/*`, `engine`, `tests`), TypeScript (typecheck), Biome (lint), `npm run verify` = lint && typecheck && test && build, guarda en `scripts/init.sh` y comandos registrados en `AGENTS.md`. Dependencias aprobadas por el usuario: typescript, @types/node (mayor 22), @biomejs/biome. Se reescribió el lockfile al registro público de npm.
+**Verificación realizada:** `npm run verify` exit=0 (lint, typecheck, 9/9 pruebas, build). Con un archivo de prueba con variable sin usar, `verify` termina con exit=1 en el lint y no corre ninguna prueba. `./scripts/init.sh` exit=0 con el mensaje de F032. `npm ls --workspaces` lista `@decidere/tests`.
+**Estado al cerrar:** F030 passing. Brecha aceptada: `node --test` sin archivos descubiertos sale con 0, y el descubrimiento de `*.test.ts` en Node 22.18 no está verificado; se verifica con la versión de Node fijada en F031.
+**Pendiente para la próxima sesión:** F031 (CI con `npm run verify`), F032 (API Fastify `/health`) y F033 (spike json-logic). Si `npm install` se corre con un espejo de npm configurado localmente, puede reescribir las URLs del lockfile. Decisión abierta: agregar `Bash(npm run verify*)` a los permisos de `.claude/settings.json`.
+**Commit:** 34cace8, 97779c7 (correcciones) sobre ccc91cc..706b014.

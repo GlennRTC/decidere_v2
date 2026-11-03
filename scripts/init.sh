@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # init.sh -- installs deps, starts the API in dev mode and runs an end-to-end smoke check.
 # Stack: npm workspaces (apps/api Fastify, apps/web Vite). Supabase is remote; no local DB step.
-# Until F001 (monorepo scaffold) is passing there is no package.json: the script says so and exits 0.
+# Until F030 (monorepo scaffold) is passing there is no package.json: the script says so and exits 0.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -9,7 +9,12 @@ API_PORT="${API_PORT:-3000}"
 API_URL="http://localhost:${API_PORT}"
 
 if [ ! -f package.json ]; then
-  echo "init.sh: no package.json yet -- scaffold pending (feature F001). Nothing to start."
+  echo "init.sh: no package.json yet -- scaffold pending (feature F030). Nothing to start."
+  exit 0
+fi
+
+if [ ! -f apps/api/package.json ]; then
+  echo "init.sh: apps/api not scaffolded yet -- API skeleton pending (feature F032). Run npm ci first to install dependencies. Nothing to start."
   exit 0
 fi
 

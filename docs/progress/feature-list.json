@@ -476,11 +476,11 @@
         "AGENTS.md 'Comandos de proyecto' actualizado con los comandos reales",
         "Dependencias aprobadas por el usuario antes de instalarse"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 1. Parte de F001."
+      "notes": "Orden 1. Parte de F001. | PASSING 2026-11-03: verified by running `npm run verify` (exit 0, 9/9 tests) on branch chore/f030-monorepo-verify, implementation head 97779c7. Known gap accepted by the user: bare `node --test` finding zero test files exits 0 and discovery of *.test.ts on the Node 22.18 floor is unverified (Node 22.x docs list the .ts patterns); verify on the pinned CI Node in F031. Lockfile resolves against registry.npmjs.org; a later `npm install` under a local mirror config can write mirror URLs back."
     },
     {
       "id": "F031",
