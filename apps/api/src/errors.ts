@@ -1,4 +1,5 @@
 import type { ValidationError } from "@decidere/schema";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
 export type ErrorCode =
   | "not_found"
@@ -85,4 +86,22 @@ export function codeFor(error: unknown): ErrorCode {
     // fall through
   }
   return "internal_error";
+}
+
+// Details are rebuilt as { path, code } pairs: extra properties never leave.
+// Logs only counts, never paths, body or values.
+export function replyValidationFailed(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  errors: ValidationError[],
+): FastifyReply {
+  const details = errors.map(({ path, code }) => ({ path, code }));
+  const status = STATUS.validation_failed;
+  request.log.warn(
+    { apiError: { code: "validation_failed", status, count: details.length } },
+    "request failed",
+  );
+  return reply
+    .code(status)
+    .send(errorBody("validation_failed", request.id, details));
 }
