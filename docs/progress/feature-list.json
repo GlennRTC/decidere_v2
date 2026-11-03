@@ -506,7 +506,7 @@
         "scripts/init.sh termina en exit 0 con la API arriba",
         "No hay estado en memoria entre requests"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
