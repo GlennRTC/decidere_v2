@@ -185,7 +185,7 @@ Este harness no asume ningún país, idioma o marco regulatorio por defecto — 
 
 ## Comandos de proyecto
 
-`npm run verify` es el comando único de verificación (lint + typecheck + tests + build) y el mismo que correrá CI.
+`npm run verify` es el comando único de verificación (lint + typecheck + tests + build) y el mismo que corre CI. CI además corre `npm run scan:phi` (heurísticas PHI sobre los archivos versionados) y un escaneo de secretos con gitleaks sobre todo el historial; ambos fallan el job ante un hallazgo.
 
 ```bash
 npm ci               # instalar dependencias desde el lockfile
@@ -193,6 +193,7 @@ npm test             # tests
 npm run lint         # lint (Biome)
 npm run build        # build
 npm run verify       # verificación única: lint + typecheck + tests + build
+npm run scan:phi     # escaneo PHI de archivos versionados (también en CI)
 ```
 
 ## Equipo de subagentes especializados

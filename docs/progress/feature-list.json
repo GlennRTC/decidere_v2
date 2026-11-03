@@ -491,7 +491,7 @@
         "Un secreto de prueba sintético hace fallar el escaneo",
         "El chequeo PHI corre en CI"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
