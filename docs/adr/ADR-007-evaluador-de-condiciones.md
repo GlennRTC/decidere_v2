@@ -36,7 +36,7 @@
 - El código vive en `engine/` (`defineRuleSet`, `evaluateRuleSet`, `RuleSetResult`); el Apéndice C pasa a ser histórico.
 - Límite de anidamiento 64, con la raíz en profundidad 0, fijado por test en `engine/src/define.test.ts`.
 - Los ids de traza de combinadores `combine` y `combine.N` están reservados: un id de condición no puede usarlos.
-- Límite conocido: Kleene es exacto solo si cada hoja aparece una vez por regla. Con una hoja repetida el resultado puede ser "unknown" donde existe un valor definido (p. ej. `all[a, not a]`, `any[a, not a]`). Nunca produce un valor definido erróneo, así que el error va hacia revisión. Quien redacte reglas no debe repetir una condición dentro de una regla.
+- Límite conocido: Kleene es exacto solo si cada hoja aparece una vez por regla. Con una hoja repetida el resultado puede ser "unknown" donde existe un valor definido (p. ej. `all[a, not a]`, `any[a, not a]`). Nunca produce un valor definido erróneo (con un `RuleSet` creado por `defineRuleSet`, marcado en el tipo y verificado en runtime por `evaluateRuleSet`), así que el error va hacia revisión. Quien redacte reglas no debe repetir una condición dentro de una regla.
 - Siguen en F037: el cargador YAML, la mitigación de ids posicionales y las notas de redacción.
 
 ## Apéndice A: resultados del spike (Node v26.3.0, tsc 7.0.2, json-logic-engine 5.0.7)
