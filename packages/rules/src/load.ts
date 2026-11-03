@@ -34,17 +34,35 @@ function inFile<T>(file: string, fn: () => T): T {
   }
 }
 
+// Any fs failure becomes a closed error: the errno text and the path never leave.
+function io<T>(file: string | undefined, fn: () => T): T {
+  try {
+    return fn();
+  } catch (err) {
+    if (err instanceof RuleLoadError) throw err;
+    throw new RuleLoadError({
+      code: "unreadable_entry",
+      ...(file !== undefined && { file }),
+    });
+  }
+}
+
 // Bounded read: no symlink following, regular files only, never more than MAX_BYTES + 1 bytes.
+// O_NONBLOCK keeps a FIFO swapped in after readdir from blocking open; fstat then rejects it.
 function readBounded(dir: string, name: string): Buffer {
-  const fd = fs.openSync(
-    path.join(dir, name),
-    fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW,
+  const fd = io(name, () =>
+    fs.openSync(
+      path.join(dir, name),
+      fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK,
+    ),
   );
   try {
+    if (!io(name, () => fs.fstatSync(fd).isFile()))
+      throw new RuleLoadError({ code: "unsupported_entry", file: name });
     const buf = Buffer.alloc(MAX_BYTES + 1);
     let n = 0;
     for (;;) {
-      const r = fs.readSync(fd, buf, n, buf.length - n, null);
+      const r = io(name, () => fs.readSync(fd, buf, n, buf.length - n, null));
       if (r === 0) break;
       n += r;
       if (n > MAX_BYTES)
@@ -62,7 +80,15 @@ export function loadRuleSet(
   dir: string,
   options: { variables: ReadonlySet<string> },
 ): LoadedRuleSet {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  if (
+    typeof options !== "object" ||
+    options === null ||
+    !(options.variables instanceof Set)
+  )
+    throw new RuleLoadError({ code: "invalid_options" });
+  const entries = io(undefined, () =>
+    fs.readdirSync(dir, { withFileTypes: true }),
+  );
   if (entries.length > MAX_FILES)
     throw new RuleLoadError({ code: "too_many_files" });
   const names = entries.map((e) => e.name).sort();
@@ -71,7 +97,7 @@ export function loadRuleSet(
       throw new RuleLoadError({ code: "unsupported_entry", file: e.name });
   // All sizes are enforced before any content is read.
   for (const name of names)
-    if (fs.lstatSync(path.join(dir, name)).size > MAX_BYTES)
+    if (io(name, () => fs.lstatSync(path.join(dir, name)).size) > MAX_BYTES)
       throw new RuleLoadError({ code: "file_too_large", file: name });
 
   const decoder = new TextDecoder("utf-8", { fatal: true });

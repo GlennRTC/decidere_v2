@@ -15,7 +15,9 @@ export type RuleLoadErrorCode =
   | "invalid_value"
   | "duplicate_rule_id"
   | "no_active_rules"
-  | "invalid_rule";
+  | "invalid_rule"
+  | "unreadable_entry"
+  | "invalid_options";
 
 // Fixed message per code: never a YAML value, key name or parser message.
 export const RULE_LOAD_ERROR_MESSAGES: Readonly<
@@ -38,6 +40,8 @@ export const RULE_LOAD_ERROR_MESSAGES: Readonly<
   duplicate_rule_id: "two rule files share the same rule id",
   no_active_rules: "no active rules were found",
   invalid_rule: "rule is rejected by the engine",
+  unreadable_entry: "rule directory or file could not be read",
+  invalid_options: "invalid loader options",
 };
 
 export class RuleLoadError extends Error {

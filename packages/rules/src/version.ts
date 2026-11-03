@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { RuleSet } from "@decidere/engine";
+import { RuleLoadError } from "./errors.ts";
 import type { Citation, ClinicalApproval } from "./schema.ts";
 
 export type RuleMeta = {
@@ -28,6 +29,11 @@ export function computeRuleSetVersion(
   ruleSet: RuleSet,
   meta: readonly RuleMeta[],
 ): string {
+  if (
+    meta.length !== ruleSet.length ||
+    ruleSet.some((r, i) => meta[i]?.id !== r.id)
+  )
+    throw new RuleLoadError({ code: "invalid_options" });
   const rules = ruleSet
     .map((rule, i) => ({ rule, meta: meta[i] }))
     .sort((a, b) =>
