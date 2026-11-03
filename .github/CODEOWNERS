@@ -1,0 +1,4 @@
+# Interim owner for clinical rules until a clinical reviewer exists.
+# Branch protection "Require review from Code Owners" is a repository setting
+# that must be enabled by the repository admin; this file alone does not enforce it.
+/knowledge/ @GlennRTC

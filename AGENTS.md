@@ -88,6 +88,7 @@ decidere-mvp/
 ├── apps/api/        # Fastify: ingesta POST, validación, orquestación, auth (valida JWT)
 ├── apps/web/        # React + Vite: dashboard, cola de revisión, mapeo, analítica, visor de reglas
 ├── packages/schema/ # schema del mensaje (episodios/instancias) y tipos compartidos
+├── packages/rules/  # cargador de reglas YAML: esquema cerrado, rule_set_version, approval
 ├── engine/          # evaluador puro (sin I/O): traza + certeza
 ├── knowledge/       # reglas YAML versionadas + cita de la guía
 ├── seeds/           # generador + casos simulados + clase esperada + criterio citado
