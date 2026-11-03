@@ -38,6 +38,24 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({
     logger: logging
       ? {
+          hooks: {
+            // pino fills msg from err.message when no message is given; Fastify does
+            // that (e.g. "Reply was already sent ... in <raw url>"). Use a fixed one.
+            logMethod(args, method) {
+              const first = args[0];
+              if (
+                first instanceof Error ||
+                (typeof first === "object" &&
+                  first !== null &&
+                  "err" in first &&
+                  typeof args[1] !== "string")
+              ) {
+                const obj = first instanceof Error ? { err: first } : first;
+                return method.apply(this, [obj, "request error"] as never);
+              }
+              return method.apply(this, args);
+            },
+          },
           ...(options.logStream ? { stream: options.logStream } : {}),
           serializers: {
             // Only method and path: no query string, headers or remote address.

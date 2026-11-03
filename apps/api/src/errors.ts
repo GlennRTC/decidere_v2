@@ -90,6 +90,7 @@ export function codeFor(error: unknown): ErrorCode {
 
 // Details are rebuilt as { path, code } pairs: extra properties never leave.
 // Logs only counts, never paths, body or values.
+// Always `return replyValidationFailed(...)` from async handlers.
 export function replyValidationFailed(
   request: FastifyRequest,
   reply: FastifyReply,
