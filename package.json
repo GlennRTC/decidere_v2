@@ -1,0 +1,9 @@
+{
+  "name": "decidere-mvp",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "workspaces": ["apps/*", "packages/*", "engine", "tests"]
+}
