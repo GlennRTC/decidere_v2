@@ -42,3 +42,16 @@ test("verification step is exactly npm run verify, followed by the PHI scan", ()
   assert.ok(verify >= 0, "missing verify step");
   assert.ok(scan > verify, "scan:phi must come after verify");
 });
+
+test("checkout fetches full history for secret scanning", () => {
+  assert.match(workflow(), /^\s+fetch-depth: 0$/m);
+});
+
+test("gitleaks download is verified by sha256 before it runs", () => {
+  const text = workflow();
+  const check = text.search(/sha256sum -c/);
+  const run = text.search(/gitleaks git\b/);
+  assert.match(text, /8\.30\.1/);
+  assert.ok(check >= 0, "missing sha256sum -c");
+  assert.ok(run > check, "gitleaks must run after checksum verification");
+});
