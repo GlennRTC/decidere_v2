@@ -12,10 +12,12 @@
     "tests"
   ],
   "devDependencies": {
+    "@biomejs/biome": "2.6.4",
     "@types/node": "^22.20.5",
     "typescript": "^7.0.2"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check ."
   }
 }

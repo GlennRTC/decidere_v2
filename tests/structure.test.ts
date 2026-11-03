@@ -1,6 +1,6 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { test } from "node:test";
 
 const read = (path: string): string =>
   readFileSync(new URL(path, import.meta.url), "utf8");
@@ -8,7 +8,12 @@ const read = (path: string): string =>
 const pkg = () => JSON.parse(read("../package.json"));
 
 test("root declares the agreed workspaces", () => {
-  assert.deepEqual(pkg().workspaces, ["apps/*", "packages/*", "engine", "tests"]);
+  assert.deepEqual(pkg().workspaces, [
+    "apps/*",
+    "packages/*",
+    "engine",
+    "tests",
+  ]);
 });
 
 test("root is private and pins the node engine", () => {
@@ -30,4 +35,8 @@ test("tests workspace has a test script", () => {
 
 test("root defines typecheck", () => {
   assert.equal(pkg().scripts.typecheck, "tsc -p tsconfig.json --noEmit");
+});
+
+test("root defines lint", () => {
+  assert.equal(pkg().scripts.lint, "biome check .");
 });
