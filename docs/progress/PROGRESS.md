@@ -107,18 +107,12 @@
 **Verificación realizada:** `npm run verify` exit=0 (api 53/53, rules 60/60, schema 34/34, engine 108/108, tests 32/33 con 1 omitida preexistente; Biome 3 warnings, sin errores; tsc limpio); `scan:phi` "scanned 36 files, skipped 67, hits 0, errors 0". Test de CODEOWNERS en rojo (3 fallos de 33) sin el archivo y en verde (0 fallos) con él.
 **Estado al cerrar:** F037 passing con lectura a nivel de cargador: criterios 1-2 verificados en `loadRuleSet` (YAML inválido lanza `RuleLoadError`; conectarlo antes de escuchar es F040, no hay reglas hasta F038); criterio 3 expuesto como `LoadedRuleSet.approval` (la respuesta del POST es F040); criterio 4 = CODEOWNERS presente con dueño interino. Activar "Require review from Code Owners" es un ajuste del repositorio, a cargo del usuario. Rama `feat/f037-rule-loader`, sin push: CI no corrió. Revisión final de toda la rama pendiente.
 **Dictámenes:** (1) `RuleLoadError.file` es `readonly`: el cargador relanza un `RuleLoadError` nuevo copiando code/path/line/detail con `file`. (2) Dueño interino de CODEOWNERS `@GlennRTC` hasta que exista un revisor clínico. (3) `maxAliasCount` no es opción de `parseDocument` (TS2353): se pasa a `toJS`, con un visitor de `Alias` como guarda principal; los alias se rechazan antes de expandir.
-**Pendiente / menores diferidos:**
-- T1: `parse.test.ts` ~l.246 es tautología (comparar con `RULE_LOAD_ERROR_MESSAGES.yaml_syntax`).
-- T1: la prueba de anidamiento profundo acepta `yaml_alias`; acotar a `yaml_syntax`.
-- T1: etiquetas estándar (`!!str`, `!!int '5'` da número 5) se aceptan sin aviso; el comentario "no tags" de `parse.ts` es más amplio que el comportamiento y no hay test.
-- T1: las directivas `%YAML` se ignoran; `lineAt` reescanea (aceptable).
-- T2: `checkRuleDoc` asume datos planos (getter que lanza o Proxy dan `Error` crudo; claves no enumerables y símbolos pasan); inalcanzable desde YAML, documentar "solo datos planos" y considerar `Reflect.ownKeys`.
-- T2: `e as boolean` redundante en `schema.ts`; `RuleDoc.conditions`/`combine` tipados `unknown`.
-- T2: `schema.test.ts` débil para `combine` string; faltan tests de `{any, extra}`, id de 201 caracteres y accessor/Proxy.
-- T3: errores crudos de fs escapan (`readdirSync`, `lstat`, `openSync`) porque no hay código de I/O en la lista cerrada; el mensaje puede llevar la ruta del operador (falla cerrado). Proponer `unreadable_entry`/`directory_unreadable` (decisión en F040).
-- T3: un FIFO o dispositivo cambiado tras `readdir` bloquea `openSync`; abrir con `O_NONBLOCK` + `fstat` `isFile`.
-- T3: `computeRuleSetVersion` no comprueba que `meta` esté alineado con `ruleSet`.
-- T3: `meta` devuelto no está congelado y se comparte con los docs parseados.
-- T3: faltan tests de `conditions` vacías hacia el motor y del mapeo de error de motor con más de una regla; el test de renombrado también cambia el título.
-- T3: warning `noExplicitAny` en `version.test.ts`.
-- T3: hash truncado a 64 bits; ya anotado como concesión deliberada en ADR-002.
+**Dictámenes adicionales (revisión final):** (4) Decisión del usuario: el formato v1 se aprieta para que cada condición se referencie exactamente una vez en `combine` (una condición sin efecto muestra un dato cumplido en la traza; una repetida puede volver "unknown" un resultado definido y empujar un crítico a revisión). (5) Alcance de la ola de arreglos: etiquetas/anclas, dos códigos nuevos (`unreadable_entry`, `invalid_options`), guarda de `meta`, y esta regla de referencias.
+**Revisión final (arreglos):** se rechaza todo nodo con etiqueta explícita (`yaml_tag`, incluidas `!!int '5'`, la forma verbatim y `!!str 1`) y todo ancla (`yaml_alias`); la prueba de anidamiento profundo se fijó a `yaml_syntax`; todo fallo de fs es `unreadable_entry` (sin ruta ni errno); `loadRuleSet` exige `options.variables` como `Set` (`invalid_options`); apertura con `O_NONBLOCK` + `fstat` `isFile` (la carrera real con un FIFO intercambiado tras `readdir` no es testeable de forma fiable; el test cubre el FIFO visible); `computeRuleSetVersion` rechaza un `meta` desalineado (`invalid_options`).
+**Pendiente / menores diferidos (quedan abiertos):**
+- `LoadedRuleSet.meta` no está congelado y comparte objetos con los docs parseados: congelar en F040 antes de mantenerlo en el proceso.
+- `checkRuleDoc` asume datos planos (getter que lanza o Proxy dan `Error` crudo; claves no enumerables y símbolos pasan); inalcanzable desde YAML.
+- `variables` y la versión del motor no entran en el hash de `rule_set_version`.
+- Directivas `%YAML` se ignoran; `lineAt` reescanea (aceptable).
+- Menores de test/tipos: `parse.test.ts` tautología de mensaje; `e as boolean` redundante en `schema.ts`; `RuleDoc.conditions`/`combine` tipados `unknown`; `schema.test.ts` débil para `combine` string y sin tests de `{any, extra}`, id de 201 caracteres, accessor/Proxy; faltan tests de `conditions` vacías hacia el motor y del mapeo de error de motor con varias reglas; el test de renombrado también cambia el título; warnings `noExplicitAny` en `schema.test.ts` y `version.test.ts`.
+- Hash truncado a 64 bits: concesión deliberada, anotada en ADR-002.
