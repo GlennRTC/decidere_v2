@@ -1,6 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { Writable } from "node:stream";
-import Fastify, { type FastifyInstance, LogController } from "fastify";
+import Fastify, {
+  type FastifyError,
+  type FastifyInstance,
+  type FastifyReply,
+  LogController,
+} from "fastify";
 import { codeFor, errorBody, STATUS } from "./errors.ts";
 
 export type BuildAppOptions = {
@@ -10,6 +15,21 @@ export type BuildAppOptions = {
 };
 
 const DEFAULT_BODY_LIMIT = 262144;
+
+// Only name and code, strings only, bounded; never message or stack.
+const safeField = (read: () => unknown) => {
+  try {
+    const v = read();
+    return typeof v === "string" ? v.slice(0, 64) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const errSerializer = (err: unknown) => ({
+  name: safeField(() => (err as { name?: unknown }).name),
+  code: safeField(() => (err as { code?: unknown }).code),
+});
 
 const pathOf = (url: string | undefined) => (url ?? "").split("?")[0];
 
@@ -21,11 +41,26 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
           ...(options.logStream ? { stream: options.logStream } : {}),
           serializers: {
             // Only method and path: no query string, headers or remote address.
+            // Typed as a full error by pino; intentionally narrower (no message/stack).
+            err: errSerializer as unknown as (err: FastifyError) => never,
             req: (req) => ({ method: req.method, path: pathOf(req.url) }),
           },
         }
       : false,
     bodyLimit: options.bodyLimit ?? DEFAULT_BODY_LIMIT,
+    // Framework errors (e.g. bad URL) would echo the path in Fastify's default body.
+    frameworkErrors: (error, request, rawReply) => {
+      const reply = rawReply as FastifyReply;
+      const code = codeFor(error);
+      const status = STATUS[code];
+      request.log.error({ apiError: { code, status } }, "request failed");
+      // onSend hooks may not run for framework errors: set headers here.
+      return reply
+        .code(status)
+        .header("cache-control", "no-store")
+        .header("x-request-id", request.id)
+        .send(errorBody(code, request.id));
+    },
     // Never trust an inbound request id; always generate one.
     requestIdHeader: false,
     genReqId: () => randomUUID(),
@@ -45,24 +80,22 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   );
 
   app.setErrorHandler((error: unknown, request, reply) => {
-    const code = codeFor(error);
-    const status = STATUS[code];
-    // The thrown value may be any type: read name/code defensively.
-    const e = (typeof error === "object" && error !== null ? error : {}) as {
-      name?: unknown;
-      code?: unknown;
-    };
-    request.log.error(
-      {
-        err: {
-          name: typeof e.name === "string" ? e.name : undefined,
-          code: typeof e.code === "string" ? e.code : undefined,
-        },
-        apiError: { code, status },
-      },
-      "request failed",
-    );
-    return reply.code(status).send(errorBody(code, request.id));
+    try {
+      const code = codeFor(error);
+      const status = STATUS[code];
+      request.log.error(
+        { err: error, apiError: { code, status } },
+        "request failed",
+      );
+      return reply.code(status).send(errorBody(code, request.id));
+    } catch {
+      // Last resort: the handler must never throw.
+      request.log.error(
+        { apiError: { code: "internal_error", status: 500 } },
+        "request failed",
+      );
+      return reply.code(500).send(errorBody("internal_error", request.id));
+    }
   });
 
   app.get(

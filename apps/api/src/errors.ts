@@ -62,17 +62,27 @@ const BY_FASTIFY_CODE: Record<string, ErrorCode> = {
 };
 
 // Reads only `statusCode` (number) and `code` (string); never `message`.
+// Total: getters or Proxies that throw end in internal_error.
 export function codeFor(error: unknown): ErrorCode {
-  if (typeof error !== "object" || error === null) return "internal_error";
-  const { statusCode, code } = error as {
-    statusCode?: unknown;
-    code?: unknown;
-  };
-  if (typeof code === "string" && Object.hasOwn(BY_FASTIFY_CODE, code)) {
-    return BY_FASTIFY_CODE[code] as ErrorCode;
-  }
-  if (typeof statusCode === "number" && statusCode >= 400 && statusCode < 500) {
-    return "bad_request";
+  try {
+    if (typeof error !== "object" || error === null) return "internal_error";
+    const { statusCode, code } = error as {
+      statusCode?: unknown;
+      code?: unknown;
+    };
+    if (typeof code === "string" && Object.hasOwn(BY_FASTIFY_CODE, code)) {
+      return BY_FASTIFY_CODE[code] as ErrorCode;
+    }
+    if (
+      typeof statusCode === "number" &&
+      Number.isInteger(statusCode) &&
+      statusCode >= 400 &&
+      statusCode < 500
+    ) {
+      return "bad_request";
+    }
+  } catch {
+    // fall through
   }
   return "internal_error";
 }
