@@ -42,6 +42,9 @@ function buildCondition(
     typeof unit !== "string"
   )
     return fail("invalid_condition", path);
+  // "combine" and "combine.*" are the trace ids of combinator nodes.
+  if (id === "combine" || id.startsWith("combine."))
+    return fail("invalid_condition", path);
   if (typeof op !== "string" || !OPS.has(op))
     return fail("invalid_condition", path);
   if (typeof value !== "number" || !Number.isFinite(value))

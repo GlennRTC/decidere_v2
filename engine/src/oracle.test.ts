@@ -131,6 +131,36 @@ describe("evaluateRuleSet agrees with the brute-force oracle", () => {
     assert.equal(evals, trees * 27);
   });
 
+  it("single-occurrence ternary roots over depth<=1 children, exact", () => {
+    const children = [...leaves(3), ...combos(leaves(3), 3)];
+    const seen: Tree[] = [];
+    // [x, y, z] over children, keeping only lists that use each leaf at most once.
+    for (const x of children)
+      for (const y of children)
+        for (const z of children) {
+          const uses = [x, y, z].flatMap(leafUses);
+          if (new Set(uses).size !== uses.length) continue;
+          const of = [x, y, z];
+          seen.push({ all: of }, { any: of });
+          for (let n = 1; n <= 3; n++) seen.push({ atLeast: n, of });
+        }
+    assert.ok(seen.length >= 200);
+    for (const t of seen) check(t, 3);
+  });
+
+  it("arity-1 lists at depth 1 and 2", () => {
+    const wrap = (c: Tree): Tree[] => [
+      { all: [c] },
+      { any: [c] },
+      { atLeast: 1, of: [c] },
+      { not: c },
+    ];
+    const level1 = leaves(3).flatMap(wrap);
+    const level2 = level1.flatMap(wrap);
+    for (const t of [...level1, ...level2]) check(t, 3);
+    assert.equal(level1.length + level2.length, 12 + 48);
+  });
+
   it("atLeast with every n over 4 leaves, all 81 assignments", () => {
     for (let n = 1; n <= 4; n++) {
       const tree: Tree = { atLeast: n, of: leaves(4) };
