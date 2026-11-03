@@ -40,3 +40,14 @@ test("root defines typecheck", () => {
 test("root defines lint", () => {
   assert.equal(pkg().scripts.lint, "biome check .");
 });
+
+test("verify chains lint, typecheck, test and build with &&", () => {
+  assert.equal(
+    pkg().scripts.verify,
+    "npm run lint && npm run typecheck && npm test && npm run build",
+  );
+});
+
+test("test runs through the workspaces", () => {
+  assert.ok(pkg().scripts.test.includes("--workspaces"));
+});
