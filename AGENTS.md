@@ -18,7 +18,7 @@ Sistema que alerta al médico de urgencias cuando un paciente presenta una condi
 2. La API valida el schema y el mapper traduce códigos locales a variables canónicas.
 3. El motor de reglas evalúa las reglas activas (definidas por clínicos, versionadas) y devuelve clase, traza de evaluación y certeza.
 4. La respuesta síncrona del POST contiene la interpretación. En paralelo el dashboard se entera por polling (posteriormente push (SSE) pero de momento fuera del alcance).
-5. Clases de salida: `crítico`, `vigilancia`, `sin alerta`, `revisión clínica`. Los casos con certeza baja van a la cola de revisión.
+5. Clases de salida: `crítico`, `vigilancia`, `sin alerta`, `revisión clínica`. Los casos con certeza baja van a la cola de revisión, salvo un crítico: conserva su clase con la bandera "requiere confirmación" (ADR-003).
 
 ### Métricas de éxito del MVP
 
@@ -158,7 +158,7 @@ La certeza se calcula con tres componentes:
 - **Margen**: cercanía de los valores a los umbrales de decisión.
 - **Conflicto**: reglas que apuntan a clases distintas.
 
-Si la certeza cae bajo un umbral configurable, el caso va a revisión clínica. La fórmula exacta y el umbral se calibran con los casos límite del gold standard.
+Si la certeza cae bajo un umbral configurable, el caso va a revisión clínica, salvo un crítico, que nunca se degrada: conserva su clase y recibe la bandera "requiere confirmación" (ADR-003). La fórmula exacta y el umbral se calibran con los casos límite del gold standard.
 
 ### Reglas clínicas (sepsis / infección)
 

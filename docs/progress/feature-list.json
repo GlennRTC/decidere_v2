@@ -29,11 +29,11 @@
         "Cada ADR incluye contexto, decisión, alternativas y consecuencias",
         "Los ADR coinciden con lo resumido en AGENTS.md (sin contradicciones)"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 5. Escribir ADR-001 a 004 antes de mergear F035, F005 y F040; ADR-005 ya existe. Agregar ADR-006 (anotaciones clínicas acotadas, excepción a la regla de texto libre). | Notas previas: Usar /adr. También registrar ADRs para decisiones pendientes cuando se confirmen: formato de reglas (YAML propio + json-logic vs CQL), SSE vs polling, Postgres/Supabase."
+      "notes": "Orden 5. Escribir ADR-001 a 004 antes de mergear F035, F005 y F040; ADR-005 ya existe. Agregar ADR-006 (anotaciones clínicas acotadas, excepción a la regla de texto libre). | Notas previas: Usar /adr. También registrar ADRs para decisiones pendientes cuando se confirmen: formato de reglas (YAML propio + json-logic vs CQL), SSE vs polling, Postgres/Supabase. | Verificacion cruzada 2026-11-03: ADR-001..004 existen, tienen contexto/decision/alternativas/consecuencias y coinciden con AGENTS.md salvo una tension: ADR-003 dice que un critico nunca se degrada a revision (conserva clase y recibe bandera), mientras AGENTS.md:21 y :161 dicen que los casos con certeza baja van a revision. Tension resuelta: AGENTS.md:21 y :161 aclarados (aprobado por el usuario) a favor de ADR-003. Los ADR siguen en estado propuesto hasta su aceptacion formal."
     },
     {
       "id": "F003",
@@ -554,11 +554,11 @@
         "Tipos TS derivados del mismo schema",
         "Tests: válido, campos faltantes, tipos incorrectos, varias instancias, históricas ignoradas"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 7. Parte de F003. Cambio de contrato: aprobación del usuario. case_id aleatorio, nunca derivado de un identificador."
+      "notes": "Passing: verify exit 0 (schema 34/34), ver ADR-008 y PROGRESS Sesión 5. Revisión /clinical-review formal pendiente (requires_compliance_review). Orden 7. Parte de F003. Cambio de contrato: aprobación del usuario. case_id aleatorio, nunca derivado de un identificador."
     },
     {
       "id": "F036",
@@ -573,7 +573,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 8. Parte de F003."
+      "notes": "Orden 8. Parte de F003. | Verificar con test que el SyntaxError de JSON.parse con canario en el body no se refleja en la respuesta ni en logs (ver ADR-008)."
     },
     {
       "id": "F037",
@@ -635,7 +635,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 13. Parte de F010. Tracer bullet."
+      "notes": "Orden 13. Parte de F010. Tracer bullet. | Gates de ADR-008 (revision clinica F035): allowlist de source por tenant antes de loguear/persistir; instance_id descartado o mapeado a case_id aleatorio y message_id solo para idempotencia con TTL; decidir unicidad de instance_id; historicas no persistidas ni logueadas mas alla de un conteo; bodyLimit bajo y rechazo previo a JSON.parse de notacion exponencial y claves duplicadas; test con canario en logs con body invalido; solo adultos."
     },
     {
       "id": "F041",
