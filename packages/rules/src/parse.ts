@@ -8,7 +8,7 @@ function lineAt(text: string, offset: number): number {
   return line;
 }
 
-// Single document, YAML 1.2 core schema, no aliases, no tags, unique keys.
+// Single document, YAML 1.2 core schema, no aliases, anchors or explicit tags, unique keys.
 // Only RuleLoadError escapes; nothing from the YAML is copied into an error.
 export function parseRuleYaml(text: string): unknown {
   try {
@@ -36,10 +36,22 @@ export function parseRuleYaml(text: string): unknown {
       });
     }
     // Reject aliases before toJS so nothing is ever expanded (toJS ignores the parse-time maxAliasCount).
+    // Anchors and every explicit tag (!!int, !<verbatim>, ...) are rejected too: untagged nodes have tag undefined.
+    const rejectNode = (
+      _key: unknown,
+      node: { tag?: string; anchor?: string },
+    ) => {
+      if (node.anchor !== undefined)
+        throw new RuleLoadError({ code: "yaml_alias" });
+      if (node.tag !== undefined) throw new RuleLoadError({ code: "yaml_tag" });
+    };
     visit(doc, {
       Alias() {
         throw new RuleLoadError({ code: "yaml_alias" });
       },
+      Scalar: rejectNode,
+      Map: rejectNode,
+      Seq: rejectNode,
     });
     return doc.toJS({ maxAliasCount: 0 });
   } catch (err) {

@@ -57,7 +57,7 @@ test("rejects a syntax error", () => {
 test("10 000 nested flow sequences raise RuleLoadError, not RangeError", () => {
   const text = `a: ${"[".repeat(10000)}${"]".repeat(10000)}\n`;
   const { code } = codeOf(text);
-  assert.ok(["yaml_syntax", "yaml_alias"].includes(code));
+  assert.equal(code, "yaml_syntax");
 });
 
 test("__proto__ stays an own key and does not pollute", () => {
