@@ -27,3 +27,9 @@
 **Verificación realizada:** feature-list.json parseado (29 features, todas failing).
 **Estado al cerrar:** N/A — solo documentación.
 **Pendiente para la próxima sesión:** Criterios de aceptación de F013/F016/F022 aún nombran los cuatro roles antiguos (reconciliar con tu aprobación). ADR-001 a 004 (F002). Planificación/brainstorming de umbrales, combinación y certeza (F006-F008).
+
+## 2026-11-03 — Sesión 0c (descomposición del MVP)
+**Qué se hizo:** Brainstorming con revisión de agentes clínico, UX, compliance y product owner. Se agregaron F030–F067 (todas `failing`) y se anotó en las originales en qué se dividieron o absorbieron. F017 (edición de mapeo) diferida a v1.1. Diseño en `docs/superpowers/specs/2026-11-03-mvp-decomposition-design.md`. Dos supuestos míos: el rol usuario también marca visto/atendido y anota; la anotación es texto libre acotado y requiere ADR-006 y revisión de compliance antes de implementarse.
+**Verificación realizada:** feature-list.json parseado (67 features, todas failing).
+**Estado al cerrar:** N/A — solo planificación.
+**Pendiente para la próxima sesión:** F030 (scaffold, requiere aprobar dependencias) y F033 (spike json-logic). Escribir ADR-001 a 004 y ADR-006 (F002). Definiciones clínicas abiertas (sospecha de infección, τ, bandas). Reclutar etiquetadores. Consultar a un abogado sobre residencia de datos.

@@ -17,7 +17,7 @@ Sistema que alerta al médico de urgencias cuando un paciente presenta una condi
 1. Un emisor envía un mensaje JSON con una o más instancias (episodios) mediante `POST /v1/messages`.
 2. La API valida el schema y el mapper traduce códigos locales a variables canónicas.
 3. El motor de reglas evalúa las reglas activas (definidas por clínicos, versionadas) y devuelve clase, traza de evaluación y certeza.
-4. La respuesta síncrona del POST contiene la interpretación. En paralelo el dashboard se entera por push (SSE) o polling.
+4. La respuesta síncrona del POST contiene la interpretación. En paralelo el dashboard se entera por polling (posteriormente push (SSE) pero de momento fuera del alcance).
 5. Clases de salida: `crítico`, `vigilancia`, `sin alerta`, `revisión clínica`. Los casos con certeza baja van a la cola de revisión.
 
 ### Métricas de éxito del MVP
