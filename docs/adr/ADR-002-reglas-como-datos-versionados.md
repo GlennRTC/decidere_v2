@@ -6,7 +6,7 @@
 
 **Decisión:**
 - Las reglas son archivos YAML en `knowledge/`, con id estable (`sepsis.qsofa.v1`) y cita de guía (versión y sección).
-- Las condiciones usan json-logic, sujeto al spike F033; el plan B es un comparador propio.
+- Las condiciones se evalúan con el comparador propio de ADR-007 (decidido en el spike F033; json-logic descartado).
 - `rule_set_version` se calcula desde las reglas activas: cambia si cambia cualquiera.
 - Cada interpretación guarda `rule_set_version`, la traza y `mapping_version`.
 - Cada regla lleva `clinical_approval` (estado, aprobador, versión de la guía). Mientras esté `pending`, la respuesta y la UI lo muestran.
