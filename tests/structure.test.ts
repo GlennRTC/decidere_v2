@@ -27,3 +27,7 @@ test("gitignore excludes node_modules, dist and .env", () => {
 test("tests workspace has a test script", () => {
   assert.equal(JSON.parse(read("./package.json")).scripts.test, "node --test");
 });
+
+test("root defines typecheck", () => {
+  assert.equal(pkg().scripts.typecheck, "tsc -p tsconfig.json --noEmit");
+});
