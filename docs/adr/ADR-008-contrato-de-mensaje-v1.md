@@ -30,4 +30,17 @@
 - Solo se soporta salida de `JSON.parse`. Getters hostiles, Proxy y claves Symbol quedan fuera del alcance HTTP.
 - Las instancias históricas vuelven completas en el resultado: F040 no debe persistirlas ni loguearlas más allá de un conteo. Los límites de tamaño y profundidad del body vienen de `bodyLimit` en F040.
 - Sin verificar: Node 22.18 (solo CI), el despliegue en Vercel de un paquete workspace con fuente `.ts`, y que el CI ejecute los 34 tests del paquete.
-- Preguntas abiertas para el clínico y legal: ver el plan `docs/superpowers/plans/2026-11-03-f035-message-schema.md`.
+
+**Población:** el contrato 1.0 asume pacientes adultos. qSOFA y GCS son umbrales de adultos y los menores tienen régimen especial (Ley 1581). No hay campo de edad; hasta que haya decisión clínica y legal, el emisor no debe enviar pacientes pediátricos.
+
+**Condiciones para F040 (la ruta `POST /v1/messages`):** estas mitigaciones no las cumple este paquete y F040 no se da por terminada sin ellas.
+- `source`: validar contra una allowlist de emisores por tenant antes de loguear o persistir; si no es válido, rechazar sin repetir el valor.
+- `message_id` e `instance_id` los controla el emisor y pueden codificar un identificador (ADR-001 descarta hashear identificadores): `instance_id` se descarta tras la respuesta o se mapea a un `case_id` aleatorio del sistema; `message_id` se persiste, si acaso, solo para idempotencia y con TTL. Decidir también la unicidad de `instance_id` dentro del mensaje.
+- Instancias históricas: no se persisten ni se loguean más allá de un conteo; justificar su aceptación o rechazarlas hasta que una regla las use.
+- Body crudo: `bodyLimit` bajo y validación previa a `JSON.parse` que rechace notación exponencial y claves duplicadas, o aceptar el riesgo con firma del clínico.
+- Test con canario en logs usando un body inválido (el `SyntaxError` de V8 puede incluir un fragmento del body).
+
+**Preguntas abiertas.**
+- *Clínico:* criterios y umbrales exactos de qSOFA (los números de ADR-007 son ilustrativos); ventana de `t_offset_min` para un dato vigente y retrospectiva de las históricas; qué medición cuenta cuando hay varias de la misma variable; rangos de plausibilidad (¿0 es posible?, ¿cota superior?, ¿implausible se revisa o se rechaza?); instancia como episodio o instantánea; ¿basta el GCS total?; distinguir "no medido" de "medido pero ilegible"; unidad canónica de GCS (`{score}` o `1`); ¿solo adultos?; ICD-10 completo o categoría (F044).
+- *Legal/compliance:* si los offsets relativos más los valores clínicos siguen siendo datos personales o de salud (Ley 1581 y equivalentes); si aceptar y descartar históricas es tratamiento; si `source` identifica indirectamente al paciente; si `message_id` e `instance_id` persistidos o logueados son datos seudonimizados; residencia y transferencia internacional (la demo usa São Paulo, ver ADR-009 cuando exista); si las alertas forman parte de la historia clínica y su retención; régimen de menores; SaMD ante INVIMA/FDA; registro de bases de datos.
+- Los artículos de la Ley 1581 citados por la revisión de F035 no están verificados: requieren opinión legal formal.

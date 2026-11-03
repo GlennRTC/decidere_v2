@@ -573,7 +573,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 8. Parte de F003."
+      "notes": "Orden 8. Parte de F003. | Verificar con test que el SyntaxError de JSON.parse con canario en el body no se refleja en la respuesta ni en logs (ver ADR-008)."
     },
     {
       "id": "F037",
@@ -635,7 +635,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 13. Parte de F010. Tracer bullet."
+      "notes": "Orden 13. Parte de F010. Tracer bullet. | Gates de ADR-008 (revision clinica F035): allowlist de source por tenant antes de loguear/persistir; instance_id descartado o mapeado a case_id aleatorio y message_id solo para idempotencia con TTL; decidir unicidad de instance_id; historicas no persistidas ni logueadas mas alla de un conteo; bodyLimit bajo y rechazo previo a JSON.parse de notacion exponencial y claves duplicadas; test con canario en logs con body invalido; solo adultos."
     },
     {
       "id": "F041",
