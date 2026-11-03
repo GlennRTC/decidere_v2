@@ -28,8 +28,35 @@ export function validateMessage(
       errors: [{ path: "/schema_version", code: "unsupported_version" }],
     };
   }
-  if (check(input)) return { ok: true, value: input as Message };
-  return { ok: false, errors: [mapError(check.errors?.[0])] };
+  if (!check(input))
+    return { ok: false, errors: [mapError(check.errors?.[0])] };
+  const message = input as Message;
+  const duplicate = findDuplicate(message);
+  if (duplicate) return { ok: false, errors: [duplicate] };
+  return { ok: true, value: message };
+}
+
+export function currentInstances(message: Message): Message["instances"] {
+  return message.instances.filter((instance) => instance.kind === "current");
+}
+
+// Reports the first later duplicate (same variable + offset in one instance).
+// Path carries indices only. Read-only over the input.
+function findDuplicate(message: Message): ValidationError | undefined {
+  for (const [i, instance] of message.instances.entries()) {
+    const seen = new Set<string>();
+    for (const [j, v] of instance.variables.entries()) {
+      const key = `${v.variable}|${v.t_offset_min}`;
+      if (seen.has(key)) {
+        return {
+          path: `/instances/${i}/variables/${j}`,
+          code: "duplicate_measurement",
+        };
+      }
+      seen.add(key);
+    }
+  }
+  return undefined;
 }
 
 // Closed mapping table. Output is { path, code } only: never message, params

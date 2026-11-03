@@ -4,4 +4,4 @@ export type {
   ValidationCode,
   ValidationError,
 } from "./types.ts";
-export { validateMessage } from "./validate.ts";
+export { currentInstances, validateMessage } from "./validate.ts";

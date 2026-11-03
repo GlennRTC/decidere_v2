@@ -228,11 +228,11 @@ test("boundary pairs for every bound", () => {
 
   const variables = (n: number) => {
     const m: Any = validMinimal();
-    m.instances[0].variables = Array.from({ length: n }, () => ({
+    m.instances[0].variables = Array.from({ length: n }, (_, i) => ({
       variable: "gcs",
       value: 14,
       unit: "{score}",
-      t_offset_min: 0,
+      t_offset_min: -i,
     }));
     return validateMessage(m).ok;
   };
