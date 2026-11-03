@@ -523,11 +523,11 @@
         "Licencia y mantenimiento verificados; plan B documentado: YAML con comparador propio",
         "Decisión presentada al usuario para aprobar la dependencia antes de usarla"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 4. En paralelo con F030. Spike: no se mantiene el código; conservarlo es una solicitud nueva."
+      "notes": "Orden 4. En paralelo con F030. Spike: no se mantiene el código; conservarlo es una solicitud nueva. | DECIDIDO 2026-11-03 por el usuario: comparador propio sin dependencias (ADR-007, estado propuesto); json-logic descartado. F005, F037 y F038 ya no dependen de una librería de condiciones."
     },
     {
       "id": "F034",
