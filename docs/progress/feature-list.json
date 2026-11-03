@@ -604,7 +604,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 11. Parte de F006. Umbrales no se inventan. | F037: el YAML va en `knowledge/rules/<id>.yaml`, `format_version: 1`, `clinical_approval.status: pending`; su test debe cargar el directorio real con `loadRuleSet` y las variables canonicas. | Archivos sueltos como `.gitkeep` o `README.md` en `knowledge/rules/` hacen fallar la carga (`unsupported_entry`); aun no hay catalogo canonico de variables (F042/F043), asi que F038 necesita un conjunto provisional."
+      "notes": "Orden 11. Parte de F006. Umbrales no se inventan. | F037: el YAML va en `knowledge/rules/<id>.yaml`, `format_version: 1`, `clinical_approval.status: pending`; su test debe cargar el directorio real con `loadRuleSet` y las variables canonicas. | Archivos sueltos como `.gitkeep` o `README.md` en `knowledge/rules/` hacen fallar la carga (`unsupported_entry`); aun no hay catalogo canonico de variables (F042/F043), asi que F038 necesita un conjunto provisional. | Cada condicion debe referenciarse exactamente una vez en `combine` (sin condiciones sin uso ni repetidas)."
     },
     {
       "id": "F039",
