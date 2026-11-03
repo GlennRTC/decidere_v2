@@ -2,7 +2,7 @@
 """Scan files for the PHI heuristics defined by the Claude hook.
 
 Usage: scan_phi.py <file>...
-Exit codes: 0 no hits, 1 at least one hit, 2 no arguments.
+Exit codes: 0 no hits, 1 at least one hit or read error, 2 no arguments.
 Prints only "<path>: <pattern name>" and a summary; never a matched value.
 """
 import importlib.util
