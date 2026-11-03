@@ -9,6 +9,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # keep the hook's __pycache__ out of the tree
+
 HOOK = Path(__file__).resolve().parent.parent / ".claude" / "hooks" / "check_phi_patterns.py"
 
 
@@ -24,23 +26,26 @@ def main(argv: list[str]) -> int:
         print("usage: scan_phi.py <file>...", file=sys.stderr)
         return 2
     hook = load_hook()
-    scanned = skipped = hits = 0
+    scanned = skipped = hits = errors = 0
     for path in argv:
-        if any(s in path.lower() for s in hook.ALLOWLIST_SUBSTRINGS):
+        # seeds/ and knowledge/ are always scanned, whatever the allowlist says
+        always = Path(path).parts[:1] in (("seeds",), ("knowledge",))
+        if not always and any(s in path.lower() for s in hook.ALLOWLIST_SUBSTRINGS):
             skipped += 1
             continue
         try:
             text = Path(path).read_text(encoding="utf-8", errors="ignore")
         except OSError:
-            skipped += 1
+            errors += 1
+            print(f"{path}: read error", file=sys.stderr)
             continue
         scanned += 1
         for name, pattern in hook.PATTERNS.items():
             if pattern.search(text):
                 hits += 1
                 print(f"{path}: {name}")
-    print(f"scanned {scanned} files, skipped {skipped}, hits {hits}")
-    return 1 if hits else 0
+    print(f"scanned {scanned} files, skipped {skipped}, hits {hits}, errors {errors}")
+    return 1 if hits or errors else 0
 
 
 if __name__ == "__main__":

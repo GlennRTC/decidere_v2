@@ -65,3 +65,24 @@ test("package.json defines scan:phi", () => {
     "python3 scripts/scan_phi.py $(git ls-files)",
   );
 });
+
+for (const name of [
+  "seeds/test-case-1.json",
+  "seeds/latest.json",
+  "knowledge/example-rule.yaml",
+]) {
+  test(`${name} is always scanned despite allowlist substrings`, () => {
+    const r = scan({ [name]: `x ${emailLike()}\n` });
+    assert.equal(r.status, 1);
+    assert.ok(r.stdout.includes(name));
+    assert.ok(r.stdout.includes("email_en_texto_plano"));
+  });
+}
+
+test("nonexistent file exits 1 and reports the path and errors 1", () => {
+  const r = scan({}, ["missing.txt"]);
+  assert.equal(r.status, 1);
+  assert.ok(r.stderr.includes("missing.txt: read error"));
+  assert.match(r.stdout, /errors 1/);
+  assert.match(r.stdout, /scanned 0 files, skipped 0, hits 0/);
+});
