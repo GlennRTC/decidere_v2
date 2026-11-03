@@ -1,4 +1,4 @@
-import { Ajv } from "ajv";
+import { Ajv, type ErrorObject } from "ajv";
 import { messageSchema, SCHEMA_VERSION } from "./message.schema.ts";
 import type { Message, ValidationError } from "./types.ts";
 
@@ -29,6 +29,40 @@ export function validateMessage(
     };
   }
   if (check(input)) return { ok: true, value: input as Message };
-  // Placeholder: safe mapping of Ajv errors lands in the next task.
-  return { ok: false, errors: [{ path: "", code: "invalid" }] };
+  return { ok: false, errors: [mapError(check.errors?.[0])] };
+}
+
+// Closed mapping table. Output is { path, code } only: never message, params
+// (except missingProperty, a schema-defined name), schemaPath or any received
+// value or key name. allErrors:false guarantees at most one error.
+function mapError(error: ErrorObject | undefined): ValidationError {
+  if (!error) return { path: "", code: "invalid" };
+  const path = error.instancePath;
+  switch (error.keyword) {
+    case "required":
+      return {
+        path: `${path}/${String(error.params.missingProperty)}`,
+        code: "required",
+      };
+    case "additionalProperties":
+      // Known parent only; params.additionalProperty is the received key name.
+      return { path, code: "unknown_field" };
+    case "discriminator": // params carry the received tag: never forwarded
+    case "enum":
+    case "const":
+      return { path, code: "invalid_value" };
+    case "type":
+      return { path, code: "invalid_type" };
+    case "pattern":
+      return { path, code: "invalid_format" };
+    case "minimum":
+    case "maximum":
+    case "minItems":
+    case "maxItems":
+    case "minLength":
+    case "maxLength":
+      return { path, code: "out_of_range" };
+    default:
+      return { path, code: "invalid" };
+  }
 }
