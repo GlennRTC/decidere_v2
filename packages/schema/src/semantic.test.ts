@@ -28,6 +28,16 @@ test("same variable with different offsets is accepted", () => {
   assert.equal(validateMessage(input).ok, true);
 });
 
+test("same offset with different variables is accepted", () => {
+  const input = validQsofa();
+  input.instances[0].variables = [
+    rr(-5),
+    { variable: "sbp", value: 100, unit: "mm[Hg]", t_offset_min: -5 },
+    { variable: "gcs", value: 15, unit: "{score}", t_offset_min: -5 },
+  ];
+  assert.equal(validateMessage(input).ok, true);
+});
+
 test("same variable and offset in different instances is accepted", () => {
   const input = withHistorical();
   input.instances[1].variables = [rr(0)];
