@@ -79,11 +79,11 @@
         "Un valor faltante marca la condición como no evaluable, no como falsa",
         "Tests unitarios escritos antes de la implementación (TDD) cubren umbrales exactos, datos faltantes y reglas múltiples"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 9. Depende de F033 (spike). Absorbe el schema de reglas en F037. | Notas previas: DECIDIDO 2026-11-03: YAML propio + json-logic para el MVP (CQL descartado). json-logic es dependencia nueva: pedir aprobación (licencia, mantenimiento) en F001/F005."
+      "notes": "Orden 9. Depende de F033 (spike). Absorbe el schema de reglas en F037. | Notas previas: DECIDIDO 2026-11-03: YAML propio + json-logic para el MVP (CQL descartado). json-logic es dependencia nueva: pedir aprobación (licencia, mantenimiento) en F001/F005. | Hecho en engine/ (sesión 7): defineRuleSet/evaluateRuleSet devuelven RuleSetResult {rules, fired}; la clase no se calcula aquí (F039). Kleene exacto solo con hojas no repetidas por regla (ADR-007, Implementación). Pendiente: revisión final de la rama y CI."
     },
     {
       "id": "F006",
@@ -589,7 +589,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 10. Absorbe F009. Depende de F005 y F033."
+      "notes": "Orden 10. Absorbe F009. Depende de F005 y F033. | Consume de F005: defineRuleSet(rules, {variables}) y su RuleSet congelado; ids de condición `combine`/`combine.N` reservados; una hoja repetida en una regla da 'unknown' (no repetir condiciones al redactar); mitigación de ids posicionales y notas de redacción son de F037."
     },
     {
       "id": "F038",
@@ -619,7 +619,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 12. Parte de F007."
+      "notes": "Orden 12. Parte de F007. | Consume de F005: evaluateRuleSet -> RuleSetResult {rules: [{rule_id, result, trace}], fired}; F005 no calcula la clase, la política (máxima severidad) es de F039."
     },
     {
       "id": "F040",
