@@ -1,0 +1,1041 @@
+{
+  "_readme": "Solo se edita 'status' y 'notes' de una feature existente; nunca se borra o edita un test para forzar 'passing'. Toda feature nueva descubierta durante el trabajo se agrega con status 'failing', nunca se implementa sin registrar. Fuente: docs de producto 'Decidere MVP: Definición v2' + AGENTS.md. 'passing' solo si lo verificaste tú mismo con evidencia.",
+  "project": "Decidere AI (MVP sepsis / infección en urgencias)",
+  "created": "2026-11-03",
+  "features": [
+    {
+      "id": "F001",
+      "title": "Scaffold del monorepo + comando único de verificación + CI",
+      "description": "Estructura apps/api, apps/web, packages/schema, engine, knowledge, seeds, tests con workspaces TypeScript. Un solo comando de verificación (lint + tests + build) que corre igual en local y en CI. Define los comandos reales y los registra en AGENTS.md ('Comandos de proyecto').",
+      "acceptance_criteria": [
+        "Existe package.json raíz con workspaces y un script de verificación único (lint + tests + build) que termina en exit 0 sobre el repo limpio",
+        "Un workflow de CI ejecuta exactamente ese mismo comando",
+        "apps/api expone GET /health que responde 200 y scripts/init.sh lo verifica",
+        "AGENTS.md sección 'Comandos de proyecto' actualizada con los comandos reales (ninguno inventado)",
+        "Dependencias aprobadas explícitamente por el usuario antes de instalarlas, con licencia y mantenimiento justificados"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "DIVIDIDA en F030, F031, F032 (pasa a passing cuando las tres pasen). Backend TS/Fastify. | Notas previas: DECIDIDO 2026-11-03: backend TS/Fastify (hosting en Vercel). Sigue pendiente aprobar dependencias concretas."
+    },
+    {
+      "id": "F002",
+      "title": "Redactar ADR-001 a ADR-004 en docs/adr/",
+      "description": "Los ADR no persistencia de PII/PHI (001), reglas como datos versionados (002), certeza determinística sin LLM (003) y API como único punto de entrada con motor sin I/O (004) están resumidos en AGENTS.md pero no existen como archivos.",
+      "acceptance_criteria": [
+        "Existen docs/adr/ADR-001 ... ADR-004 con el formato de ADR-000-template.md",
+        "Cada ADR incluye contexto, decisión, alternativas y consecuencias",
+        "Los ADR coinciden con lo resumido en AGENTS.md (sin contradicciones)"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 5. Escribir ADR-001 a 004 antes de mergear F035, F005 y F040; ADR-005 ya existe. Agregar ADR-006 (anotaciones clínicas acotadas, excepción a la regla de texto libre). | Notas previas: Usar /adr. También registrar ADRs para decisiones pendientes cuando se confirmen: formato de reglas (YAML propio + json-logic vs CQL), SSE vs polling, Postgres/Supabase."
+    },
+    {
+      "id": "F003",
+      "title": "Schema JSON del mensaje v1.0 (packages/schema)",
+      "description": "JSON Schema y tipos TS compartidos para el mensaje: schema_version, message_id, source, N instancias (current/historical) con variables (code, system, loinc, value, unit, t_offset_min) y diagnoses_icd10. Solo offsets relativos en minutos y sin texto libre.",
+      "acceptance_criteria": [
+        "Mensajes válidos del boceto del contrato pasan la validación; el schema rechaza fechas absolutas y campos de texto libre",
+        "Un mensaje inválido produce errores estructurados que identifican el campo sin reflejar el valor recibido",
+        "Los tipos TS se generan o derivan del mismo schema (una sola fuente)",
+        "Tests unitarios cubren mensajes válidos, campos faltantes, tipos incorrectos, múltiples instancias y diagnósticos ICD-10 inválidos"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "DIVIDIDA en F035, F036, F044. | Notas previas: Cambiar el contrato requiere aprobación. DECIDIDO 2026-11-03: offsets relativos confirmados; texto libre fuera del MVP pero a integrar después (ver F029)."
+    },
+    {
+      "id": "F004",
+      "title": "Catálogo de variables canónicas (LOINC/UCUM) y mapper de códigos locales",
+      "description": "Variables mínimas (FC, FR, TA, temperatura, SpO2, Glasgow, lactato, leucocitos, creatinina, bilirrubina, plaquetas, PaO2/FiO2, cultivos y antibióticos ordenados, ICD-10 previos) con código LOINC y unidad UCUM. El mapper traduce código local a variable canónica y normaliza unidades.",
+      "acceptance_criteria": [
+        "Catálogo versionado con LOINC + UCUM para cada variable mínima, con fuente citada",
+        "El mapper traduce un código local conocido a su variable canónica y convierte unidades compatibles",
+        "Un código local sin mapeo no se descarta: se marca como no mapeado y es visible en la respuesta",
+        "Una unidad incompatible produce un error estructurado, no una conversión silenciosa",
+        "Tests unitarios para mapeo, conversión de unidades y código desconocido"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "DIVIDIDA en F042, F043. | Notas previas: Los códigos LOINC deben verificarse contra la fuente oficial, no escribirse de memoria."
+    },
+    {
+      "id": "F005",
+      "title": "Motor de reglas puro: evaluador YAML -> clase + traza (engine/)",
+      "description": "Paquete sin I/O que recibe variables canónicas y un rule set ya cargado, evalúa condiciones y reglas, y devuelve clase, reglas disparadas y traza completa (entradas -> condiciones -> reglas -> clase) apta para el visor.",
+      "acceptance_criteria": [
+        "engine/ no importa módulos de I/O (fs, red, DB) y esto se verifica en un test o regla de lint",
+        "Misma entrada y mismo rule set producen siempre la misma salida (determinístico)",
+        "La traza incluye cada condición evaluada, su valor de entrada, el umbral y el resultado",
+        "Un valor faltante marca la condición como no evaluable, no como falsa",
+        "Tests unitarios escritos antes de la implementación (TDD) cubren umbrales exactos, datos faltantes y reglas múltiples"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 9. Depende de F033 (spike). Absorbe el schema de reglas en F037. | Notas previas: DECIDIDO 2026-11-03: YAML propio + json-logic para el MVP (CQL descartado). json-logic es dependencia nueva: pedir aprobación (licencia, mantenimiento) en F001/F005."
+    },
+    {
+      "id": "F006",
+      "title": "Reglas YAML versionadas: qSOFA, SIRS, SOFA, NEWS2 con cita de guía",
+      "description": "Reglas de sepsis/infección en knowledge/ con id estable y versionado (ej. sepsis.qsofa.v1). Cada regla cita versión y sección de Sepsis-3 / Surviving Sepsis Campaign.",
+      "acceptance_criteria": [
+        "Cada regla tiene id estable, versión, umbrales y cita (guía, versión, sección)",
+        "Un test valida que todo YAML de knowledge/ cumple el schema de reglas",
+        "Los umbrales y la aprobación clínica quedan registrados vía revisión de PR por un clínico (nombre del revisor en notes)",
+        "Ninguna regla de otra patología (fuera de alcance)"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "DIVIDIDA en F038 (qSOFA), F045 (SIRS), F046 (proxy infección). Alcance: solo qSOFA y SIRS. | Notas previas: BLOQUEADA: umbrales y combinación final se definen luego en planificación/brainstorming con un agente especializado. No inventar umbrales; los publicados deben citarse de la fuente."
+    },
+    {
+      "id": "F007",
+      "title": "Combinación de reglas en clase final (crítico / vigilancia / sin alerta / revisión clínica)",
+      "description": "Política que combina las reglas disparadas en una de las cuatro clases de salida, priorizando por gravedad, y documenta el criterio aplicado para vigilancia y revisión clínica (que no existen en fuentes externas).",
+      "acceptance_criteria": [
+        "Toda entrada válida termina en exactamente una de las cuatro clases",
+        "Cada clase cita el criterio aplicado en el rule set",
+        "Reglas que apuntan a clases distintas se resuelven de forma documentada y alimentan el componente de conflicto de la certeza",
+        "Tests con casos límite en umbrales, señales contradictorias y datos faltantes"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Reemplazada por F039 (política provisional). Se cierra cuando F039 pase y el clínico apruebe. | Notas previas: BLOQUEADA: la combinación final se define luego en planificación/brainstorming con un agente especializado."
+    },
+    {
+      "id": "F008",
+      "title": "Certeza determinística y derivación a revisión clínica",
+      "description": "Certeza = f(completitud, margen, conflicto), sin LLM. Si cae bajo un umbral configurable el caso va a 'revisión clínica'.",
+      "acceptance_criteria": [
+        "Completitud, margen y conflicto se calculan por separado y se devuelven en la respuesta",
+        "El umbral es configurable por variable de entorno o config del rule set, no hardcodeado",
+        "Datos faltantes reducen la certeza; valores cercanos a un umbral reducen el margen",
+        "Certeza bajo el umbral deriva a revisión clínica; sobre el umbral conserva la clase",
+        "Tests unitarios por componente y de integración con casos límite"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "DIVIDIDA en F047, F048, F049. | Notas previas: Umbral de certeza y fórmula: a definir en planificación/brainstorming con un agente experto, y calibrar con los casos límite (depende de F018). Hasta entonces, valores provisionales marcados como tales."
+    },
+    {
+      "id": "F009",
+      "title": "Carga y versionado del rule set activo (rule_set_version)",
+      "description": "La API carga las reglas activas desde knowledge/ y calcula un rule_set_version; cada interpretación guarda esa versión y la traza (ADR-002).",
+      "acceptance_criteria": [
+        "rule_set_version cambia cuando cambia cualquier regla activa y es estable si no cambia",
+        "Toda interpretación incluye rule_set_version y la traza",
+        "Un rule set inválido impide el arranque con error claro, no corre con reglas parciales"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "ABSORBIDA por F037."
+    },
+    {
+      "id": "F010",
+      "title": "POST /v1/messages de punta a punta (validar -> mapear -> evaluar -> responder)",
+      "description": "Flujo central. Valida el schema, mapea, evalúa y responde síncronamente con case_id, class, certainty, rules_fired[], trace, rule_set_version. Un mensaje inválido nunca se descarta en silencio.",
+      "acceptance_criteria": [
+        "Un mensaje válido con N instancias devuelve 200 con interpretación completa",
+        "Un mensaje inválido devuelve error estructurado y queda contabilizado en la métrica de cobertura",
+        "100% de los mensajes válidos terminan en una clase o en revisión clínica",
+        "El payload crudo no se escribe en logs, errores ni almacenamiento; solo vive en memoria durante el request",
+        "Ninguna instancia de la API guarda estado en memoria entre requests",
+        "Prueba e2e real contra la API levantada con scripts/init.sh"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "DIVIDIDA en F040, F041. | Notas previas: Depende de F003, F004, F005, F007, F008, F009. Manejo de instancias históricas vs actuales a definir en el contrato."
+    },
+    {
+      "id": "F011",
+      "title": "Logging estructurado sin PHI ni payload",
+      "description": "Logger estructurado que registra message_id, case_id, clase, certeza e ids de reglas disparadas. Nunca payload completo, PHI ni valores clínicos de la solicitud.",
+      "acceptance_criteria": [
+        "Un test envía un mensaje con valores clínicos conocidos y comprueba que no aparecen en ninguna salida de log",
+        "Los errores expuestos al cliente tampoco reflejan valores recibidos",
+        "Los campos logueados son exactamente los definidos en AGENTS.md"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 15. Agregar test canario con valor centinela en logs y errores."
+    },
+    {
+      "id": "F012",
+      "title": "Persistencia en Supabase Postgres sin PII (interpretaciones, mapeos, reglas activas, revisiones)",
+      "description": "Esquema y migraciones para interpretaciones (con rule_set_version y traza), variables clínicas sin identificadores, mapeos y revisiones. Identificadores opacos. Scope de un solo tenant por query.",
+      "acceptance_criteria": [
+        "Migraciones reproducibles desde cero",
+        "Ninguna columna admite identificadores de paciente, fechas absolutas ni texto libre",
+        "Toda query corre con scope de tenant y un test demuestra que no cruza tenants",
+        "La interpretación se guarda y se recupera por case_id con su traza",
+        "Pruebas de integración contra una base real (no mock) si se define así la regla de tests del proyecto"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "DIVIDIDA en F054, F055. | Notas previas: DECIDIDO 2026-11-03: Supabase Postgres. Pendientes: región/residencia de datos (marco legal de cada despliegue; primero: Ley 1581) y regla de tests sobre la base de datos."
+    },
+    {
+      "id": "F013",
+      "title": "Autenticación Supabase Auth + validación de JWT y roles en la API",
+      "description": "El front usa Supabase Auth; la API valida el JWT y aplica roles (médico, enfermero, revisor, admin) en los endpoints de lectura y revisión.",
+      "acceptance_criteria": [
+        "Un request sin JWT o con JWT inválido recibe 401",
+        "Un rol sin permiso recibe 403 en el endpoint protegido (matriz rol x endpoint probada)",
+        "Usuarios demo por rol, sin cuenta compartida, con contraseñas hasheadas por el proveedor de auth",
+        "Ningún secreto en el repo; nombres de variables en .env.example"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "DIVIDIDA en F057, F058. Criterios con 4 roles: se mantienen, el usuario decidió no reescribirlos; F058 define la matriz de 3 roles. | Notas previas: DECIDIDO 2026-11-03: tres roles. (1) superadministrador: capacidades absolutas; (2) experto: audita/verifica reglas (y revisa casos); (3) usuario: ve interpretaciones en el visor de alertas/dashboard. Los criterios de aceptación aún mencionan médico/enfermero/revisor/admin: reconciliar con el usuario antes de implementar. Matriz detallada rol x endpoint: por definir en planificación."
+    },
+    {
+      "id": "F014",
+      "title": "Protección del POST de ingesta: API key, rate limiting y límite de tamaño",
+      "description": "Requisito de la demo pública: POST /v1/messages protegido con API key del emisor, rate limiting y límite de tamaño de payload.",
+      "acceptance_criteria": [
+        "Sin API key válida el POST recibe 401 y no se procesa el cuerpo",
+        "Exceder el rate limit devuelve 429",
+        "Payload sobre el límite devuelve 413 sin procesarlo ni loguearlo",
+        "La API key se lee de variable de entorno; nunca aparece en logs ni en el repo"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "DIVIDIDA en F052 (key y tamaño), F064 (rate limit distribuido, P2). | Notas previas: Rate limiting distribuido en Vercel (sin estado en memoria) puede requerir un almacén externo: decisión de arquitectura pendiente."
+    },
+    {
+      "id": "F015",
+      "title": "Entrega de críticos al dashboard (SSE o polling) y endpoint de lectura",
+      "description": "El dashboard se entera de nuevos casos críticos sin recargar. La definición de producto indica SSE; la arquitectura del stack menciona polling cada 2-3 s.",
+      "acceptance_criteria": [
+        "Un caso crítico enviado por POST aparece en el dashboard en menos de 5 s sin recargar la página",
+        "Existe endpoint de lectura de casos por clase con scope de rol",
+        "El mecanismo elegido funciona en el entorno de despliegue real (Vercel)",
+        "Verificado de punta a punta con un cliente real, no solo test unitario"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 37 junto con F023. El endpoint está en F056. Polling 2-3 s (ADR-005). | Notas previas: DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción."
+    },
+    {
+      "id": "F016",
+      "title": "Cola de revisión clínica (API + UI)",
+      "description": "Los casos de baja certeza o clase 'revisión clínica' se listan en una cola; el revisor ve la traza y registra su resolución.",
+      "acceptance_criteria": [
+        "Un caso de baja certeza aparece en la cola con motivo (completitud, margen o conflicto)",
+        "Solo los roles revisor y admin pueden resolver; la resolución queda persistida con rol y versión de reglas, sin identificadores personales",
+        "Los casos resueltos salen de la cola y se cuentan en la analítica",
+        "Verificado en la UI real"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar)."
+    },
+    {
+      "id": "F017",
+      "title": "Módulo de revisión y edición del mapeo de variables",
+      "description": "El revisor ve los códigos locales no mapeados o dudosos y edita el mapeo hacia variables canónicas; el cambio aplica a mensajes futuros.",
+      "acceptance_criteria": [
+        "Códigos no mapeados aparecen listados con su frecuencia",
+        "Editar un mapeo cambia el resultado de mensajes posteriores y no reescribe interpretaciones pasadas",
+        "Cada cambio de mapeo queda auditado (quién por rol, cuándo en offset relativo o marca interna, qué cambió)",
+        "Solo roles autorizados pueden editar"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "DIFERIDA a v1.1 por decisión del usuario: en el MVP solo lectura (F063). No es parte del MVP. | Notas previas: Depende de F004 y F012. Roles: ver F013 (tres roles)."
+    },
+    {
+      "id": "F018",
+      "title": "Seeds sintéticos: generador, casos y clase esperada con criterio citado",
+      "description": "Decenas de casos sintéticos escritos por clínicos con composición mínima: positivos claros, negativos claros, casos límite en umbrales, datos faltantes y señales contradictorias. Cada seed lleva clase esperada y criterio citado.",
+      "acceptance_criteria": [
+        "Cubre las cinco categorías de composición mínima",
+        "Cada seed tiene clase esperada, criterio citado y firma/aprobación clínica registrada",
+        "Todos los seeds son sintéticos, con IDs opacos y tiempos relativos; el hook PHI no se evade",
+        "Ningún dato de MIMIC ni de PhysioNet commiteado"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 23. Agregar test de que el hook PHI no se evade. Etiquetas provisionales mientras los etiquetadores sean placeholders. | Notas previas: Etiquetadores y árbitro: usar placeholders (Etiquetador A, Etiquetador B, Árbitro) hasta nombrar personas reales. No cambiar la clase esperada de un seed para que pase."
+    },
+    {
+      "id": "F019",
+      "title": "Proceso de gold standard: doble etiquetado, kappa de Cohen y adjudicación",
+      "description": "Herramienta para importar las etiquetas independientes de dos clínicos, calcular kappa de Cohen, listar desacuerdos, registrar la adjudicación de un tercero y conservar los desacuerdos como seeds de ambigüedad.",
+      "acceptance_criteria": [
+        "El cálculo de kappa se verifica contra un ejemplo con resultado conocido",
+        "Los etiquetadores no ven la salida del motor ni las reglas durante el etiquetado (proceso documentado)",
+        "Los casos en desacuerdo se conservan y marcan como ambigüedad",
+        "El reporte declara explícitamente si un etiquetador participó en redactar las reglas (limitación: mide consistencia, no corrección clínica independiente)"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Script en F051. El etiquetado independiente es tarea humana paralela. | Notas previas: Depende de F018. Es un proceso con humanos: el software solo lo soporta. Etiquetadores/árbitro como placeholders por ahora."
+    },
+    {
+      "id": "F020",
+      "title": "Suite e2e que ejecuta los seeds y calcula las métricas del hito",
+      "description": "Corre todos los seeds contra la API, compara con el gold standard y genera un reporte: cobertura, sensibilidad de crítico, conformidad con criterios publicados (Sepsis-3/SSC; validación clínica pendiente) y casos en revisión clínica.",
+      "acceptance_criteria": [
+        "Cobertura reportada: 100% de mensajes válidos terminan en clase o revisión",
+        "Sensibilidad de crítico sobre seeds reportada (meta 100%)",
+        "Conformidad reportada con la etiqueta 'conformidad con criterios publicados; validación clínica pendiente', nunca como 'concordancia' o 'validación clínica'",
+        "El reporte aclara que con menos de 100 seeds 99% equivale a cero discrepancias y no es una cifra estadística",
+        "Casos en revisión se reportan sin penalizar; el reporte no compara 1:1 con PhysioNet/CinC 2019",
+        "Un solo comando ejecuta la suite y falla (exit distinto de 0) si un crítico no se detecta"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "ABSORBIDA por F050. | Notas previas: Depende de F010, F018. DECIDIDO 2026-11-03: meta de conformidad = cero discrepancias."
+    },
+    {
+      "id": "F021",
+      "title": "Simulador de seeds (emisor) que hace POST a /v1/messages",
+      "description": "Script que lee los seeds y los envía a la API como lo haría un emisor real, sin cambiar el contrato (futuro reemplazo por Mirth Connect).",
+      "acceptance_criteria": [
+        "Envía todos los seeds con la API key y reporta éxitos y errores por mensaje",
+        "Usa el contrato definido en packages/schema sin extensiones",
+        "Puede enviar en modo continuo para alimentar la demo"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "ABSORBIDA por F050. | Notas previas: Depende de F010 y F018."
+    },
+    {
+      "id": "F022",
+      "title": "Scaffold de la WebApp (React + Vite), login y navegación por rol",
+      "description": "Aplicación web con inicio de sesión vía Supabase Auth y rutas visibles según rol (médico, enfermero, revisor, admin).",
+      "acceptance_criteria": [
+        "Login y logout funcionales con usuarios demo",
+        "Cada rol ve solo sus secciones; verificado en el navegador",
+        "Todos los textos de UI en el idioma del producto (idioma del despliegue; primero español)"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 36. Incluye el banner 'datos sintéticos, demo en desarrollo, no apto para uso clínico' desde el inicio. | Notas previas: Depende de F001 y F013. Roles: tres (ver F013)."
+    },
+    {
+      "id": "F023",
+      "title": "Dashboard de críticos priorizado por gravedad",
+      "description": "El médico ve varios pacientes a la vez, ordenados por gravedad; cada tarjeta muestra siempre la regla que disparó y los valores que la sustentan.",
+      "acceptance_criteria": [
+        "Los casos se ordenan por gravedad y la lista se actualiza al llegar un crítico nuevo",
+        "Cada caso muestra el id de la regla disparada y los valores de entrada que la sustentan",
+        "Estados vacío y de error diseñados (sin casos, desconexión del push)",
+        "Verificado en el navegador con seeds enviados por el simulador"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022."
+    },
+    {
+      "id": "F024",
+      "title": "Visor 'red de evaluación de reglas' generado desde la traza",
+      "description": "Visualización estilo perceptrón multicapa: entradas (variables) -> condiciones -> reglas -> clase, generada directamente de la traza de evaluación.",
+      "acceptance_criteria": [
+        "El visor se renderiza solo a partir de la traza devuelta por la API, sin lógica de evaluación propia",
+        "El rótulo es 'red de evaluación de reglas'; ningún texto la describe como IA, ML o red neuronal",
+        "Muestra qué condiciones se cumplieron, cuáles no fueron evaluables y la clase resultante",
+        "Verificado en el navegador con un caso real"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 40. Después del detalle en texto (F062). | Notas previas: Depende de F005 y F022."
+    },
+    {
+      "id": "F025",
+      "title": "Dashboard de analítica básica",
+      "description": "Distribución de clases, volumen de mensajes, tasa de revisión y reglas más disparadas.",
+      "acceptance_criteria": [
+        "Las cuatro métricas se calculan desde datos persistidos y coinciden con un conteo manual sobre seeds conocidos",
+        "Solo agregados: sin datos a nivel de paciente en esta vista",
+        "Verificado en el navegador"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 45. P2, después de la demo básica. | Notas previas: Depende de F012 y F022."
+    },
+    {
+      "id": "F026",
+      "title": "Endurecimiento de la demo pública (banner, HTTPS, sin logs de payload, reset periódico)",
+      "description": "Requisitos mínimos de la demo para inversores: banner 'datos sintéticos, no apto para uso clínico', HTTPS obligatorio, sin logs de payload en servidor ni proveedor de hosting, reset periódico de datos.",
+      "acceptance_criteria": [
+        "El banner es visible en todas las pantallas",
+        "HTTP redirige a HTTPS o se rechaza",
+        "Se confirma que ni la API ni la configuración del hosting registran el cuerpo de las solicitudes",
+        "Un job de reset restaura la base de datos al estado de seeds y es idempotente"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 43. El reset no puede borrar el audit log. Banner ya viene desde F022. | Notas previas: Revisar con clinical-safety-compliance-reviewer antes de publicar. La demo no debe sugerir que la red de evaluación es IA."
+    },
+    {
+      "id": "F027",
+      "title": "Despliegue en Vercel + Supabase",
+      "description": "Despliegue reproducible de API y web en Vercel con Supabase como estado y auth.",
+      "acceptance_criteria": [
+        "Despliegue de preview funcional con un health check público verificado",
+        "Variables de entorno documentadas en .env.example; ningún secreto en el repo",
+        "Región de Vercel/Supabase decidida y documentada",
+        "Aprobación explícita del usuario antes de cada despliegue"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 47. Precondiciones: F052, F053, F063/F064 según prioridad, F026, F065, y reglas aprobadas o banner explícito. Esqueleto temprano en F034. | Notas previas: Residencia de datos (marco legal de cada despliegue; primero: Ley 1581) pendiente de decidir. Usar devops-sre."
+    },
+    {
+      "id": "F028",
+      "title": "Registro de requisitos previos a uso clínico (SaMD, autoridades regulatorias aplicables) y limitaciones del MVP",
+      "description": "Documento corto que declara que el MVP no es apto para uso clínico, que un software de alerta de sepsis probablemente es SaMD ante las autoridades regulatorias aplicables (p. ej. FDA, INVIMA), y lista las limitaciones conocidas (conformidad no es validación clínica, independencia de etiquetadores, <100 seeds).",
+      "acceptance_criteria": [
+        "Documento en docs/ revisado por clinical-safety-compliance-reviewer",
+        "Las limitaciones coinciden con las del reporte de F020"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Doc de uso previsto en F065. Esta feature queda para la clasificación regulatoria (post-MVP, con abogado/regulatorio). | Notas previas: No constituye revisión legal formal."
+    },
+    {
+      "id": "F029",
+      "title": "Texto libre clínico como fuente de datos de diagnóstico (post-MVP)",
+      "description": "Incorporar texto libre (notas clínicas) como fuente de datos de diagnóstico, hoy excluido del contrato por riesgo de reidentificación y porque ADR-003 descarta LLM/NLP en v1.",
+      "acceptance_criteria": [
+        "ADR nuevo que decida el enfoque (determinístico/NLP/LLM) y su costo, y que reconsidere ADR-003 explícitamente",
+        "Estrategia de desidentificación del texto antes de persistir o procesar, revisada por clinical-safety-compliance-reviewer",
+        "Cambio del contrato de datos aprobado por el usuario antes de implementarse"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "Bloqueada hasta que exista un ADR nuevo. Contradice ADR-001 y el alcance v1 hasta entonces. Distinta de la anotación acotada de F061. | Notas previas: POST-MVP. Registrada 2026-11-03 por decisión del usuario: queda fuera del MVP pero debe integrarse eventualmente. No implementar en v1."
+    },
+    {
+      "id": "F030",
+      "title": "Monorepo con workspaces y comando único de verificación",
+      "description": "Estructura apps/api, apps/web, packages/schema, engine, knowledge, seeds, tests con un comando único (lint + tests + build).",
+      "acceptance_criteria": [
+        "Un script raíz de verificación termina en exit 0 sobre el repo limpio",
+        "AGENTS.md 'Comandos de proyecto' actualizado con los comandos reales",
+        "Dependencias aprobadas por el usuario antes de instalarse"
+      ],
+      "status": "passing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 1. Parte de F001. | PASSING 2026-11-03: verified by running `npm run verify` (exit 0, 9/9 tests) on branch chore/f030-monorepo-verify, implementation head 97779c7. Known gap accepted by the user: bare `node --test` finding zero test files exits 0 and discovery of *.test.ts on the Node 22.18 floor is unverified (Node 22.x docs list the .ts patterns); verify on the pinned CI Node in F031. Lockfile resolves against registry.npmjs.org; a later `npm install` under a local mirror config can write mirror URLs back."
+    },
+    {
+      "id": "F031",
+      "title": "CI con el mismo comando, secret scanning y hook PHI",
+      "description": "Workflow de CI que corre exactamente el comando de verificación y añade escaneo de secretos y el chequeo PHI.",
+      "acceptance_criteria": [
+        "CI corre el mismo comando que local",
+        "Un secreto de prueba sintético hace fallar el escaneo",
+        "El chequeo PHI corre en CI"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 2. Parte de F001. Depende de F030."
+    },
+    {
+      "id": "F032",
+      "title": "Esqueleto de API Fastify con GET /health e init.sh verificado",
+      "description": "API mínima en TypeScript con /health; scripts/init.sh la levanta y verifica.",
+      "acceptance_criteria": [
+        "GET /health responde 200",
+        "scripts/init.sh termina en exit 0 con la API arriba",
+        "No hay estado en memoria entre requests"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 3. Parte de F001. Depende de F030."
+    },
+    {
+      "id": "F033",
+      "title": "Spike: json-logic-engine vs evaluador propio",
+      "description": "Spike con caja de tiempo, desechable, para decidir la librería de condiciones.",
+      "acceptance_criteria": [
+        "Un dato faltante produce 'no evaluable', no falso (o se documenta cómo envolverlo)",
+        "Se puede obtener resultado por condición para la traza",
+        "Misma entrada produce misma salida (determinismo)",
+        "Licencia y mantenimiento verificados; plan B documentado: YAML con comparador propio",
+        "Decisión presentada al usuario para aprobar la dependencia antes de usarla"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 4. En paralelo con F030. Spike: no se mantiene el código; conservarlo es una solicitud nueva."
+    },
+    {
+      "id": "F034",
+      "title": "Esqueleto de despliegue en Vercel con /health y región decidida",
+      "description": "Despliegue preview mínimo para descubrir temprano problemas de Fastify en Vercel y de región de Supabase.",
+      "acceptance_criteria": [
+        "Preview con /health público verificado",
+        "Región de Vercel/Supabase decidida y documentada",
+        "Solo /health expuesto; ningún endpoint de ingesta público"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 6. Parte de F027. Residencia de datos (marco legal de cada despliegue; primero: Ley 1581) requiere criterio legal. Aprobación del usuario antes de cada despliegue."
+    },
+    {
+      "id": "F035",
+      "title": "Schema reducido v1.0 para el primer corte (qSOFA), estricto",
+      "description": "Schema del mensaje con las variables de qSOFA, offsets relativos acotados, sin texto libre, valida estructura de varias instancias; las históricas se aceptan y no se usan.",
+      "acceptance_criteria": [
+        "additionalProperties false; códigos, unidades y etiquetas como enums o patrones",
+        "Offsets acotados; sin fechas absolutas",
+        "Tipos TS derivados del mismo schema",
+        "Tests: válido, campos faltantes, tipos incorrectos, varias instancias, históricas ignoradas"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "Orden 7. Parte de F003. Cambio de contrato: aprobación del usuario. case_id aleatorio, nunca derivado de un identificador."
+    },
+    {
+      "id": "F036",
+      "title": "Errores estructurados que no reflejan valores ni nombres de campos desconocidos",
+      "description": "Respuesta de error identifica el campo conocido inválido sin devolver el valor recibido ni claves desconocidas.",
+      "acceptance_criteria": [
+        "Un campo con clave desconocida no aparece en el mensaje de error",
+        "Un valor inválido no se refleja",
+        "Error estructurado y nunca se lanza un string"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 8. Parte de F003."
+    },
+    {
+      "id": "F037",
+      "title": "Esquema de reglas YAML, loader, rule_set_version y campo clinical_approval",
+      "description": "Define el formato de reglas (YAML + condiciones), carga las reglas activas y calcula rule_set_version. Cada regla lleva clinical_approval (estado, aprobador, versión de la guía).",
+      "acceptance_criteria": [
+        "rule_set_version cambia al cambiar cualquier regla activa y es estable si no",
+        "Un YAML inválido impide el arranque con error claro",
+        "clinical_approval 'pending' se refleja en la respuesta del POST",
+        "CODEOWNERS clínico sobre knowledge/"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 10. Absorbe F009. Depende de F005 y F033."
+    },
+    {
+      "id": "F038",
+      "title": "Regla qSOFA v1 transcrita y citada",
+      "description": "Umbrales publicados de qSOFA transcritos por el desarrollador con cita de guía, versión y sección; aprobación clínica pendiente.",
+      "acceptance_criteria": [
+        "Id estable sepsis.qsofa.v1 con cita",
+        "clinical_approval = pending hasta que un clínico apruebe",
+        "Test valida el YAML contra el schema de reglas"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 11. Parte de F006. Umbrales no se inventan."
+    },
+    {
+      "id": "F039",
+      "title": "Política de clase provisional (crítico / vigilancia / sin alerta / revisión clínica)",
+      "description": "Combina reglas por máxima severidad en las 4 clases con criterio citado; provisional hasta aprobación clínica.",
+      "acceptance_criteria": [
+        "Toda entrada válida termina en exactamente una clase",
+        "Reglas en conflicto se resuelven por máxima severidad y alimentan el conflicto de la certeza",
+        "Marcada provisional y fuera de las métricas hasta la aprobación clínica"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 12. Parte de F007."
+    },
+    {
+      "id": "F040",
+      "title": "POST /v1/messages, happy path sin persistencia",
+      "description": "Valida, evalúa qSOFA y responde síncronamente con case_id, class, certainty, rules_fired, trace y rule_set_version.",
+      "acceptance_criteria": [
+        "Un curl con un seed devuelve clase y traza",
+        "N instancias en un mensaje se procesan",
+        "El payload crudo no se escribe en logs ni almacenamiento",
+        "Prueba e2e contra la API levantada con init.sh"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "Orden 13. Parte de F010. Tracer bullet."
+    },
+    {
+      "id": "F041",
+      "title": "POST /v1/messages, mensaje inválido estructurado",
+      "description": "Un inválido devuelve error estructurado y se contabiliza para la cobertura en el runner e2e.",
+      "acceptance_criteria": [
+        "Inválido devuelve 4xx estructurado",
+        "El runner cuenta inválidos y válidos; cobertura reportada"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 14. Parte de F010. La cobertura se contabiliza en el runner (F050); el contador persistido llega con la persistencia."
+    },
+    {
+      "id": "F042",
+      "title": "Catálogo canónico de variables de qSOFA y SIRS con LOINC y UCUM verificados",
+      "description": "Catálogo versionado de las variables mínimas del primer corte con código y unidad verificados contra fuente oficial.",
+      "acceptance_criteria": [
+        "Cada variable con LOINC y UCUM y fuente citada",
+        "Ningún código escrito de memoria sin verificar"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "Orden 16. Parte de F004."
+    },
+    {
+      "id": "F043",
+      "title": "Mapper de códigos locales con conversión de unidades y mapping_version",
+      "description": "Traduce código local a canónico, convierte unidades y versiona el mapeo; cada interpretación guarda mapping_version.",
+      "acceptance_criteria": [
+        "Código local conocido se traduce; unidad compatible se convierte",
+        "Código sin mapeo no se descarta: queda 'no mapeado' y visible",
+        "Unidad incompatible produce error estructurado",
+        "Cada interpretación incluye mapping_version"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "Orden 17. Parte de F004. ADR-002 solo versiona reglas: el mapeo también cambia la clasificación."
+    },
+    {
+      "id": "F044",
+      "title": "Ampliar el schema para SIRS y el proxy de infección",
+      "description": "Agrega temperatura, leucocitos, cultivos, antibióticos e ICD-10 al schema.",
+      "acceptance_criteria": [
+        "Tests de válido e inválido para las variables nuevas",
+        "Decisión documentada sobre PaCO2 y bandas de SIRS (omitidas o no) y su efecto en la completitud"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "Orden 18. Parte de F003. Cambio de contrato: aprobación del usuario."
+    },
+    {
+      "id": "F045",
+      "title": "Regla SIRS v1 transcrita y citada",
+      "description": "Umbrales publicados de SIRS, aprobación clínica pendiente.",
+      "acceptance_criteria": [
+        "Id estable sepsis.sirs.v1 con cita",
+        "clinical_approval = pending"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 19. Parte de F006."
+    },
+    {
+      "id": "F046",
+      "title": "Proxy de sospecha de infección (provisional)",
+      "description": "Proxy operativo con cultivos, antibióticos, ICD-10 y fiebre/leucocitos. No puede llegar a crítico hasta que el clínico lo defina.",
+      "acceptance_criteria": [
+        "El proxy solo produce vigilancia o revisión clínica mientras esté provisional",
+        "Definición operativa final registrada por el clínico antes de pasar a passing"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 20. Parte de F006. BLOQUEADA por decisión clínica."
+    },
+    {
+      "id": "F047",
+      "title": "Certeza: completitud, margen y conflicto (mínimo), crítico nunca se degrada",
+      "description": "Certeza = mínimo de los tres componentes, con mejor y peor caso para datos faltantes.",
+      "acceptance_criteria": [
+        "Los tres componentes se devuelven por separado",
+        "Definición verificable de margen (distancia normalizada con banda por variable) y del denominador de completitud",
+        "Un crítico con certeza baja conserva la clase y recibe la bandera 'requiere confirmación' además de ir a revisión",
+        "Test explícito de que ningún caso crítico baja a sin alerta por datos faltantes"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 21. Parte de F008. Bandas y pesos provisionales hasta calibrar con el clínico."
+    },
+    {
+      "id": "F048",
+      "title": "Derivación a revisión con τ provisional",
+      "description": "Si la certeza cae bajo τ el caso va a revisión clínica (nunca reemplaza a un crítico).",
+      "acceptance_criteria": [
+        "τ configurable por entorno",
+        "Debajo de τ un no crítico va a revisión; un crítico conserva la clase",
+        "τ provisional marcado como tal"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 22. Parte de F008."
+    },
+    {
+      "id": "F049",
+      "title": "Calibración final de τ con los seeds",
+      "description": "Elegir τ en una meseta estable sin optimizar sobre las etiquetas.",
+      "acceptance_criteria": [
+        "Curva '% a revisión frente a τ' reportada",
+        "τ elegido es un valor redondo estable ante ±0.1, con cero falsos 'sin alerta' sobre críticos",
+        "Reservar cerca de 30% de seeds sin tocar; reportado como calibración, no validación"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 26. Parte de F008. Depende de F018."
+    },
+    {
+      "id": "F050",
+      "title": "Runner e2e con simulador integrado y métricas",
+      "description": "Un solo runner envía los seeds por POST y calcula cobertura, sensibilidad de crítico y conformidad (cero discrepancias).",
+      "acceptance_criteria": [
+        "Reporta cobertura, sensibilidad de crítico y conformidad con la etiqueta 'conformidad con criterios publicados; validación clínica pendiente'",
+        "Sale con código distinto de 0 si un crítico no se detecta",
+        "Mientras los etiquetadores sean placeholders, el reporte marca las etiquetas como provisionales y no presenta kappa ni cero discrepancias como evidencia",
+        "Sin las palabras 'IA' ni 'precisión'; aclara que <100 seeds no es cifra estadística",
+        "API key del simulador por variable de entorno"
+      ],
+      "status": "failing",
+      "priority": "P0",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 24. Absorbe F020 y F021."
+    },
+    {
+      "id": "F051",
+      "title": "Script de kappa de Cohen",
+      "description": "Calcula kappa y lista desacuerdos desde dos conjuntos de etiquetas.",
+      "acceptance_criteria": [
+        "Verificado contra un ejemplo de resultado conocido",
+        "Desacuerdos listados como seeds de ambigüedad"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 25. Parte de F019. El etiquetado independiente es una tarea humana paralela fuera de las features."
+    },
+    {
+      "id": "F052",
+      "title": "API key y límite de tamaño en el POST",
+      "description": "POST protegido con API key y límite de payload.",
+      "acceptance_criteria": [
+        "Sin API key 401 sin procesar el cuerpo",
+        "Payload sobre el límite 413 sin procesarlo ni loguearlo",
+        "La key se lee de variable de entorno y no aparece en logs"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 27. Parte de F014."
+    },
+    {
+      "id": "F053",
+      "title": "CORS, headers de seguridad y gestión de secretos",
+      "description": "Configuración de CORS restrictivo, headers y manejo de secretos antes de exponer la API.",
+      "acceptance_criteria": [
+        "CORS permite solo orígenes configurados",
+        "Headers de seguridad presentes",
+        "Nombres de variables en .env.example, ningún valor en el repo",
+        "La key del simulador no va en el bundle público de la web"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 28. Nueva (compliance)."
+    },
+    {
+      "id": "F054",
+      "title": "Esquema Supabase y migraciones con tenant_id",
+      "description": "Tablas de interpretaciones, mapeos, reglas activas, revisiones, anotaciones y auditoría; sin PII.",
+      "acceptance_criteria": [
+        "Migraciones reproducibles desde cero",
+        "Ninguna columna admite identificadores de paciente, fechas absolutas ni texto libre del emisor",
+        "Toda tabla lleva tenant_id"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 29. Parte de F012. Cambio de esquema: aprobación del usuario."
+    },
+    {
+      "id": "F055",
+      "title": "Persistir interpretaciones y test de aislamiento entre tenants",
+      "description": "Guarda la interpretación con traza mínima (solo los valores que sustentan la regla), rule_set_version y mapping_version.",
+      "acceptance_criteria": [
+        "Recuperable por case_id",
+        "Toda query lleva tenant_id (la API usa service role, que salta RLS)",
+        "Test cross-tenant demuestra el no-cruce",
+        "La traza persistida nunca se loguea"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 30. Parte de F012."
+    },
+    {
+      "id": "F056",
+      "title": "GET de casos por clase con limit y since",
+      "description": "Endpoint de lectura para el polling del dashboard.",
+      "acceptance_criteria": [
+        "Filtra por clase, acepta limit y since",
+        "Scope por rol",
+        "Medido en el despliegue: un crítico aparece en menos de 5 s con polling de 2-3 s"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 31. Parte de F015 (ADR-005)."
+    },
+    {
+      "id": "F057",
+      "title": "Middleware JWT de Supabase (401)",
+      "description": "La API valida el JWT de Supabase.",
+      "acceptance_criteria": [
+        "Sin JWT o JWT inválido devuelve 401",
+        "El rol se lee de app_metadata, no de user_metadata"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 32. Parte de F013."
+    },
+    {
+      "id": "F058",
+      "title": "Matriz de permisos de los 3 roles (403)",
+      "description": "Usuario: dashboard, detalle, visor, analítica, marcar visto/atendido y anotar criterio distinto. Experto: lo anterior más cola de revisión, resolver, ver reglas y rule_set_version y mapeo en solo lectura. Superadministrador: todo más usuarios y reset de la demo.",
+      "acceptance_criteria": [
+        "Matriz rol x endpoint probada con 403 donde corresponde",
+        "Ningún rol edita reglas desde la app"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 33. Parte de F013. Reconcilia los criterios de roles de F013. Supuesto a confirmar: el rol usuario también marca visto/atendido y anota (decisión 3 del usuario)."
+    },
+    {
+      "id": "F059",
+      "title": "Audit log append-only",
+      "description": "Registro sin UPDATE ni DELETE con quién (rol), cuándo (marca interna), qué y qué versión.",
+      "acceptance_criteria": [
+        "Sin UPDATE ni DELETE, con RLS",
+        "Cubre resolución de revisión, anotaciones, cambios de rol y activación de rule_set_version",
+        "El reset de la demo no puede borrarlo"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 34. Nueva (compliance). Debe existir antes de F016 y de F061."
+    },
+    {
+      "id": "F060",
+      "title": "Gestión de usuarios del superadministrador",
+      "description": "Crear, cambiar rol y desactivar usuarios demo.",
+      "acceptance_criteria": [
+        "Solo superadministrador accede",
+        "Cada cambio de rol queda en el audit log"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 35. Nueva (UX). El email del personal es dato personal (marco legal aplicable; primero: Ley 1581): consultar a un abogado."
+    },
+    {
+      "id": "F061",
+      "title": "Reconocimiento visto/atendido de un crítico y anotación de criterio distinto",
+      "description": "El crítico se marca como visto/atendido (persistido). Si el criterio del clínico difiere, un checkbox habilita campos de decisión y justificación. El crítico no cambia de clase.",
+      "acceptance_criteria": [
+        "Marcar visto/atendido persiste, con rol e id interno opaco",
+        "El checkbox 'criterio diferente' habilita los campos de decisión y justificación",
+        "La clase del crítico no cambia por la anotación",
+        "La justificación tiene longitud máxima, aviso de no ingresar identificadores, nunca se loguea y queda en el audit log",
+        "Estados vacío y de error en la UI"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 38. Nueva (decisiones 2 y 3 del usuario). La justificación es texto libre clínico: excepción acotada a ADR-001, requiere ADR-006 y revisión de compliance ANTES de implementar. Aplica también a casos resueltos en la cola (F016)."
+    },
+    {
+      "id": "F062",
+      "title": "Detalle del caso con traza en texto",
+      "description": "Por criterio: variable, valor, umbral y resultado (cumple, no cumple, no disponible). Siempre rule_id y rule_set_version.",
+      "acceptance_criteria": [
+        "'No disponible' se distingue visualmente de 'normal'",
+        "Muestra rule_id, rule_set_version y mapping_version",
+        "Muestra clinical_approval pendiente cuando aplica"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 39. Parte de F023. Antes del visor gráfico (F024)."
+    },
+    {
+      "id": "F063",
+      "title": "Mapeo de variables en solo lectura (lista de no mapeados)",
+      "description": "Lista de códigos no mapeados con su frecuencia. La edición queda para v1.1.",
+      "acceptance_criteria": [
+        "Lista códigos no mapeados con frecuencia",
+        "Solo experto y superadministrador acceden",
+        "Sin edición en el MVP"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "Orden 42. Recorta F017 (decisión 1 del usuario)."
+    },
+    {
+      "id": "F064",
+      "title": "Rate limiting distribuido en el POST",
+      "description": "Rate limit con almacén externo o configuración de Vercel, porque la API es stateless.",
+      "acceptance_criteria": [
+        "Exceder el límite devuelve 429",
+        "No usa memoria local de la instancia"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 44. Parte de F014."
+    },
+    {
+      "id": "F065",
+      "title": "Documento de uso previsto y limitaciones (antes del despliegue público)",
+      "description": "Uso previsto, no apto para uso clínico, validación pendiente, significado de las métricas y limitación de etiquetadores.",
+      "acceptance_criteria": [
+        "Revisado por clinical-safety-compliance-reviewer",
+        "Coincide con el reporte de F050"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": false,
+      "notes": "Orden 46. Parte de F028. La clasificación regulatoria ante las autoridades aplicables (p. ej. INVIMA, FDA) queda en F028."
+    },
+    {
+      "id": "F066",
+      "title": "Reglas SOFA (parcial)",
+      "description": "SOFA con las variables disponibles; sin vasopresores ni diuresis es parcial.",
+      "acceptance_criteria": [
+        "Línea base de SOFA definida por el clínico",
+        "Parcialidad reflejada en la completitud"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "Post-MVP. Amplía el contrato."
+    },
+    {
+      "id": "F067",
+      "title": "Reglas NEWS2",
+      "description": "NEWS2 con O2 suplementario y ACVPU.",
+      "acceptance_criteria": [
+        "Mapeo de Glasgow a ACVPU decidido por el clínico",
+        "Poblaciones excluidas declaradas"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "Post-MVP. Amplía el contrato (O2, ACVPU)."
+    }
+  ]
+}
