@@ -111,7 +111,7 @@ Si estás retomando este proyecto sin contexto de una sesión anterior, sigue es
 1. `pwd` — confirma el directorio de trabajo real, no asumas.
 2. Lee `git log --oneline -20` y `docs/progress/PROGRESS.md` para entender qué se hizo en la sesión anterior y por qué (no solo qué archivos cambiaron).
 3. Lee `docs/progress/feature-list.json` y elige la feature de mayor prioridad con `"status": "failing"`. No trabajes en varias features a la vez — una por sesión, terminada y verificada, es mejor que tres a medias.
-4. Corre `./scripts/init.sh` para levantar el entorno (servidor dev, dependencias) — no asumas que el entorno ya está corriendo de la sesión anterior.
+4. Corre `./scripts/init.sh` (smoke check: instala dependencias con `npm ci`, arranca la API, comprueba `/health` y la detiene; variables `API_PORT` y `SKIP_INSTALL`). Para un servidor dev que siga arriba usa `npm run dev -w apps/api` (variables `PORT` y `API_HOST`). No asumas que el entorno ya está corriendo de la sesión anterior.
 5. Corre una verificación básica end-to-end (no solo `npm test`) antes de tocar código, para detectar si algo ya está roto de forma no documentada. Si algo está roto y no está en `PROGRESS.md`, documéntalo antes de seguir.
 6. Implementa la feature elegida. Al terminar: corre los tests, marca `"status": "passing"` en `feature-list.json` **solo si la verificaste tú mismo, no porque "debería funcionar"**, actualiza `PROGRESS.md` con qué se hizo y qué queda pendiente, y haz commit con mensaje descriptivo.
 

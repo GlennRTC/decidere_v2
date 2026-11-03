@@ -2,6 +2,12 @@
 import { buildApp } from "./app.ts";
 import { readHost, readPort } from "./config.ts";
 
+// Log only the error's name and code, never its message or stack (same convention as app.ts).
+const errInfo = (err: unknown): { name?: string; code?: unknown } => {
+  const { name, code } = (err ?? {}) as { name?: string; code?: unknown };
+  return { name, code };
+};
+
 async function main(): Promise<void> {
   const port = readPort(process.env);
   const host = readHost(process.env);
@@ -12,7 +18,7 @@ async function main(): Promise<void> {
     app.close().then(
       () => process.exit(0),
       (err: unknown) => {
-        app.log.error({ err }, "shutdown failed");
+        app.log.error({ err: errInfo(err) }, "shutdown failed");
         process.exit(1);
       },
     );
@@ -20,14 +26,14 @@ async function main(): Promise<void> {
   process.on("SIGTERM", shutdown);
   process.on("SIGINT", shutdown);
   process.on("unhandledRejection", (err) => {
-    app.log.error({ err }, "unhandled rejection");
+    app.log.error({ err: errInfo(err) }, "unhandled rejection");
     process.exit(1);
   });
 
   try {
     await app.listen({ port, host });
   } catch (err) {
-    app.log.error({ err }, "listen failed");
+    app.log.error({ err: errInfo(err) }, "listen failed");
     process.exit(1);
   }
 }

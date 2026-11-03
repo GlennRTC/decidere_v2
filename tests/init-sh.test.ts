@@ -88,3 +88,30 @@ test("init.sh fails when the port is already serving", async () => {
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+test("init.sh fails fast when the API dies at startup", async () => {
+  const started = Date.now();
+  const run = await new Promise<Run>((resolve) => {
+    execFile(
+      "bash",
+      [initPath],
+      {
+        env: { ...process.env, API_PORT: "abc", SKIP_INSTALL: "1" },
+        encoding: "utf8",
+        timeout: 60000,
+      },
+      (err, stdout, stderr) => {
+        const code = (err as { code?: unknown } | null)?.code;
+        resolve({
+          status: err ? (typeof code === "number" ? code : null) : 0,
+          stdout,
+          stderr,
+        });
+      },
+    );
+  });
+  const detail = `status=${run.status}\nstdout=${run.stdout}\nstderr=${run.stderr}`;
+  assert.equal(run.status, 1, detail);
+  assert.ok(run.stderr.includes("exited early"), detail);
+  assert.ok(Date.now() - started < 15000, `took ${Date.now() - started} ms`);
+});
