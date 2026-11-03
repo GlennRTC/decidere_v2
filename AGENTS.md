@@ -102,7 +102,7 @@ decidere-mvp/
 - **ADR-003**: la certeza se calcula de forma determinística, sin LLM ni costo por token.
 - **ADR-004**: la API es el único punto de entrada y el motor no hace I/O.
 
-> Los ADR-001 a 004, ADR-005 y ADR-006 están en `docs/adr/` con estado "propuesto" hasta su aprobación.
+> Los ADR-001 a 008 están en `docs/adr/` con estado "aceptado" (aprobados por el usuario el 2026-11-03).
 
 ## Protocolo de inicio de sesión (léelo primero, cada vez)
 

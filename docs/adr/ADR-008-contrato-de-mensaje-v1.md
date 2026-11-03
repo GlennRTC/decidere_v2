@@ -1,6 +1,6 @@
 # ADR-008: Contrato del mensaje v1.0 (`POST /v1/messages`)
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** El contrato del mensaje es la frontera donde un dato clínico entra al sistema y donde se puede filtrar PHI (ADR-001). F035 implementa la versión 1.0 en `packages/schema` para el corte qSOFA: sin esto, el mapper, el motor y el visor no tienen un contrato estable. Los límites numéricos son estructurales y provisionales: no son criterio clínico.
 

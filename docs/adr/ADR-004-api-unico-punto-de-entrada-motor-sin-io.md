@@ -1,6 +1,6 @@
 # ADR-004: La API es el único punto de entrada y el motor no hace I/O
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** Hay que hacer cumplir autorización, aislamiento de tenant y no persistencia de PII en un solo lugar, y el motor debe poder probarse sin infraestructura.
 

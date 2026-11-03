@@ -1,6 +1,6 @@
 # ADR-001: No se persiste PII/PHI
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** El sistema recibe variables clínicas y tiempos que, combinados, pueden reidentificar a una persona. La demo es pública y usa datos sintéticos. El marco legal de protección de datos y de salud depende de la jurisdicción de cada despliegue y puede haber varios a la vez. Almacenar menos reduce la superficie de riesgo y facilita cumplir cualquier marco aplicable.
 
