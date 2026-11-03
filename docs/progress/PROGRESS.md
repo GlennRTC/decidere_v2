@@ -77,3 +77,8 @@
 **Estado al cerrar:** F035 passing. Revisión formal `/clinical-review` pendiente (la feature requiere compliance review).
 **Decisiones:** la allowlist de emisores por tenant (`source`) se valida en F040. Unicidad de `instance_id` no exigida en 1.0.
 **Pendiente / abiertos:** ver "Límites conocidos" en ADR-008 (`source` no es opaco por patrón, claves JSON duplicadas, precisión de `JSON.parse`, rangos provisionales, Node 22.18 y Vercel sin verificar). Hallazgos menores: test de ReDoS sobredenominado, dos tests dependen del orden de keywords de Ajv. Siguiente: F036 (errores estructurados en la API), F034 (Vercel, bloqueada por residencia de datos).
+
+## 2026-11-03 — Sesión 5 (cierre): revisión clínica de F035 y F002
+**Qué se hizo:** `/clinical-review` de F035 sin hallazgos bloqueantes para el merge. Los gates para F040 (allowlist de `source`, destino de `instance_id`/`message_id`, históricas, body crudo antes de `JSON.parse`, test canario en logs, solo adultos) quedaron en ADR-008 y en las notas de F040/F036. Verificación cruzada de ADR-001 a 004 contra AGENTS.md: una tensión (crítico con certeza baja), resuelta con aprobación del usuario editando `AGENTS.md:21` y `:161` a favor de ADR-003. F002 pasa a passing (los ADR siguen "propuesto").
+**Decisiones:** región de la demo São Paulo (Supabase `sa-east-1`, Vercel `gru1`), un solo proyecto Vercel en monorepo, y ADR-009 con alcance "solo demo" (aún por redactar, con F034).
+**Pendiente:** revisión legal formal (Ley 1581 citada sin verificar); aceptar ADR-001 a 008; F036; F034 con ADR-009.
