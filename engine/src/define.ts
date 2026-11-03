@@ -71,7 +71,9 @@ function buildNode(
     if (!Array.isArray(list) || list.length === 0)
       return fail("invalid_combinator", path);
     return Object.freeze(
-      list.map((child, i) => buildNode(child, `${path}.${i}`, depth + 1, ids)),
+      Array.from(list, (child, i) =>
+        buildNode(child, `${path}.${i}`, depth + 1, ids),
+      ),
     ) as Node[];
   };
   if (kind === "not")
@@ -102,7 +104,7 @@ function buildRule(
   if (!Array.isArray(rawConditions))
     return fail("invalid_rule", `${path}.conditions`);
   const ids = new Set<string>();
-  const conditions = rawConditions.map((c, i) => {
+  const conditions = Array.from(rawConditions, (c, i) => {
     const cond = buildCondition(c, `${path}.conditions.${i}`, variables);
     if (ids.has(cond.id)) fail("duplicate_id", `${path}.conditions.${i}`);
     ids.add(cond.id);
@@ -125,7 +127,7 @@ export function defineRuleSet(
     if (!Array.isArray(rules) || rules.length === 0)
       return fail("invalid_rule_set", "rules");
     const seen = new Set<string>();
-    const built = rules.map((r, i) => {
+    const built = Array.from(rules, (r, i) => {
       const rule = buildRule(r, i, options?.variables);
       if (seen.has(rule.id)) fail("duplicate_id", `rules.${i}`);
       seen.add(rule.id);

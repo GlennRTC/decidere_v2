@@ -250,4 +250,37 @@ describe("defineRuleSet", () => {
       }
     }
   });
+  it("rejects sparse arrays (holes) in rules, conditions and combinator children", () => {
+    const holey = (first: unknown) => {
+      const arr: unknown[] = [first, first];
+      delete arr[0];
+      return arr;
+    };
+    const c = "rules.0.combine";
+    for (const make of [() => new Array(2), () => holey("a")]) {
+      fails(
+        [rule({ combine: { all: make() } })],
+        "invalid_combinator",
+        `${c}.0`,
+      );
+      fails(
+        [rule({ combine: { any: make() } })],
+        "invalid_combinator",
+        `${c}.0`,
+      );
+      fails(
+        [rule({ combine: { atLeast: { n: 1, of: make() } } })],
+        "invalid_combinator",
+      );
+      fails(
+        [rule({ conditions: make() })],
+        "invalid_condition",
+        "rules.0.conditions.0",
+      );
+    }
+    fails(new Array(2), "invalid_rule", "rules.0");
+    const sparseRules: unknown[] = [rule(), rule({ id: "r2" })];
+    delete sparseRules[1];
+    fails(sparseRules, "invalid_rule", "rules.1");
+  });
 });
