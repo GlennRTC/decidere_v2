@@ -1,3 +1,4 @@
+import { isDefinedRuleSet } from "./define.ts";
 import type {
   Condition,
   Input,
@@ -10,6 +11,7 @@ import type {
   TraceEntry,
   Tri,
 } from "./types.ts";
+import { RuleError } from "./types.ts";
 
 const OPERATORS: ReadonlyMap<Op, (a: number, b: number) => boolean> = new Map<
   Op,
@@ -111,6 +113,8 @@ function evaluateRule(rule: Readonly<Rule>, input: Input): RuleResult {
 }
 
 export function evaluateRuleSet(ruleSet: RuleSet, input: Input): RuleSetResult {
+  if (!isDefinedRuleSet(ruleSet))
+    throw new RuleError("invalid_rule_set", "rules");
   const rules = ruleSet.map((r) => evaluateRule(r, input));
   return {
     rules,

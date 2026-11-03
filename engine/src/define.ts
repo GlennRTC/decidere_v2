@@ -11,6 +11,21 @@ import { RuleError } from "./types.ts";
 const OPS: ReadonlySet<string> = new Set([">", ">=", "<", "<=", "=="]);
 const MAX_DEPTH = 64; // root combinator is depth 0 (ADR-007, por confirmar)
 
+// Index-based map: an own Symbol.iterator on a raw array must never change what is validated.
+const mapIndexed = <T>(
+  list: readonly unknown[],
+  fn: (x: unknown, i: number) => T,
+): T[] => {
+  const out: T[] = [];
+  for (let i = 0; i < list.length; i++) out.push(fn(list[i], i));
+  return out;
+};
+
+// Rule sets produced by defineRuleSet; evaluateRuleSet refuses anything else.
+const defined = new WeakSet<object>();
+export const isDefinedRuleSet = (x: unknown): boolean =>
+  typeof x === "object" && x !== null && defined.has(x);
+
 const fail = (code: RuleErrorCode, path: string): never => {
   throw new RuleError(code, path);
 };
@@ -74,7 +89,7 @@ function buildNode(
     if (!Array.isArray(list) || list.length === 0)
       return fail("invalid_combinator", path);
     return Object.freeze(
-      Array.from(list, (child, i) =>
+      mapIndexed(list, (child, i) =>
         buildNode(child, `${path}.${i}`, depth + 1, ids),
       ),
     ) as Node[];
@@ -107,7 +122,7 @@ function buildRule(
   if (!Array.isArray(rawConditions))
     return fail("invalid_rule", `${path}.conditions`);
   const ids = new Set<string>();
-  const conditions = Array.from(rawConditions, (c, i) => {
+  const conditions = mapIndexed(rawConditions, (c, i) => {
     const cond = buildCondition(c, `${path}.conditions.${i}`, variables);
     if (ids.has(cond.id)) fail("duplicate_id", `${path}.conditions.${i}`);
     ids.add(cond.id);
@@ -130,13 +145,15 @@ export function defineRuleSet(
     if (!Array.isArray(rules) || rules.length === 0)
       return fail("invalid_rule_set", "rules");
     const seen = new Set<string>();
-    const built = Array.from(rules, (r, i) => {
+    const built = mapIndexed(rules, (r, i) => {
       const rule = buildRule(r, i, options?.variables);
       if (seen.has(rule.id)) fail("duplicate_id", `rules.${i}`);
       seen.add(rule.id);
       return rule;
     });
-    return Object.freeze(built);
+    const result = Object.freeze(built) as unknown as RuleSet;
+    defined.add(result);
+    return result;
   } catch (e) {
     if (e instanceof RuleError) throw e;
     // Hostile objects (throwing getters, proxies) must not leak other error types.

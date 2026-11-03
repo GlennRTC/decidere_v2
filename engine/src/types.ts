@@ -15,7 +15,9 @@ export type Node =
   | { not: Node }
   | { atLeast: { n: number; of: Node[] } };
 export type Rule = { id: string; conditions: Condition[]; combine: Node };
-export type RuleSet = readonly Readonly<Rule>[]; // deep-frozen, produced only by defineRuleSet
+declare const brand: unique symbol;
+// Deep-frozen, produced only by defineRuleSet (also enforced at runtime by evaluateRuleSet).
+export type RuleSet = readonly Readonly<Rule>[] & { readonly [brand]: true };
 
 export type RuleErrorCode =
   | "invalid_rule_set"

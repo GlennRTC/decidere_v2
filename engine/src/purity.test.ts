@@ -3,7 +3,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 const dir = new URL("./", import.meta.url);
-const sources = readdirSync(dir)
+const sources = readdirSync(dir, { recursive: true })
+  .map(String)
   .filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"))
   .map((f) => ({
     name: f,
@@ -22,6 +23,11 @@ const FORBIDDEN: [string, RegExp][] = [
   ["Function(", /\bFunction\s*\(/],
   ["new Function", /\bnew\s+Function\b/],
   ["require", /\brequire\b/],
+  ["console", /\bconsole\b/],
+  ["globalThis", /\bglobalThis\b/],
+  ["performance", /\bperformance\b/],
+  ["crypto", /\bcrypto\b/],
+  ["setTimeout", /\bsetTimeout\b/],
   ["dynamic import", /\bimport\s*\(/],
 ];
 
