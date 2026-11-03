@@ -561,7 +561,7 @@ test("condition id is not subject to the rule id regex, only length", () => {
   const out = checkRuleDoc(
     mut((d) => {
       d.conditions[0].id = "Cond One";
-      d.combine = { all: ["Cond One", "c2"] };
+      d.combine = { all: ["Cond One", "c2", "c3"] };
     }),
   );
   assert.equal((out.conditions[0] as Obj).id, "Cond One");
@@ -611,6 +611,9 @@ test("combine shapes accepted", () => {
     const out = checkRuleDoc(
       mut((d) => {
         d.combine = combine;
+        d.conditions = d.conditions.filter((c: Obj) =>
+          JSON.stringify(combine).includes(`"${c.id}"`),
+        );
       }),
     );
     assert.deepEqual(out.combine, combine);
@@ -676,12 +679,14 @@ test("combine depth: root is 0, 64 is allowed, 65 is invalid_value", () => {
     checkRuleDoc(
       mut((d) => {
         d.combine = nest(64);
+        d.conditions = d.conditions.slice(0, 1);
       }),
     ),
   );
   expectErr(
     mut((d) => {
       d.combine = nest(65);
+      d.conditions = d.conditions.slice(0, 1);
     }),
     "invalid_value",
     `combine${".not".repeat(65)}`,
@@ -690,6 +695,7 @@ test("combine depth: root is 0, 64 is allowed, 65 is invalid_value", () => {
   const err = fail(
     mut((d) => {
       d.combine = nest(20000);
+      d.conditions = d.conditions.slice(0, 1);
     }),
   );
   assert.equal(err.code, "invalid_value");
@@ -702,6 +708,7 @@ test("sparse arrays and own iterators on input arrays do not change validation",
   expectErr(sparse, "invalid_type", "conditions.0");
   const evil = mut((d) => {
     d.combine = { all: ["c1", "c2"] };
+    d.conditions = d.conditions.slice(0, 2);
     Object.defineProperty(d.combine.all, Symbol.iterator, {
       value: function* () {
         yield "zzz";

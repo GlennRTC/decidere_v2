@@ -132,6 +132,44 @@ function checkNode(raw: unknown, path: string, depth: number): unknown {
   return { atLeast: { n, of } };
 }
 
+// Format v1 rule: each condition is referenced exactly once in combine. An unused condition
+// would show a met input in the trace with no effect; a repeated one makes Kleene logic return
+// "unknown" where the value is defined. References to missing ids are the engine's job.
+function checkReferences(
+  conditions: readonly unknown[],
+  combine: unknown,
+): void {
+  const index = new Map<string, number>();
+  conditions.forEach((c, i) => {
+    const id = (c as { id: string }).id;
+    if (!index.has(id)) index.set(id, i);
+  });
+  const used = new Set<string>();
+  const walk = (node: unknown, path: string): void => {
+    if (typeof node === "string") {
+      if (used.has(node)) fail("invalid_value", path);
+      used.add(node);
+      return;
+    }
+    const n = node as Record<string, unknown>;
+    if ("not" in n) {
+      walk(n.not, join(path, "not"));
+      return;
+    }
+    const kind = "all" in n ? "all" : "any" in n ? "any" : "atLeast";
+    const body = n[kind];
+    const list = (
+      kind === "atLeast" ? (body as { of: unknown[] }).of : body
+    ) as unknown[];
+    const at =
+      kind === "atLeast" ? join(join(path, kind), "of") : join(path, kind);
+    for (let i = 0; i < list.length; i++) walk(list[i], join(at, i));
+  };
+  walk(combine, "combine");
+  for (const [id, i] of index)
+    if (!used.has(id)) fail("invalid_value", join("conditions", i));
+}
+
 // Closed structural check of a parsed rule file. Reads own keys only, rejects every
 // unknown key at every level (the engine would silently drop them), and returns fresh
 // plain objects that share nothing with the input.
@@ -203,6 +241,7 @@ export function checkRuleDoc(doc: unknown): RuleDoc {
     conditions.push(checkCondition(rawConditions[i], join("conditions", i)));
 
   const combine = checkNode(own(d, "combine"), "combine", 0);
+  checkReferences(conditions, combine);
 
   return {
     format_version: 1,
