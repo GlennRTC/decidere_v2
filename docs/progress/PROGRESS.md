@@ -21,3 +21,9 @@
 **Verificación realizada:** `feature-list.json` parseado con python (28 features, todas failing). `init.sh` ejecutado en el estado actual (sin package.json).
 **Estado al cerrar:** N/A — solo setup, ninguna feature implementada.
 **Pendiente para la próxima sesión:** Resolver antes de codificar: (1) backend TS/Fastify vs Python/FastAPI, (2) SSE vs polling en Vercel (F015), (3) Supabase vs Postgres local, (4) nombrar clínicos etiquetadores y árbitro, (5) umbrales de reglas, meta de conformidad y umbral de certeza. Luego F002 (ADRs) y F001 (scaffold, requiere aprobar dependencias).
+
+## 2026-11-03 — Sesión 0b (decisiones del usuario)
+**Qué se hizo:** Se registraron las decisiones: backend TS/Fastify, polling 2-3 s (ADR-005), Supabase, YAML propio + json-logic, tres roles (superadministrador, experto, usuario), conformidad = cero discrepancias, offsets relativos confirmados, texto libre fuera del MVP pero a integrar (F029 nueva). Etiquetadores/árbitro como placeholders. Umbrales, combinación de reglas y umbral de certeza: a definir en planificación con agente especializado. `AGENTS.md` actualizado (roles, polling). Solo se tocó `notes` en features existentes.
+**Verificación realizada:** feature-list.json parseado (29 features, todas failing).
+**Estado al cerrar:** N/A — solo documentación.
+**Pendiente para la próxima sesión:** Criterios de aceptación de F013/F016/F022 aún nombran los cuatro roles antiguos (reconciliar con tu aprobación). ADR-001 a 004 (F002). Planificación/brainstorming de umbrales, combinación y certeza (F006-F008).

@@ -18,7 +18,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Requiere aprobación de dependencias (Fastify, Vite/React, test runner, linter, parser YAML). Decisión pendiente en la definición de producto: backend Python/FastAPI vs TS/Fastify; AGENTS.md ya fija TS/Fastify, confirmar con el usuario."
+      "notes": "DECIDIDO 2026-11-03: backend TS/Fastify (hosting en Vercel). Sigue pendiente aprobar dependencias concretas."
     },
     {
       "id": "F002",
@@ -49,7 +49,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Cambiar el contrato requiere aprobación (límites de autonomía). Tratamiento de tiempos (offsets) y exclusión de texto libre aún como propuesta en la definición de producto: confirmar."
+      "notes": "Cambiar el contrato requiere aprobación. DECIDIDO 2026-11-03: offsets relativos confirmados; texto libre fuera del MVP pero a integrar después (ver F029)."
     },
     {
       "id": "F004",
@@ -83,7 +83,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Formato de reglas pendiente de confirmar (YAML propio + json-logic vs CQL). Si json-logic es una dependencia nueva requiere aprobación."
+      "notes": "DECIDIDO 2026-11-03: YAML propio + json-logic para el MVP (CQL descartado). json-logic es dependencia nueva: pedir aprobación (licencia, mantenimiento) en F001/F005."
     },
     {
       "id": "F006",
@@ -99,7 +99,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "BLOQUEADA por decisión clínica: umbrales y combinación final los define el clínico. No inventar umbrales; los publicados deben citarse de la fuente."
+      "notes": "BLOQUEADA: umbrales y combinación final se definen luego en planificación/brainstorming con un agente especializado. No inventar umbrales; los publicados deben citarse de la fuente."
     },
     {
       "id": "F007",
@@ -115,7 +115,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "BLOQUEADA por decisión clínica de la combinación final."
+      "notes": "BLOQUEADA: la combinación final se define luego en planificación/brainstorming con un agente especializado."
     },
     {
       "id": "F008",
@@ -132,7 +132,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Fórmula exacta y umbral se calibran con los casos límite del gold standard (depende de F018). Hasta entonces, valores provisionales marcados como tales."
+      "notes": "Umbral de certeza y fórmula: a definir en planificación/brainstorming con un agente experto, y calibrar con los casos límite (depende de F018). Hasta entonces, valores provisionales marcados como tales."
     },
     {
       "id": "F009",
@@ -197,7 +197,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Cambiar el esquema de base de datos requiere aprobación. Pendientes: Supabase vs Postgres local (docker-compose) vs SQLite para desarrollo; residencia de datos de Vercel/Supabase (Ley 1581); regla de tests 'no mocks de la base de datos' aún sin definir."
+      "notes": "DECIDIDO 2026-11-03: Supabase Postgres. Pendientes: región/residencia de datos (Ley 1581) y regla de tests sobre la base de datos."
     },
     {
       "id": "F013",
@@ -213,7 +213,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Requiere la matriz de permisos por rol (qué ve/hace cada rol): definir con el usuario."
+      "notes": "DECIDIDO 2026-11-03: tres roles. (1) superadministrador: capacidades absolutas; (2) experto: audita/verifica reglas (y revisa casos); (3) usuario: ve interpretaciones en el visor de alertas/dashboard. Los criterios de aceptación aún mencionan médico/enfermero/revisor/admin: reconciliar con el usuario antes de implementar. Matriz detallada rol x endpoint: por definir en planificación."
     },
     {
       "id": "F014",
@@ -245,7 +245,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "CONFLICTO a resolver con el usuario: las funciones serverless de Vercel no sostienen bien conexiones SSE de larga duración. Alternativas: polling (stack actual), SSE con límites, o realtime de Supabase. Registrar la decisión en un ADR."
+      "notes": "DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción."
     },
     {
       "id": "F016",
@@ -261,7 +261,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Usar agente clinical-ux-designer para el flujo."
+      "notes": "Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar)."
     },
     {
       "id": "F017",
@@ -277,7 +277,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": true,
-      "notes": "Depende de F004 y F012."
+      "notes": "Depende de F004 y F012. Roles: ver F013 (tres roles)."
     },
     {
       "id": "F018",
@@ -293,7 +293,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "BLOQUEADA por clínicos: falta nombrar a los dos etiquetadores y al árbitro. No cambiar la clase esperada de un seed para que pase."
+      "notes": "Etiquetadores y árbitro: usar placeholders (Etiquetador A, Etiquetador B, Árbitro) hasta nombrar personas reales. No cambiar la clase esperada de un seed para que pase."
     },
     {
       "id": "F019",
@@ -309,7 +309,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Depende de F018. Es un proceso con humanos: el software solo lo soporta."
+      "notes": "Depende de F018. Es un proceso con humanos: el software solo lo soporta. Etiquetadores/árbitro como placeholders por ahora."
     },
     {
       "id": "F020",
@@ -327,7 +327,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Depende de F010, F018. Meta de conformidad global (99%, aceptar 1 o 2 discrepancias) pendiente de definir con el clínico."
+      "notes": "Depende de F010, F018. DECIDIDO 2026-11-03: meta de conformidad = cero discrepancias."
     },
     {
       "id": "F021",
@@ -357,7 +357,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Depende de F001 y F013."
+      "notes": "Depende de F001 y F013. Roles: tres (ver F013)."
     },
     {
       "id": "F023",
@@ -451,6 +451,21 @@
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
       "notes": "No constituye revisión legal formal."
+    },
+    {
+      "id": "F029",
+      "title": "Texto libre clínico como fuente de datos de diagnóstico (post-MVP)",
+      "description": "Incorporar texto libre (notas clínicas) como fuente de datos de diagnóstico, hoy excluido del contrato por riesgo de reidentificación y porque ADR-003 descarta LLM/NLP en v1.",
+      "acceptance_criteria": [
+        "ADR nuevo que decida el enfoque (determinístico/NLP/LLM) y su costo, y que reconsidere ADR-003 explícitamente",
+        "Estrategia de desidentificación del texto antes de persistir o procesar, revisada por clinical-safety-compliance-reviewer",
+        "Cambio del contrato de datos aprobado por el usuario antes de implementarse"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "POST-MVP. Registrada 2026-11-03 por decisión del usuario: queda fuera del MVP pero debe integrarse eventualmente. No implementar en v1."
     }
   ]
 }

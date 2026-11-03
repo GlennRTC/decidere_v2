@@ -39,9 +39,9 @@ Sistema que alerta al médico de urgencias cuando un paciente presenta una condi
 
 - Schema JSON con varias instancias por mensaje (actuales e históricas): variables clínicas, paraclínicos, órdenes y resultados, diagnósticos previos ICD-10.
 - `POST /v1/messages` con parseo, validación y evaluación por reglas; respuesta con interpretación; mapeo en el visor de alertas.
-- Dashboard de críticos (push por SSE) y cola de revisión clínica.
+- Dashboard de críticos (polling 2-3 s, ADR-005) y cola de revisión clínica.
 - Módulo de revisión y edición del mapeo de variables.
-- Autenticación simple con roles (médico, enfermero, revisor, admin).
+- Autenticación simple con tres roles: superadministrador (capacidades absolutas), experto (audita/verifica reglas) y usuario (ve interpretaciones en el dashboard).
 - WebApp pública de demostración para inversores.
 - Visor de evaluación de reglas con apariencia de perceptrón multicapa: entradas (variables) → condiciones → reglas → clase, generado directamente de la traza.
 - Dashboard con analítica básica (distribución de clases, volumen, tasa de revisión, reglas más disparadas).
