@@ -554,11 +554,11 @@
         "Tipos TS derivados del mismo schema",
         "Tests: válido, campos faltantes, tipos incorrectos, varias instancias, históricas ignoradas"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 7. Parte de F003. Cambio de contrato: aprobación del usuario. case_id aleatorio, nunca derivado de un identificador."
+      "notes": "Passing: verify exit 0 (schema 34/34), ver ADR-008 y PROGRESS Sesión 5. Revisión /clinical-review formal pendiente (requires_compliance_review). Orden 7. Parte de F003. Cambio de contrato: aprobación del usuario. case_id aleatorio, nunca derivado de un identificador."
     },
     {
       "id": "F036",
