@@ -1,0 +1,15 @@
+{
+  "name": "@decidere/rules",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@decidere/engine": "*",
+    "yaml": "2.9.1"
+  }
+}
