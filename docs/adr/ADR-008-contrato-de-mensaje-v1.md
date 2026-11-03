@@ -1,6 +1,6 @@
 # ADR-008: Contrato del mensaje v1.0 (`POST /v1/messages`)
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** El contrato del mensaje es la frontera donde un dato clínico entra al sistema y donde se puede filtrar PHI (ADR-001). F035 implementa la versión 1.0 en `packages/schema` para el corte qSOFA: sin esto, el mapper, el motor y el visor no tienen un contrato estable. Los límites numéricos son estructurales y provisionales: no son criterio clínico.
 
@@ -11,6 +11,19 @@
 - Excluidos de 1.0: `diagnoses_icd10` (F044), `loinc`/`code`/`system` (1.1, F042/F043), etiquetas, notas y fechas.
 - Validación con un Ajv propio (`strict`, sin coerción, sin strip, un solo error). Fastify no valida este cuerpo: la ruta llama a `validateMessage` y no debe usar `messageSchema` como schema de ruta, porque los defaults de Fastify coercionan y eliminan campos.
 - Errores: solo `{path, code}` con códigos de una tabla cerrada (`required`, `unknown_field`, `invalid_type`, `invalid_value`, `invalid_format`, `out_of_range`, `unsupported_version`, `duplicate_measurement`, `invalid`). Nunca valores recibidos ni nombres de campos desconocidos.
+- Contrato de errores de la API (F036): cuerpo `{"error":{"code","message","request_id","details"?}}`. Los códigos son cerrados, los mensajes son fijos y `details` solo existe en `validation_failed`, como pares `{path, code}` de `@decidere/schema`. Nunca se refleja un valor, una clave ni un mensaje del parser.
+
+  | `code` | HTTP | Cuándo | `message` fijo |
+  |---|---|---|---|
+  | `bad_request` | 400 | URL malformada u otra solicitud inválida a nivel de framework | `The request is invalid.` |
+  | `invalid_json` | 400 | Cuerpo JSON vacío o no parseable (incluye `__proto__` y `constructor.prototype`) | `The request body is not valid JSON.` |
+  | `not_found` | 404 | Ruta inexistente | `Resource not found.` |
+  | `payload_too_large` | 413 | Cuerpo sobre `bodyLimit` (262144 bytes por defecto) | `The request body is too large.` |
+  | `unsupported_media_type` | 415 | `content-type` no soportado | `The content type is not supported.` |
+  | `validation_failed` | 422 | El mensaje no cumple el schema (`details` presente) | `The message failed validation.` |
+  | `internal_error` | 500 | Cualquier error no previsto, incluido un fallo del propio manejador | `Internal server error.` |
+
+  `request_id` lo genera el servidor (nunca se acepta `x-request-id` del cliente). Toda respuesta de error lleva `cache-control: no-store`. 401, 403 y 429 no existen aún: F040 los agrega al conjunto cerrado. Para el emisor, toda respuesta no-2xx significa que el mensaje NO fue interpretado: debe reintentar o alertar por otro canal. `internal_error` y `payload_too_large` no indican si hubo evaluación parcial; F040 define la semántica de reintento. `bad_request` agrupa hoy cualquier 4xx del framework: F040 debe conservar el estado real al agregar 429. Todo rechazo debe quedar contado por código (F040/F041); un log no basta como cobertura. Los `message` de arriba deben coincidir con `MESSAGES` en `apps/api/src/errors.ts`; el código es la fuente y esta tabla se actualiza con él.
 - `source` se restringe a un conjunto de caracteres en 1.0; la allowlist de emisores por tenant se valida en F040 (decidido por el usuario).
 
 **Alternativas consideradas:**
@@ -35,7 +48,7 @@
 
 **Condiciones para F040 (la ruta `POST /v1/messages`):** estas mitigaciones no las cumple este paquete y F040 no se da por terminada sin ellas.
 - `source`: validar contra una allowlist de emisores por tenant antes de loguear o persistir; si no es válido, rechazar sin repetir el valor.
-- `message_id` e `instance_id` los controla el emisor y pueden codificar un identificador (ADR-001 descarta hashear identificadores): `instance_id` se descarta tras la respuesta o se mapea a un `case_id` aleatorio del sistema; `message_id` se persiste, si acaso, solo para idempotencia y con TTL. Decidir también la unicidad de `instance_id` dentro del mensaje.
+- `message_id` e `instance_id` los controla el emisor y pueden codificar un identificador (ADR-001 descarta hashear identificadores): `instance_id` se descarta tras la respuesta o se mapea a un `case_id` aleatorio del sistema; `message_id` se puede loguear como campo estructurado (decisión del usuario, 2026-11-03, coherente con AGENTS.md y F011), con estas salvaguardas (revisión clínica de F036): solo después de validar el formato UUID y nunca en `validation_failed`, `invalid_json` ni otra rama de error (ahí el valor no está validado); `request_id` correlaciona sin él. Condiciones de F040: documentar retención, control de acceso y destino de los logs (Vercel, residencia no resuelta) y un test con canario. No se persiste salvo para idempotencia y con TTL. Nunca se loguea `instance_id`. Decidir también la unicidad de `instance_id` dentro del mensaje.
 - Instancias históricas: no se persisten ni se loguean más allá de un conteo; justificar su aceptación o rechazarlas hasta que una regla las use.
 - Body crudo: `bodyLimit` bajo y validación previa a `JSON.parse` que rechace notación exponencial y claves duplicadas, o aceptar el riesgo con firma del clínico.
 - Test con canario en logs usando un body inválido (el `SyntaxError` de V8 puede incluir un fragmento del body).

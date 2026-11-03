@@ -1,6 +1,6 @@
 # ADR-003: Certeza determinística, sin LLM
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** El sistema debe decidir cuándo un caso es dudoso y derivarlo a revisión, de forma explicable y sin costo por token.
 

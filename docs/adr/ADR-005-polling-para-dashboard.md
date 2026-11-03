@@ -1,6 +1,6 @@
 # ADR-005: Polling de 2-3 s para el dashboard de críticos (en lugar de SSE)
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:**
 La definición de producto (v2) describe un push por SSE hacia el dashboard; `AGENTS.md` menciona polling de 2-3 s. La API corre como funciones serverless en Vercel y la demo debe poder hostearse allí. Las funciones serverless tienen duración máxima por invocación y no mantienen estado entre requests (ninguna instancia guarda estado en memoria), por lo que una conexión SSE de larga duración es frágil o costosa en ese entorno.

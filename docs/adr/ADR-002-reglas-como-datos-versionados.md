@@ -1,6 +1,6 @@
 # ADR-002: Reglas como datos versionados
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** Los clínicos deben poder revisar las reglas y aprobarlas, y cada resultado debe poder reconstruirse. Las reglas cambian con el tiempo.
 

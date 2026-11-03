@@ -102,7 +102,7 @@ decidere-mvp/
 - **ADR-003**: la certeza se calcula de forma determinística, sin LLM ni costo por token.
 - **ADR-004**: la API es el único punto de entrada y el motor no hace I/O.
 
-> Los ADR-001 a 004, ADR-005 y ADR-006 están en `docs/adr/` con estado "propuesto" hasta su aprobación.
+> Los ADR-001 a 008 están en `docs/adr/` con estado "aceptado" (aprobados por el usuario el 2026-11-03).
 
 ## Protocolo de inicio de sesión (léelo primero, cada vez)
 
@@ -169,7 +169,7 @@ Si la certeza cae bajo un umbral configurable, el caso va a revisión clínica, 
 
 ### Convenciones del proyecto
 
-- Errores: un mensaje inválido nunca se descarta en silencio. Devuelve una respuesta de error estructurada y queda contabilizado (la cobertura debe ser 100%). Nunca lanzar strings.
+- Errores: un mensaje inválido nunca se descarta en silencio. Devuelve una respuesta de error estructurada y queda contabilizado (la cobertura debe ser 100%). Nunca lanzar strings. Cuerpo `{"error":{"code","message","request_id","details"?}}` con códigos cerrados (`not_found`, `bad_request`, `invalid_json`, `payload_too_large`, `unsupported_media_type`, `validation_failed`, `internal_error`; estados 404/400/400/413/415/422/500) y mensajes fijos; `details` (solo en `validation_failed`) son pares `{path, code}` de `@decidere/schema`. Nunca se refleja un valor, una clave ni un mensaje del parser (ADR-001, ADR-008).
 - Logging: logger estructurado; se registran `message_id`, `case_id`, clase, certeza e ids de reglas disparadas. Nunca el payload completo, ni PHI, ni valores clínicos de la solicitud.
 - Textos de la UI: el visor de evaluación de reglas se llama **"red de evaluación de reglas"**. No es una red neuronal entrenada y no se describe como IA, ML ni red neuronal; la demo no debe sugerirlo.
 - Config y secretos: por variable de entorno; nombres en `.env.example`. Nunca valores reales en el repo.

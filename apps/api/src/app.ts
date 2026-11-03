@@ -3,16 +3,33 @@ import type { Writable } from "node:stream";
 import Fastify, {
   type FastifyError,
   type FastifyInstance,
+  type FastifyReply,
   LogController,
 } from "fastify";
+import { codeFor, errorBody, STATUS } from "./errors.ts";
 
-export type BuildAppOptions = { log?: boolean; logStream?: Writable };
+export type BuildAppOptions = {
+  log?: boolean;
+  logStream?: Writable;
+  bodyLimit?: number;
+};
 
-const MESSAGES = {
-  not_found: "Resource not found.",
-  bad_request: "The request is invalid.",
-  internal_error: "Internal server error.",
-} as const;
+const DEFAULT_BODY_LIMIT = 262144;
+
+// Only name and code, strings only, bounded; never message or stack.
+const safeField = (read: () => unknown) => {
+  try {
+    const v = read();
+    return typeof v === "string" ? v.slice(0, 64) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const errSerializer = (err: unknown) => ({
+  name: safeField(() => (err as { name?: unknown }).name),
+  code: safeField(() => (err as { code?: unknown }).code),
+});
 
 const pathOf = (url: string | undefined) => (url ?? "").split("?")[0];
 
@@ -21,13 +38,47 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({
     logger: logging
       ? {
+          hooks: {
+            // pino fills msg from err.message when no message is given; Fastify does
+            // that (e.g. "Reply was already sent ... in <raw url>"). Use a fixed one.
+            logMethod(args, method) {
+              const first = args[0];
+              if (
+                first instanceof Error ||
+                (typeof first === "object" &&
+                  first !== null &&
+                  "err" in first &&
+                  typeof args[1] !== "string")
+              ) {
+                const obj = first instanceof Error ? { err: first } : first;
+                return method.apply(this, [obj, "request error"] as never);
+              }
+              return method.apply(this, args);
+            },
+          },
           ...(options.logStream ? { stream: options.logStream } : {}),
           serializers: {
             // Only method and path: no query string, headers or remote address.
+            // Typed as a full error by pino; intentionally narrower (no message/stack).
+            err: errSerializer as unknown as (err: FastifyError) => never,
             req: (req) => ({ method: req.method, path: pathOf(req.url) }),
           },
         }
       : false,
+    bodyLimit: options.bodyLimit ?? DEFAULT_BODY_LIMIT,
+    // Framework errors (e.g. bad URL) would echo the path in Fastify's default body.
+    frameworkErrors: (error, request, rawReply) => {
+      const reply = rawReply as FastifyReply;
+      const code = codeFor(error);
+      const status = STATUS[code];
+      request.log.error({ apiError: { code, status } }, "request failed");
+      // onSend hooks may not run for framework errors: set headers here.
+      return reply
+        .code(status)
+        .header("cache-control", "no-store")
+        .header("x-request-id", request.id)
+        .send(errorBody(code, request.id));
+    },
     // Never trust an inbound request id; always generate one.
     requestIdHeader: false,
     genReqId: () => randomUUID(),
@@ -42,21 +93,27 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     reply.header("x-request-id", request.id);
   });
 
-  const errorBody = (code: keyof typeof MESSAGES, requestId: string) => ({
-    error: { code, message: MESSAGES[code], request_id: requestId },
-  });
-
   app.setNotFoundHandler((request, reply) =>
     reply.code(404).send(errorBody("not_found", request.id)),
   );
 
-  app.setErrorHandler((error, request, reply) => {
-    const { name, code, statusCode } = error as FastifyError;
-    request.log.error({ err: { name, code } }, "request failed");
-    if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
-      return reply.code(statusCode).send(errorBody("bad_request", request.id));
+  app.setErrorHandler((error: unknown, request, reply) => {
+    try {
+      const code = codeFor(error);
+      const status = STATUS[code];
+      request.log.error(
+        { err: error, apiError: { code, status } },
+        "request failed",
+      );
+      return reply.code(status).send(errorBody(code, request.id));
+    } catch {
+      // Last resort: the handler must never throw.
+      request.log.error(
+        { apiError: { code: "internal_error", status: 500 } },
+        "request failed",
+      );
+      return reply.code(500).send(errorBody("internal_error", request.id));
     }
-    return reply.code(500).send(errorBody("internal_error", request.id));
   });
 
   app.get(

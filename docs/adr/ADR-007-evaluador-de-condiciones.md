@@ -1,6 +1,6 @@
 # ADR-007: Evaluador de condiciones de las reglas
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** ADR-002 dejó el formato de condiciones sujeto al spike F033 (json-logic), con un comparador propio como plan B. El evaluador es el núcleo de seguridad del sistema: un dato faltante tratado como "falso" puede ocultar un crítico, y cada condición debe aparecer en la traza que lee el médico. El spike probó `json-logic-engine` 5.0.7 y un comparador propio con los mismos casos y un oráculo de fuerza bruta. Los valores de prueba son sintéticos. Los umbrales de los fixtures son solo mecánica: no son reglas clínicas ni una transcripción de qSOFA/SIRS, que se hace en F038/F045 con aprobación clínica pendiente.
 
