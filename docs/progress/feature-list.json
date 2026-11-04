@@ -600,11 +600,11 @@
         "clinical_approval = pending hasta que un clínico apruebe",
         "Test valida el YAML contra el schema de reglas"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 11. Parte de F006. Umbrales no se inventan. | F037: el YAML va en `knowledge/rules/<id>.yaml`, `format_version: 1`, `clinical_approval.status: pending`; su test debe cargar el directorio real con `loadRuleSet` y las variables canonicas. | Archivos sueltos como `.gitkeep` o `README.md` en `knowledge/rules/` hacen fallar la carga (`unsupported_entry`); aun no hay catalogo canonico de variables (F042/F043), asi que F038 necesita un conjunto provisional. | Cada condicion debe referenciarse exactamente una vez en `combine` (sin condiciones sin uso ni repetidas)."
+      "notes": "Orden 11. Parte de F006. Umbrales no se inventan. | F037: el YAML va en `knowledge/rules/<id>.yaml`, `format_version: 1`, `clinical_approval.status: pending`; su test debe cargar el directorio real con `loadRuleSet` y las variables canonicas. | Archivos sueltos como `.gitkeep` o `README.md` en `knowledge/rules/` hacen fallar la carga (`unsupported_entry`); aun no hay catalogo canonico de variables (F042/F043), asi que F038 necesita un conjunto provisional. | Cada condicion debe referenciarse exactamente una vez en `combine` (sin condiciones sin uso ni repetidas). | F038 (Task 1-2): `knowledge/rules/sepsis.qsofa.v1.yaml` con cita Seymour et al., JAMA 2016;315(8):801-10 (Sepsis-3 Singer), `clinical_approval.status: pending`. Criterios: (1) id y cita y (2) pending en `packages/rules/src/qsofa.test.ts` (\"pending and cited\"); (3) `loadRuleSet` del directorio real. `passing` = transcripcion verificada por tests, NO aprobada clinicamente; preguntas abiertas en PROGRESS Sesion 9. | Handoff F039: la unica regla es `sepsis.qsofa.v1`, sin `severity`; leer `rules[].result` (no `fired`, que oculta unknown). | Handoff F040: `knowledge/rules/` debe desplegarse con la API; un archivo suelto hace fallar la carga; el conjunto provisional de variables existe solo en el test de F038 y debe venir de F042/F043 o de `@decidere/schema`. | Handoff F042: reemplazar el conjunto provisional de variables."
     },
     {
       "id": "F039",
