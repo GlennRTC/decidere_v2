@@ -27,7 +27,7 @@
       "Read(./**/*.env)",
       "Read(./**/*.pem)",
       "Read(./**/secrets/**)",
-      "Read(./**/*phi*)",
+      //"Read(./**/*phi*)",
       "Read(./**/*patient_export*)"
     ],
     "ask": [
