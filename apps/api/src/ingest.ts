@@ -1,6 +1,7 @@
 import type { LoadedRuleSet } from "@decidere/rules";
 import { validateMessage } from "@decidere/schema";
 import type { FastifyInstance } from "fastify";
+import { SOURCE_PATTERN } from "./config.ts";
 import { errorBody, replyValidationFailed, STATUS } from "./errors.ts";
 import { interpretMessage } from "./interpret.ts";
 import { strictJsonParse } from "./strict-json.ts";
@@ -12,6 +13,7 @@ export type IngestDeps = {
 
 // Payload, source, instance_id and clinical values are never logged. message_id is
 // logged only on the success branch, after the schema validated its format.
+const UTF8 = new Set(["utf-8", "utf8"]);
 const BODY_LIMIT = 131072; // 20 instances x 50 variables is about 100 KB
 
 export function registerIngest(app: FastifyInstance, deps: IngestDeps): void {
@@ -26,7 +28,10 @@ export function registerIngest(app: FastifyInstance, deps: IngestDeps): void {
         const charset = /;\s*charset=([^;]+)/i.exec(
           request.headers["content-type"] ?? "",
         )?.[1];
-        if (charset && charset.trim().toLowerCase() !== "utf-8") {
+        if (
+          charset &&
+          !UTF8.has(charset.trim().replace(/^"|"$/g, "").toLowerCase())
+        ) {
           done(
             Object.assign(new Error("Unsupported media type."), {
               code: "FST_ERR_CTP_INVALID_MEDIA_TYPE",
@@ -52,6 +57,16 @@ function registerRoute(app: FastifyInstance, deps: IngestDeps): void {
     { bodyLimit: BODY_LIMIT },
     async (request, reply) => {
       const body = request.body;
+      if (body === undefined) {
+        // No content-type and no body: same answer as an empty JSON body.
+        request.log.warn(
+          { apiError: { code: "invalid_json", status: STATUS.invalid_json } },
+          "request failed",
+        );
+        return reply
+          .code(STATUS.invalid_json)
+          .send(errorBody("invalid_json", request.id));
+      }
       const source =
         typeof body === "object" && body !== null
           ? (body as { source?: unknown }).source
@@ -60,7 +75,7 @@ function registerRoute(app: FastifyInstance, deps: IngestDeps): void {
       // one falls through to validation (422). The value is never echoed.
       if (
         typeof source === "string" &&
-        /^[a-z0-9-]{1,32}$/.test(source) &&
+        SOURCE_PATTERN.test(source) &&
         !deps.allowedSources.has(source)
       ) {
         request.log.warn(

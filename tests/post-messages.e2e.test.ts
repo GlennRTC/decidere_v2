@@ -28,15 +28,21 @@ after(() => {
 });
 
 function start(port: number, env: Record<string, string> = {}) {
+  // The developer's own ALLOWED_SOURCES / RULES_DIR must not change the result.
+  const { ALLOWED_SOURCES: _a, RULES_DIR: _r, ...inherited } = process.env;
   const child = spawn("node", [serverPath], {
-    env: { ...process.env, PORT: String(port), ...env },
-    stdio: "ignore",
+    env: { ...inherited, PORT: String(port), ...env },
+    stdio: ["ignore", "ignore", "pipe"],
   });
   children.push(child);
+  let stderr = "";
+  child.stderr?.on("data", (d) => {
+    stderr += String(d);
+  });
   const exited = new Promise<number | null>((r) =>
     child.once("exit", (c) => r(c)),
   );
-  return { child, exited };
+  return { child, exited, stderr: () => stderr };
 }
 
 async function waitHealthy(port: number, exited: Promise<number | null>) {
@@ -113,10 +119,25 @@ test("startup aborts when a rule has no severity", async () => {
     file,
     readFileSync(file, "utf8").replace(/^severity: critical\n/m, ""),
   );
-  const { exited } = start(await freePort(), { RULES_DIR: dir });
+  const { exited, stderr } = start(await freePort(), { RULES_DIR: dir });
   const outcome = await Promise.race([
     exited,
     new Promise<string>((r) => setTimeout(() => r("still running"), 8000)),
   ]);
   assert.ok(typeof outcome === "number" && outcome !== 0);
+  assert.match(stderr(), /"code":"missing_severity"/);
+});
+
+test("an invalid ALLOWED_SOURCES aborts with a structured line, no stack", async () => {
+  const { exited, stderr } = start(await freePort(), {
+    ALLOWED_SOURCES: "Bad Source!",
+  });
+  const outcome = await Promise.race([
+    exited,
+    new Promise<string>((r) => setTimeout(() => r("still running"), 8000)),
+  ]);
+  assert.ok(typeof outcome === "number" && outcome !== 0);
+  assert.match(stderr(), /"msg":"invalid configuration"/);
+  assert.ok(!stderr().includes("    at "));
+  assert.ok(!stderr().includes("Bad Source"));
 });

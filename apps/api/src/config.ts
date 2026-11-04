@@ -14,7 +14,7 @@ export function readHost(env: Env): string {
   return env.API_HOST || "127.0.0.1";
 }
 
-const SOURCE = /^[a-z0-9-]{1,32}$/;
+export const SOURCE_PATTERN = /^[a-z0-9-]{1,32}$/;
 
 // Provisional global allowlist (F040); per-tenant allowlists arrive with F054.
 export function readAllowedSources(env: Env): ReadonlySet<string> {
@@ -22,7 +22,7 @@ export function readAllowedSources(env: Env): ReadonlySet<string> {
     .split(",")
     .map((s) => s.trim())
     .filter((s) => s !== "");
-  if (entries.length === 0 || !entries.every((s) => SOURCE.test(s))) {
+  if (entries.length === 0 || !entries.every((s) => SOURCE_PATTERN.test(s))) {
     throw new Error("ALLOWED_SOURCES entries must match ^[a-z0-9-]{1,32}$");
   }
   return new Set(entries);

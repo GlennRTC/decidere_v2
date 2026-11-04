@@ -58,3 +58,7 @@ test("accepts a string value equal to its key", () => {
 test("rejects duplicates that differ only by escape", () => {
   rejects('{"a":1,"\\u0061":2}');
 });
+
+test("accepts a leading UTF-8 BOM", () => {
+  assert.deepEqual(strictJsonParse('﻿{"a":1}'), { a: 1 });
+});

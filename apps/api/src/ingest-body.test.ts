@@ -84,3 +84,22 @@ test("body over 131072 bytes is 413", async () => {
   assert.equal(res.statusCode, 413);
   assert.equal(res.json().error.code, "payload_too_large");
 });
+
+for (const ct of [
+  'application/json; charset="utf-8"',
+  "application/json; charset=utf8",
+  "application/json; charset=UTF-8",
+]) {
+  test(`${ct} is accepted`, async () => {
+    const { app } = setup();
+    const res = await send(app, ct, "{}");
+    assert.equal(res.statusCode, 422);
+  });
+}
+
+test("POST with no content-type and no body is 400 invalid_json", async () => {
+  const { app } = setup();
+  const res = await app.inject({ method: "POST", url: "/v1/messages" });
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.json().error.code, "invalid_json");
+});

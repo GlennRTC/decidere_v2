@@ -11,9 +11,18 @@ const errInfo = (err: unknown): { name?: string; code?: unknown } => {
 };
 
 async function main(): Promise<void> {
-  const port = readPort(process.env);
-  const host = readHost(process.env);
-  const allowedSources = readAllowedSources(process.env);
+  let port: number;
+  let host: string;
+  let allowedSources: ReturnType<typeof readAllowedSources>;
+  try {
+    port = readPort(process.env);
+    host = readHost(process.env);
+    allowedSources = readAllowedSources(process.env);
+  } catch {
+    // The config messages are fixed strings, but a raw stack would print paths.
+    console.error(JSON.stringify({ msg: "invalid configuration" }));
+    process.exit(1);
+  }
   // Rules load before listening; a bad rule set aborts startup (name/code only logged).
   let rules: ReturnType<typeof loadActiveRules>;
   try {

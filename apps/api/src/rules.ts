@@ -1,10 +1,10 @@
+import { fileURLToPath } from "node:url";
 import { type LoadedRuleSet, loadRuleSet } from "@decidere/rules";
 import { CANONICAL_VARIABLES } from "./interpret.ts";
 
-export const DEFAULT_RULES_DIR = new URL(
-  "../../../knowledge/rules/",
-  import.meta.url,
-).pathname;
+export const DEFAULT_RULES_DIR = fileURLToPath(
+  new URL("../../../knowledge/rules/", import.meta.url),
+);
 
 // Fail closed: without a severity per rule every POST would end in internal_error.
 export function loadActiveRules(dir: string): LoadedRuleSet {
@@ -13,7 +13,9 @@ export function loadActiveRules(dir: string): LoadedRuleSet {
     loaded.meta.length === 0 ||
     loaded.severities.size !== loaded.meta.length
   ) {
-    throw new Error("every active rule needs a severity");
+    throw Object.assign(new Error("every active rule needs a severity"), {
+      code: "missing_severity",
+    });
   }
   return loaded;
 }

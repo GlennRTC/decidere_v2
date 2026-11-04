@@ -12,7 +12,9 @@ const NUMBER = /-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
 const FORBIDDEN_KEYS = new Set(["__proto__", "constructor"]);
 
 // Throws a fixed error (never the parser's text, which can quote the body).
-export function strictJsonParse(text: string): unknown {
+export function strictJsonParse(input: string): unknown {
+  // Fastify's default parser accepted a leading BOM; keep that.
+  const text = input.charCodeAt(0) === 0xfeff ? input.slice(1) : input;
   let value: unknown;
   try {
     value = JSON.parse(text);
