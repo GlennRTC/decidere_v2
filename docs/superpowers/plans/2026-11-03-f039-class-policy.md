@@ -1,5 +1,7 @@
 # F039 Provisional Class Policy Implementation Plan
 
+Nota: el "experto" es un subagente de IA, no un clínico humano.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A pure `classify` function that turns the engine's per-rule results into exactly one of four classes with a cited criterion, a conflict flag and the highest reachable class, plus the optional `severity` key in the rule file so clinicians review the mapping with the thresholds.

@@ -158,7 +158,8 @@ export function loadRuleSet(
     citation: doc.citation,
     clinical_approval: doc.clinical_approval,
   }));
-  // Only active rules that declare severity; a copy callers cannot mutate.
+  // Only active rules that declare severity; a copy. Direct mutators are blocked below,
+  // but Map.prototype.set.call can still mutate the copy; classify re-validates values.
   const severities = new Map<string, Severity>();
   for (const m of meta)
     if (m.severity !== undefined) severities.set(m.id, m.severity);

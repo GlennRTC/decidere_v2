@@ -245,7 +245,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 37 junto con F023. El endpoint está en F056. Polling 2-3 s (ADR-005). | Notas previas: DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción."
+      "notes": "Orden 37 junto con F023. El endpoint está en F056. Polling 2-3 s (ADR-005). | Notas previas: DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción. | Handoff F039: un review con highest_reachable_class critical (p. ej. FR 26 con TAS faltante) debe verse como 'posible critico, datos incompletos' para el clinico de turno; definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F016",
@@ -261,7 +261,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar)."
+      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar). | Handoff F039: ordenar la cola por highest_reachable_class, no solo por clase; un review con critico alcanzable es 'posible critico, datos incompletos'; definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F017",
@@ -373,7 +373,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022."
+      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022. | Handoff F039: mostrar el review con highest_reachable_class critical como 'posible critico, datos incompletos'; no ocultarlo detras de vigilancia."
     },
     {
       "id": "F024",
@@ -619,7 +619,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 12. Parte de F007. | Consume de F005: evaluateRuleSet -> RuleSetResult {rules: [{rule_id, result, trace}], fired}; F005 no calcula la clase, la política (máxima severidad) es de F039. | `fired` mezcla unknown con false: la política de clase debe leer rules[].result para que un unknown nunca se convierta en 'sin alerta'. Invariante de ADR-007: si el mejor caso (atLeast max) alcanza el umbral, la clase nunca es 'sin alerta'. | F037: agregar `severity` es un cambio de `format_version` del esquema de archivo de reglas. | Sesion 10: politica provisional implementada (classify en engine/src/policy.ts, severity opcional en reglas, ADR-010 propuesto), NOT clinically approved, outside the metrics. Verificado: npm run verify exit 0. Preguntas clinicas abiertas en ADR-010 y PROGRESS Sesion 10."
+      "notes": "Orden 12. Parte de F007. | Consume de F005: evaluateRuleSet -> RuleSetResult {rules: [{rule_id, result, trace}], fired}; F005 no calcula la clase, la política (máxima severidad) es de F039. | `fired` mezcla unknown con false: la política de clase debe leer rules[].result para que un unknown nunca se convierta en 'sin alerta'. Invariante de ADR-007: si el mejor caso (atLeast max) alcanza el umbral, la clase nunca es 'sin alerta'. | F037: agregar `severity` es un cambio de `format_version` del esquema de archivo de reglas. | Sesion 10: politica provisional implementada (classify en engine/src/policy.ts, severity opcional en reglas, ADR-010 propuesto), NO aprobada clinicamente y fuera de las metricas. Verificado: npm run verify exit 0. Preguntas clinicas abiertas en ADR-010 y PROGRESS Sesion 10."
     },
     {
       "id": "F040",
@@ -784,7 +784,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 24. Absorbe F020 y F021. | Handoff F039 (BLOQUEANTE si se ignora): el runner debe reportar aparte los seeds esperados critico que caen en revision clinica; NO cuentan como aciertos, de lo contrario la metrica de sensibilidad de critico 100% se cumple en silencio."
+      "notes": "Orden 24. Absorbe F020 y F021. | Handoff F039 (BLOQUEANTE si se ignora): el runner debe reportar aparte los seeds esperados critico que caen en revision clinica; NO cuentan como aciertos, de lo contrario la metrica de sensibilidad de critico 100% se cumple en silencio. | Aclaracion F039: para seeds esperados critico que caen en revision clinica NO aplica 'casos en revision se reportan, no se penalizan' de AGENTS.md; el runner sale con codigo distinto de 0, los reporta aparte y etiqueta con policy_version provisional, sin presentarlos como hito cumplido (proponer al usuario conciliar AGENTS.md)."
     },
     {
       "id": "F051",
@@ -903,7 +903,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 33. Parte de F013. Reconcilia los criterios de roles de F013. Supuesto a confirmar: el rol usuario también marca visto/atendido y anota (decisión 3 del usuario)."
+      "notes": "Orden 33. Parte de F013. Reconcilia los criterios de roles de F013. Supuesto a confirmar: el rol usuario también marca visto/atendido y anota (decisión 3 del usuario). | Handoff F039: el rol usuario no puede quedarse sin ver un review con critico alcanzable ('posible critico, datos incompletos'); definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F059",
