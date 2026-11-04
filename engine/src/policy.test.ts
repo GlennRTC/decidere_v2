@@ -324,3 +324,121 @@ describe("no mutation", () => {
     assert.doesNotThrow(() => classify(result, qsofaSev));
   });
 });
+
+describe("totality", () => {
+  const good = () => evaluateRuleSet(qsofaSet, build("met", "met", "met"));
+  const boom = () => {
+    throw new Error("boom t.qsofa");
+  };
+  const code = (result: unknown, sev: unknown = qsofaSev) => {
+    try {
+      classify(result as never, sev as never);
+    } catch (e) {
+      assert.ok(e instanceof PolicyError);
+      return e.code;
+    }
+    return "no throw";
+  };
+  it("throwing own getter on a rule", () => {
+    const r = good();
+    Object.defineProperty(r.rules[0], "result", {
+      get: boom,
+      enumerable: true,
+    });
+    assert.equal(code(r), "invalid_input");
+  });
+  it("throwing getter on rules", () => {
+    const r = good();
+    Object.defineProperty(r, "rules", { get: boom });
+    assert.equal(code(r), "invalid_input");
+  });
+  it("revoked Proxy as result", () => {
+    const { proxy, revoke } = Proxy.revocable(good(), {});
+    revoke();
+    assert.equal(code(proxy), "invalid_input");
+  });
+  it("Proxy rules array with throwing traps", () => {
+    const rules = new Proxy([], { get: boom, getOwnPropertyDescriptor: boom });
+    assert.equal(code({ rules, fired: [] }), "invalid_input");
+  });
+  it("Map subclass whose get throws", () => {
+    class Bad extends Map<string, Severity> {
+      override get(): Severity | undefined {
+        return boom();
+      }
+    }
+    assert.equal(
+      code(good(), new Bad([["t.qsofa", "critical"]])),
+      "invalid_input",
+    );
+  });
+});
+
+describe("tie-break on equal final class", () => {
+  const watchAll = {
+    id: "t.w",
+    conditions: [cond("p", "p", ">=", 1), cond("q", "q", ">=", 1)],
+    combine: { all: ["p", "q"] },
+  };
+  const sev = new Map<string, Severity>([
+    ["t.qsofa", "critical"],
+    ["t.w", "watch"],
+  ]);
+  const input = { p: 0 }; // t.w: false with unknown leaf; qsofa all unknown
+  it("watch incomplete first, critical could_escalate second", () => {
+    const d = classify(
+      evaluateRuleSet(defineRuleSet([watchAll, qsofa]), input),
+      sev,
+    );
+    assert.equal(d.class, "review");
+    assert.equal(d.reason_code, "could_escalate");
+    assert.equal(d.highest_reachable_class, "critical");
+  });
+  it("critical first, same outcome", () => {
+    const d = classify(
+      evaluateRuleSet(defineRuleSet([qsofa, watchAll]), input),
+      sev,
+    );
+    assert.equal(d.class, "review");
+    assert.equal(d.reason_code, "could_escalate");
+    assert.equal(d.highest_reachable_class, "critical");
+  });
+});
+
+describe("no silent no_alert from malformed traces", () => {
+  const leaf = (result: unknown) => ({
+    id: "a",
+    kind: "leaf",
+    result,
+    observed: 0,
+    op: ">=",
+    threshold: 1,
+    unit: "u",
+    label: "l",
+  });
+  const run2 = (trace: unknown[]) => {
+    try {
+      classify(
+        { rules: [{ rule_id: "r", result: false, trace }], fired: [] } as never,
+        new Map<string, Severity>([["r", "watch"]]),
+      );
+    } catch (e) {
+      assert.ok(e instanceof PolicyError);
+      return e.code;
+    }
+    return "no throw";
+  };
+  it("false with no leaf entry", () => {
+    assert.equal(
+      run2([{ id: "combine", kind: "all", result: false }]),
+      "invalid_input",
+    );
+  });
+  it("leaf result outside the tri-state", () => {
+    assert.equal(run2([leaf("maybe")]), "invalid_input");
+    assert.equal(run2([leaf(0)]), "invalid_input");
+  });
+  it("well-formed false leaf still gives no_alert", () => {
+    assert.equal(run2([leaf(false)]), "no throw");
+  });
+});

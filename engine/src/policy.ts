@@ -1,4 +1,4 @@
-import type { RuleResult, RuleSetResult, TraceEntry, Tri } from "./types.ts";
+import type { RuleSetResult, TraceEntry, Tri } from "./types.ts";
 
 // PROVISIONAL, team-defined class policy (F039). Pure: no I/O. Never reads `fired`
 // (it merges unknown with false); reads `rules[].result` and `rules[].trace`.
@@ -77,8 +77,9 @@ const REACH_RANK: Readonly<Record<Exclude<ClassId, "review">, number>> = {
   critical: 2,
 };
 
+// Own data properties only: accessors count as absent, so no user code runs on read.
 const own = (o: object, k: string): unknown =>
-  Object.hasOwn(o, k) ? (o as Record<string, unknown>)[k] : undefined;
+  Object.getOwnPropertyDescriptor(o, k)?.value;
 const isObject = (x: unknown): x is object =>
   typeof x === "object" && x !== null;
 
@@ -97,15 +98,22 @@ function basisFor(rule: unknown, severities: unknown): RuleBasis {
   if (severity !== "critical" && severity !== "watch") return invalid();
 
   let unknown_leaves = 0;
+  let leaves = 0;
   // A single-leaf combine has no "combine" entry (the leaf is the root): counts stay null.
   let root: TraceEntry | undefined;
   for (let i = 0; i < trace.length; i++) {
-    const e: unknown = trace[i];
+    const e: unknown = own(trace, String(i));
     if (!isObject(e)) return invalid();
-    if (own(e, "kind") === "leaf" && own(e, "result") === "unknown")
-      unknown_leaves++;
+    if (own(e, "kind") === "leaf") {
+      const lr = own(e, "result");
+      if (lr !== true && lr !== false && lr !== "unknown") return invalid();
+      leaves++;
+      if (lr === "unknown") unknown_leaves++;
+    }
     if (own(e, "id") === "combine") root = e as TraceEntry;
   }
+  // A false rule with no leaf evidence must never read as all clear.
+  if (result === false && leaves === 0) return invalid();
 
   let counts: RuleBasis["counts"] = null;
   if (root !== undefined && own(root, "kind") === "atLeast") {
@@ -172,7 +180,20 @@ function basisFor(rule: unknown, severities: unknown): RuleBasis {
   };
 }
 
+// Total: any non-PolicyError (getter, Proxy, throwing Map) fails closed as invalid_input.
 export function classify(
+  result: RuleSetResult,
+  severities: ReadonlyMap<string, Severity>,
+): ClassDecision {
+  try {
+    return classifyUnchecked(result, severities);
+  } catch (e) {
+    if (e instanceof PolicyError) throw e;
+    throw new PolicyError("invalid_input");
+  }
+}
+
+function classifyUnchecked(
   result: RuleSetResult,
   severities: ReadonlyMap<string, Severity>,
 ): ClassDecision {
@@ -183,14 +204,20 @@ export function classify(
 
   const basis: RuleBasis[] = [];
   for (let i = 0; i < rules.length; i++)
-    basis.push(basisFor(rules[i] as RuleResult, severities));
+    basis.push(basisFor(own(rules, String(i)), severities));
 
   let top = basis[0] as RuleBasis;
   let reach = top.reachable;
   let conflict = false;
   for (let i = 1; i < basis.length; i++) {
     const b = basis[i] as RuleBasis;
-    if (CLASS_RANK[b.class] > CLASS_RANK[top.class]) top = b;
+    // Tie on class: the rule with the highest reachable class explains the decision.
+    if (
+      CLASS_RANK[b.class] > CLASS_RANK[top.class] ||
+      (b.class === top.class &&
+        REACH_RANK[b.reachable] > REACH_RANK[top.reachable])
+    )
+      top = b;
     if (REACH_RANK[b.reachable] > REACH_RANK[reach]) reach = b.reachable;
     if (b.class !== (basis[0] as RuleBasis).class) conflict = true;
   }
