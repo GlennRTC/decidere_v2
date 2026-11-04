@@ -39,7 +39,7 @@
 
 - Riesgo aguas abajo: una decisión `review` con `highest_reachable_class: critical` (p. ej. FR 26 con TAS faltante) debe ser visible para el clínico de turno como "posible crítico, datos incompletos" (F015, F023); el rol `usuario` (F058) no debe quedar sin verlo; hay que definir quién revisa y en cuánto tiempo; la cola (F016) se ordena por `highest_reachable_class`, no solo por clase.
 - F040 debe fallar el arranque salvo que toda regla activa tenga severidad (`loaded.severities.size === loaded.meta.length`); si no, cada POST sería `internal_error`.
-- F050: para seeds esperados `crítico` que caen en `revisión clínica`, la línea de AGENTS.md "casos en revisión se reportan, no se penalizan" NO aplica: el runner debe salir con código distinto de 0 y reportarlos aparte, etiquetando con `policy_version` provisional y sin presentarlos como hito cumplido. Se propone que el usuario concilie AGENTS.md (no se edita aquí).
+- F050: para seeds esperados `crítico` que caen en `revisión clínica`, la línea de AGENTS.md "casos en revisión se reportan, no se penalizan" NO aplica (AGENTS.md ya recoge esta excepción, aprobada por el usuario): el runner debe salir con código distinto de 0 y reportarlos aparte, etiquetando con `policy_version` provisional y sin presentarlos como hito cumplido.
 
 **Preguntas clínicas abiertas (ninguna decidida aquí; en orden de prioridad):**
 1. ¿Aprobar `sepsis.qsofa.v1` aprueba también `severity: critical`, es decir, qSOFA >= 2 como `crítico` sin precondición de infección? SSC 2021 Rec. 2 advierte sobre la baja sensibilidad de qSOFA, no sobre falsas alarmas; bajarlo a vigilancia cambiaría el error inaceptable por menos fatiga.

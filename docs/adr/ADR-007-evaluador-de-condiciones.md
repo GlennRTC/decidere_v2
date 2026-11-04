@@ -38,7 +38,7 @@
 - Los ids de traza de combinadores `combine` y `combine.N` están reservados: un id de condición no puede usarlos.
 - Límite conocido: Kleene es exacto solo si cada hoja aparece una vez por regla. Con una hoja repetida el resultado puede ser "unknown" donde existe un valor definido (p. ej. `all[a, not a]`, `any[a, not a]`). Nunca produce un valor definido erróneo (con un `RuleSet` creado por `defineRuleSet`, marcado en el tipo y verificado en runtime por `evaluateRuleSet`), así que el error va hacia revisión. Quien redacte reglas no debe repetir una condición dentro de una regla.
 - F038 transcribió qSOFA en `knowledge/rules/sepsis.qsofa.v1.yaml` (aprobación clínica pendiente).
-- Siguen en F037: el cargador YAML, la mitigación de ids posicionales y las notas de redacción.
+- El cargador YAML se entregó en F037 (ver ADR-002); allí también se rechaza repetir o dejar sin usar una condición. Sigue pendiente la mitigación de ids posicionales de combinadores.
 
 ## Apéndice A: resultados del spike (Node v26.3.0, tsc 7.0.2, json-logic-engine 5.0.7)
 
