@@ -8,6 +8,9 @@
   "scripts": {
     "test": "node --test"
   },
+  "devDependencies": {
+    "@decidere/schema": "*"
+  },
   "dependencies": {
     "@decidere/engine": "*",
     "yaml": "2.9.1"

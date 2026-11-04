@@ -116,3 +116,19 @@
 - Directivas `%YAML` se ignoran; `lineAt` reescanea (aceptable).
 - Menores de test/tipos: `parse.test.ts` tautología de mensaje; `e as boolean` redundante en `schema.ts`; `RuleDoc.conditions`/`combine` tipados `unknown`; `schema.test.ts` débil para `combine` string y sin tests de `{any, extra}`, id de 201 caracteres, accessor/Proxy; faltan tests de `conditions` vacías hacia el motor y del mapeo de error de motor con varias reglas; el test de renombrado también cambia el título; warnings `noExplicitAny` en `schema.test.ts` y `version.test.ts`.
 - Hash truncado a 64 bits: concesión deliberada, anotada en ADR-002.
+
+## 2026-11-03 — Sesión 9 (F038: regla qSOFA v1 transcrita y citada)
+**Feature(s) trabajada(s):** F038 — `knowledge/rules/sepsis.qsofa.v1.yaml` (+ `packages/rules/src/qsofa.test.ts`, 9 tests)
+**Qué se hizo:** Regla `sepsis.qsofa.v1` transcrita de Sepsis-3 (Singer et al., JAMA 2016;315(8):801-10, Box 4 en el HTML de JAMA y PMC): FR ≥ 22/min, TAS ≤ 100 mm Hg, Glasgow < 15, al menos 2 de 3. `clinical_approval.status: pending`. El test carga el directorio real con `loadRuleSet` y un conjunto provisional de variables (solo en el test). Nueva devDependency interna `@decidere/schema` en `packages/rules` (enlace de workspace).
+**Verificación realizada:** ver sección de cifras al final de esta entrada.
+**Estado al cerrar:** F038 `passing` como transcripción verificada por tests, NO aprobada clínicamente. Rama `feat/f038-qsofa-rule`, apilada sobre `feat/f037-rule-loader`, sin push. Handoff: F039 (única regla `sepsis.qsofa.v1`, sin `severity`, leer `rules[].result`), F040 (`knowledge/rules/` viaja con la API; archivos sueltos fallan la carga; variables desde F042/F043 o `@decidere/schema`), F042 (reemplazar el conjunto provisional).
+**Preguntas clínicas abiertas (ninguna decidida aquí; en orden de prioridad):**
+1. ¿Puede qSOFA solo producir una clase, en especial `crítico`? La Surviving Sepsis Campaign 2021, Recomendación 2, desaconseja qSOFA como herramienta única de tamizaje (doi:10.1007/s00134-021-06506-y). ¿Se combina con SIRS/NEWS2?
+2. qSOFA es para adultos con infección sospechada y la regla no tiene precondición de infección. ¿Cómo se expresa la sospecha (cultivos/antibióticos ordenados, ICD-10, ambos)? La política de clases es F039.
+3. Estado mental alterado: Glasgow < 15 (texto de Singer; con enteros equivale a ≤ 14) frente a ≤ 13 (corte con el que Seymour et al., doi:10.1001/jama.2016.0288, derivó qSOFA; < 15 fue análisis de sensibilidad). Déficits basales (demencia, ACV) y pacientes sedados/intubados no tienen Glasgow representable. El clínico confirma que encaja con la práctica de urgencias.
+4. ¿Qué medición cuenta: la última o la peor dentro de una ventana? Seymour usó 48 h antes a 24 h después del inicio de la infección. Ventana de 7 días de `t_offset_min` y criterio con varias mediciones por definir.
+5. ¿A qué clase mapea `unknown`? La validación publicada imputó valores normales a los datos faltantes (faltante = falso); el motor usa unknown (más conservador, cambia resultados).
+6. Texto de UI: aviso de tamizaje, no diagnóstico (Seymour et al., JAMA 2016;315(8):762-774); incluir la advertencia de Singer de que no cumplir qSOFA no debe diferir la investigación ni el tratamiento de la infección (F062).
+7. Redondeo aguas arriba de TAS (p. ej. 100,4 → 100) podría invertir el resultado: asunto del mapper (F043).
+8. El número de Box y el nombre de la sección se verificaron solo contra el HTML de JAMA y PMC; falta revisar la versión impresa (PDF).
+**Cifras de verificación (F038):** `npm run verify` exit=0 (api 53/53, rules 83/83, schema 34/34, engine 108/108, tests 32/33 con 1 omitida preexistente; Biome 3 warnings, sin errores; tsc limpio); `scan:phi` "scanned 37 files, skipped 73, hits 0, errors 0" confirmado sobre 05393a5.

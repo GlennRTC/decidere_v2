@@ -1,0 +1,38 @@
+format_version: 1
+id: sepsis.qsofa.v1
+title: "qSOFA (quick SOFA): tamizaje de riesgo de sepsis"
+citation:
+  source: "Singer M, et al. The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3). JAMA. 2016. doi:10.1001/jama.2016.0287"
+  version: "JAMA 2016;315(8):801-810"
+  section: "Box 4 (qSOFA criteria); section 'Screening for Patients Likely to Have Sepsis'"
+clinical_approval:
+  status: pending
+  approver: null
+  guideline_version: null
+conditions:
+  - {
+      id: fr_alta,
+      label: "Frecuencia respiratoria alta",
+      variable: resp_rate,
+      op: ">=",
+      value: 22,
+      unit: "/min",
+    }
+  - {
+      id: ta_baja,
+      label: "Presión sistólica baja",
+      variable: sbp,
+      op: "<=",
+      value: 100,
+      unit: "mm[Hg]",
+    }
+  - {
+      id: gcs_bajo,
+      label: "Alteración del estado mental (GCS)",
+      variable: gcs,
+      op: "<",
+      value: 15,
+      unit: "{score}",
+    }
+combine:
+  atLeast: { n: 2, of: [fr_alta, ta_baja, gcs_bajo] }
