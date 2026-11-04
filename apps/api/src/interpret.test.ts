@@ -197,3 +197,18 @@ test("a later null does not erase an earlier measured value: rr 30 at -60, null 
   );
   assert.equal(out.results[0].class, "crítico");
 });
+
+test("the latest value wins regardless of array order: t=0 listed first", () => {
+  const out = interpretMessage(
+    msg(
+      inst(INSTANCE_ID, "current", [
+        ["resp_rate", 12, 0],
+        ["resp_rate", 30, -60],
+        ["sbp", 120],
+        ["gcs", 15],
+      ]),
+    ),
+    loaded,
+  );
+  assert.equal(out.results[0].class, "sin alerta");
+});

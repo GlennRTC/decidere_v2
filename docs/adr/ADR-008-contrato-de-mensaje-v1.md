@@ -19,7 +19,7 @@
   | `bad_request` | 400 | URL malformada u otra solicitud inválida a nivel de framework | `The request is invalid.` |
   | `invalid_json` | 400 | Cuerpo JSON vacío o no parseable (incluye `__proto__` y `constructor.prototype`) | `The request body is not valid JSON.` |
   | `not_found` | 404 | Ruta inexistente | `Resource not found.` |
-  | `payload_too_large` | 413 | Cuerpo sobre `bodyLimit` (262144 bytes por defecto) | `The request body is too large.` |
+  | `payload_too_large` | 413 | Cuerpo sobre `bodyLimit` (262144 bytes por defecto; 131072 en `POST /v1/messages`, F040) | `The request body is too large.` |
   | `unsupported_media_type` | 415 | `content-type` no soportado | `The content type is not supported.` |
   | `validation_failed` | 422 | El mensaje no cumple el schema (`details` presente) | `The message failed validation.` |
   | `internal_error` | 500 | Cualquier error no previsto, incluido un fallo del propio manejador | `Internal server error.` |
@@ -66,7 +66,7 @@
 - **Históricas:** se aceptan, no se evalúan, no se persisten ni se loguean; solo `historical_ignored`. Un mensaje sin instancias `current` responde 422 (`/instances`, `invalid_value`) para que ningún caso se pierda en silencio; F050 debe contarlo como rechazo contabilizado.
 - **Medición:** por variable gana, entre las mediciones con valor, la de mayor `t_offset_min` (la más cercana al presente); un `null` posterior no borra una medición anterior (revisión externa: lo contrario degradaba un crítico a revisión); solo `null` o ausente = faltante (`unknown`). **Provisional**: puede ocultar un valor crítico anterior (GCS 8 en t=-30 y 15 en t=0 dan 15). La pregunta clínica "qué medición cuenta" sigue abierta.
 - **`source`:** `ALLOWED_SOURCES` (lista separada por comas, por defecto `sim-1`) es una allowlist global provisional. **No autentica al emisor** (cualquiera puede enviar `sim-1`) y el 403 frente al 422 revela qué fuentes tienen forma válida; ambos se resuelven con auth y allowlist por tenant (F052/F054). No usar con datos reales.
-- **Cuerpo:** `bodyLimit` de 131072 bytes en la ruta; parser JSON propio (`strict-json.ts`) que rechaza notación exponencial, claves duplicadas y `__proto__`/`constructor` con `invalid_json`; `text/plain` y charsets distintos de utf-8 dan 415. Los enteros sobre 2^53 se redondean antes del parser: el schema los acota por rango.
+- **Cuerpo:** `bodyLimit` de 131072 bytes en la ruta (el mensaje válido más grande mide unos 72 KB en JSON compacto y unos 139 KB con sangría de 2 espacios: **el emisor debe enviar JSON compacto**, o recibirá 413 sin remedio por reintento); parser JSON propio (`strict-json.ts`) que rechaza notación exponencial, claves duplicadas y `__proto__`/`constructor` con `invalid_json`; `text/plain` y charsets distintos de utf-8 dan 415. Los enteros sobre 2^53 se redondean antes del parser: el schema los acota por rango.
 - **Arranque:** `knowledge/rules` (o `RULES_DIR`) se carga antes de escuchar; el servidor aborta si una regla no tiene `severity`.
 - **Logs:** solo `message_id` (tras validar, nunca en ramas de error), `case_id`, clase, certeza, ids de reglas disparadas y conteos. Destino, retención y control de acceso de los logs: **pendiente de documentar** (Vercel, residencia sin decidir).
 - **Semántica para el emisor:** cualquier respuesta no-2xx significa que el mensaje NO fue interpretado; reintentar o alertar por otro canal. Un 5xx no indica evaluación parcial.

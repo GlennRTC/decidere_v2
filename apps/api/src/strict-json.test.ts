@@ -48,3 +48,13 @@ test("accepts a valid message-like body and integers/decimals without exponent",
     n: null,
   });
 });
+
+test("rejects a duplicate key when whitespace precedes the colon", () =>
+  rejects('{"a" :1,"a":2}'));
+test("rejects a plain duplicate key", () => rejects('{"a":1,"a":2}'));
+test("accepts a string value equal to its key", () => {
+  assert.deepEqual(strictJsonParse('{"a":"a"}'), { a: "a" });
+});
+test("rejects duplicates that differ only by escape", () => {
+  rejects('{"a":1,"\\u0061":2}');
+});

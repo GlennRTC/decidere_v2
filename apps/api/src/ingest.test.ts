@@ -140,3 +140,18 @@ test("evaluation error is 500 internal_error with a fixed body", async () => {
   assert.equal(res.json().error.code, "internal_error");
   assert.equal(res.json().error.message, "Internal server error.");
 });
+
+test("logs carry no engine input: no variable names, units or values", async () => {
+  const { app, logs } = setup();
+  await post(app, message());
+  const out = logs();
+  for (const leak of [
+    "resp_rate",
+    "sbp",
+    "gcs",
+    "mm[Hg]",
+    "/min",
+    "t_offset_min",
+  ])
+    assert.ok(!out.includes(leak), leak);
+});
