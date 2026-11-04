@@ -25,7 +25,7 @@ Sistema que alerta al médico de urgencias cuando un paciente presenta una condi
 - **Cobertura**: 100% de los mensajes válidos termina en una clase o en revisión. Ningún caso se pierde.
 - **Sensibilidad de la clase crítico sobre seeds**: 100%. Un crítico no detectado es el error inaceptable.
 - **Conformidad con criterios publicados** (Sepsis-3/SSC): 99% (a confirmar). Con menos de 100 casos, 99% equivale a cero discrepancias; definir con el clínico si se acepta 1 o 2.
-- **Casos en revisión clínica**: se reportan, no se penalizan. Un caso ambiguo bien derivado es resultado correcto.
+- **Casos en revisión clínica**: se reportan, no se penalizan. Un caso ambiguo bien derivado es resultado correcto. Excepción: un seed esperado `crítico` que cae en revisión clínica NO es un acierto; se reporta aparte y hace fallar el runner (ADR-010, F050).
 
 ### Gold standard
 

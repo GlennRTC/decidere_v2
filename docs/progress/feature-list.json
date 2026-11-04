@@ -115,7 +115,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Reemplazada por F039 (política provisional). Se cierra cuando F039 pase y el clínico apruebe. | Notas previas: BLOQUEADA: la combinación final se define luego en planificación/brainstorming con un agente especializado."
+      "notes": "Reemplazada por F039 (política provisional). Se cierra cuando F039 pase y el clínico apruebe. | Notas previas: BLOQUEADA: la combinación final se define luego en planificación/brainstorming con un agente especializado. | Sesion 10: F039 implementada como politica provisional; F007 sigue failing hasta que un clinico apruebe la tabla (ADR-010, preguntas abiertas)."
     },
     {
       "id": "F008",
@@ -245,7 +245,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 37 junto con F023. El endpoint está en F056. Polling 2-3 s (ADR-005). | Notas previas: DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción."
+      "notes": "Orden 37 junto con F023. El endpoint está en F056. Polling 2-3 s (ADR-005). | Notas previas: DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción. | Handoff F039: un review con highest_reachable_class critical (p. ej. FR 26 con TAS faltante) debe verse como 'posible critico, datos incompletos' para el clinico de turno; definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F016",
@@ -261,7 +261,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar)."
+      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar). | Handoff F039: ordenar la cola por highest_reachable_class, no solo por clase; un review con critico alcanzable es 'posible critico, datos incompletos'; definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F017",
@@ -373,7 +373,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022."
+      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022. | Handoff F039: mostrar el review con highest_reachable_class critical como 'posible critico, datos incompletos'; no ocultarlo detras de vigilancia."
     },
     {
       "id": "F024",
@@ -615,11 +615,11 @@
         "Reglas en conflicto se resuelven por máxima severidad y alimentan el conflicto de la certeza",
         "Marcada provisional y fuera de las métricas hasta la aprobación clínica"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 12. Parte de F007. | Consume de F005: evaluateRuleSet -> RuleSetResult {rules: [{rule_id, result, trace}], fired}; F005 no calcula la clase, la política (máxima severidad) es de F039. | `fired` mezcla unknown con false: la política de clase debe leer rules[].result para que un unknown nunca se convierta en 'sin alerta'. Invariante de ADR-007: si el mejor caso (atLeast max) alcanza el umbral, la clase nunca es 'sin alerta'. | F037: agregar `severity` es un cambio de `format_version` del esquema de archivo de reglas."
+      "notes": "Orden 12. Parte de F007. | Consume de F005: evaluateRuleSet -> RuleSetResult {rules: [{rule_id, result, trace}], fired}; F005 no calcula la clase, la política (máxima severidad) es de F039. | `fired` mezcla unknown con false: la política de clase debe leer rules[].result para que un unknown nunca se convierta en 'sin alerta'. Invariante de ADR-007: si el mejor caso (atLeast max) alcanza el umbral, la clase nunca es 'sin alerta'. | (superado por ADR-010: `severity` es aditiva en v1) F037: agregar `severity` es un cambio de `format_version` del esquema de archivo de reglas. | Sesion 10: politica provisional implementada (classify en engine/src/policy.ts, severity opcional en reglas, ADR-010 propuesto), NO aprobada clinicamente y fuera de las metricas. Verificado: npm run verify exit 0. Preguntas clinicas abiertas en ADR-010 y PROGRESS Sesion 10."
     },
     {
       "id": "F040",
@@ -635,7 +635,7 @@
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 13. Parte de F010. Tracer bullet. | Gates de ADR-008 (revision clinica F035): allowlist de source por tenant antes de loguear/persistir; instance_id descartado o mapeado a case_id aleatorio y message_id solo para idempotencia con TTL; decidir unicidad de instance_id; historicas no persistidas ni logueadas mas alla de un conteo; bodyLimit bajo y rechazo previo a JSON.parse de notacion exponencial y claves duplicadas; test con canario en logs con body invalido; solo adultos. | Handoff de F036: devolver replyValidationFailed con return en handlers async; parser JSON previo (claves duplicadas, notacion exponencial) que lance errores 4xx FST_ERR_CTP_*; extender ErrorCode con 401/403/429 y el rechazo de source fuera de la allowlist; rechazar text/plain y charsets arbitrarios (415); clientError de Node sin request id; server.ts sin handler de uncaughtException y errInfo sin try/catch; message_id se loguea (decidido 2026-11-03; ADR-008 actualizado; instance_id nunca se loguea); la tabla de codigos de error ya esta en ADR-008 (agregar 401/403/429 alli); empaquetado de @decidere/schema en Vercel sin verificar. | Review clinico F036: message_id solo tras validar formato y nunca en ramas de error (test canario); documentar retencion/acceso/destino de logs; source sin validar no se loguea hasta la allowlist; contador de rechazos por codigo (incl. clientError y 405 que hoy da 404) antes de pasar; semantica de reintento para el emisor; conservar estado 4xx real (429); considerar bodyLimit menor, path de log normalizado, err.code solo FST_ERR_*; opinion legal formal sobre message_id y logs (Ley 1581, SaMD). | La traza lleva `observed` (números clínicos) por diseño: puede ir en la respuesta y en la persistencia, nunca en logs. Envolver la evaluación en el manejador de F036 y pasar un objeto derivado de JSON plano (el mensaje de un getter que lanza escapa de evaluateRuleSet; un input null lanza TypeError). | F037: llamar `loadRuleSet(dir, {variables})` antes de escuchar y fallar el arranque ante `RuleLoadError`; devolver `rule_set_version` y `approval` en la respuesta del POST; el cargador necesita decidir un codigo de error de I/O (ver menores diferidos de la Sesion 8). | `RuleLoadError` ahora incluye los codigos `unreadable_entry` e `invalid_options`; `LoadedRuleSet.meta` no esta congelado (congelarlo antes de mantenerlo en el proceso); resolver o empaquetar `knowledge/rules` para Vercel."
+      "notes": "Orden 13. Parte de F010. Tracer bullet. | Gates de ADR-008 (revision clinica F035): allowlist de source por tenant antes de loguear/persistir; instance_id descartado o mapeado a case_id aleatorio y message_id solo para idempotencia con TTL; decidir unicidad de instance_id; historicas no persistidas ni logueadas mas alla de un conteo; bodyLimit bajo y rechazo previo a JSON.parse de notacion exponencial y claves duplicadas; test con canario en logs con body invalido; solo adultos. | Handoff de F036: devolver replyValidationFailed con return en handlers async; parser JSON previo (claves duplicadas, notacion exponencial) que lance errores 4xx FST_ERR_CTP_*; extender ErrorCode con 401/403/429 y el rechazo de source fuera de la allowlist; rechazar text/plain y charsets arbitrarios (415); clientError de Node sin request id; server.ts sin handler de uncaughtException y errInfo sin try/catch; message_id se loguea (decidido 2026-11-03; ADR-008 actualizado; instance_id nunca se loguea); la tabla de codigos de error ya esta en ADR-008 (agregar 401/403/429 alli); empaquetado de @decidere/schema en Vercel sin verificar. | Review clinico F036: message_id solo tras validar formato y nunca en ramas de error (test canario); documentar retencion/acceso/destino de logs; source sin validar no se loguea hasta la allowlist; contador de rechazos por codigo (incl. clientError y 405 que hoy da 404) antes de pasar; semantica de reintento para el emisor; conservar estado 4xx real (429); considerar bodyLimit menor, path de log normalizado, err.code solo FST_ERR_*; opinion legal formal sobre message_id y logs (Ley 1581, SaMD). | La traza lleva `observed` (números clínicos) por diseño: puede ir en la respuesta y en la persistencia, nunca en logs. Envolver la evaluación en el manejador de F036 y pasar un objeto derivado de JSON plano (el mensaje de un getter que lanza escapa de evaluateRuleSet; un input null lanza TypeError). | F037: llamar `loadRuleSet(dir, {variables})` antes de escuchar y fallar el arranque ante `RuleLoadError`; devolver `rule_set_version` y `approval` en la respuesta del POST; el cargador necesita decidir un codigo de error de I/O (ver menores diferidos de la Sesion 8). | `RuleLoadError` ahora incluye los codigos `unreadable_entry` e `invalid_options`; `LoadedRuleSet.meta` no esta congelado (congelarlo antes de mantenerlo en el proceso); resolver o empaquetar `knowledge/rules` para Vercel. | Handoff F039: llamar classify(result, loaded.severities) despues de evaluateRuleSet; FALLAR EL ARRANQUE salvo que toda regla activa tenga severity (loaded.severities.size === loaded.meta.length), si no cada POST sera internal_error (cobertura); guardar policy_version con cada interpretacion; mapear ClassId (critical/watch/no_alert/review) a los nombres de la respuesta; PolicyError => internal_error; exponer provisional y el estado provisional de la politica por separado de approval de la regla; los consumidores deben ordenar la cola de revision por highest_reachable_class."
     },
     {
       "id": "F041",
@@ -737,7 +737,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 21. Parte de F008. Bandas y pesos provisionales hasta calibrar con el clínico."
+      "notes": "Orden 21. Parte de F008. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation."
     },
     {
       "id": "F048",
@@ -784,7 +784,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 24. Absorbe F020 y F021."
+      "notes": "Orden 24. Absorbe F020 y F021. | Handoff F039 (BLOQUEANTE si se ignora): el runner debe reportar aparte los seeds esperados critico que caen en revision clinica; NO cuentan como aciertos, de lo contrario la metrica de sensibilidad de critico 100% se cumple en silencio. | Aclaracion F039: para seeds esperados critico que caen en revision clinica NO aplica 'casos en revision se reportan, no se penalizan' de AGENTS.md; el runner sale con codigo distinto de 0, los reporta aparte y etiqueta con policy_version provisional, sin presentarlos como hito cumplido (proponer al usuario conciliar AGENTS.md)."
     },
     {
       "id": "F051",
@@ -903,7 +903,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 33. Parte de F013. Reconcilia los criterios de roles de F013. Supuesto a confirmar: el rol usuario también marca visto/atendido y anota (decisión 3 del usuario)."
+      "notes": "Orden 33. Parte de F013. Reconcilia los criterios de roles de F013. Supuesto a confirmar: el rol usuario también marca visto/atendido y anota (decisión 3 del usuario). | Handoff F039: el rol usuario no puede quedarse sin ver un review con critico alcanzable ('posible critico, datos incompletos'); definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F059",
@@ -964,7 +964,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 39. Parte de F023. Antes del visor gráfico (F024)."
+      "notes": "Orden 39. Parte de F023. Antes del visor gráfico (F024). | Handoff F039: redaccion 'tamizaje de alto riesgo', no diagnostico; mostrar la advertencia de Singer de que un qSOFA negativo no debe diferir la investigacion ni el tratamiento."
     },
     {
       "id": "F063",

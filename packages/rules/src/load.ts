@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { RuleSet } from "@decidere/engine";
+import type { RuleSet, Severity } from "@decidere/engine";
 import { defineRuleSet, RuleError } from "@decidere/engine";
 import { RuleLoadError } from "./errors.ts";
 import { parseRuleYaml } from "./parse.ts";
@@ -12,6 +12,7 @@ export type LoadedRuleSet = {
   ruleSet: RuleSet;
   meta: readonly RuleMeta[];
   rule_set_version: string;
+  severities: ReadonlyMap<string, Severity>;
   approval: "pending" | "approved";
 };
 
@@ -153,11 +154,26 @@ export function loadRuleSet(
   const meta: RuleMeta[] = active.map(({ doc }) => ({
     id: doc.id,
     title: doc.title,
+    ...(doc.severity !== undefined && { severity: doc.severity }),
     citation: doc.citation,
     clinical_approval: doc.clinical_approval,
   }));
+  // Only active rules that declare severity; a copy. Direct mutators are blocked below,
+  // but Map.prototype.set.call can still mutate the copy; classify re-validates values.
+  const severities = new Map<string, Severity>();
+  for (const m of meta)
+    if (m.severity !== undefined) severities.set(m.id, m.severity);
+  // Object.freeze does not stop Map mutation: block the mutators on the instance.
+  for (const op of ["set", "delete", "clear"] as const)
+    Object.defineProperty(severities, op, {
+      value: () => {
+        throw new TypeError("severities is read-only");
+      },
+    });
+  Object.freeze(severities);
   return {
     ruleSet,
+    severities,
     meta,
     rule_set_version: computeRuleSetVersion(ruleSet, meta),
     approval: meta.every((m) => m.clinical_approval.status === "approved")
