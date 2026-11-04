@@ -182,3 +182,18 @@ test("certainty is null and policy.provisional is true", () => {
   assert.equal(out.policy.version, "policy-provisional-1");
   assert.equal(out.rule_set.approval, "pending");
 });
+
+test("a later null does not erase an earlier measured value: rr 30 at -60, null at 0 stays crítico", () => {
+  const out = interpretMessage(
+    msg(
+      inst(INSTANCE_ID, "current", [
+        ["resp_rate", null, 0],
+        ["resp_rate", 30, -60],
+        ["sbp", 95],
+        ["gcs", 15],
+      ]),
+    ),
+    loaded,
+  );
+  assert.equal(out.results[0].class, "crítico");
+});

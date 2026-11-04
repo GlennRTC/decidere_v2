@@ -45,10 +45,13 @@ export type Interpretation = {
 type Instance = Message["instances"][number];
 
 // Provisional (clinical question open): per variable, the measurement closest to
-// now (largest t_offset_min) wins. null means missing, so the leaf is `unknown`.
+// now (largest t_offset_min) wins among non-null values; none means `unknown`.
 function engineInput(instance: Instance): Record<string, number> {
   const latest = new Map<string, { t: number; value: number | null }>();
   for (const v of instance.variables) {
+    // A null entry never hides a real measurement (a missed critical is the
+    // unacceptable error); a variable with only nulls stays missing.
+    if (v.value === null) continue;
     const prev = latest.get(v.variable);
     if (!prev || v.t_offset_min > prev.t)
       latest.set(v.variable, { t: v.t_offset_min, value: v.value });
