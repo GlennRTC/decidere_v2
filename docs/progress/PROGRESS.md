@@ -131,4 +131,4 @@
 6. Texto de UI: aviso de tamizaje, no diagnóstico (Seymour et al., JAMA 2016;315(8):762-774); incluir la advertencia de Singer de que no cumplir qSOFA no debe diferir la investigación ni el tratamiento de la infección (F062).
 7. Redondeo aguas arriba de TAS (p. ej. 100,4 → 100) podría invertir el resultado: asunto del mapper (F043).
 8. El número de Box y el nombre de la sección se verificaron solo contra el HTML de JAMA y PMC; falta revisar la versión impresa (PDF).
-**Cifras de verificación (F038):** `npm run verify` exit=0 (api 53/53, rules 83/83, schema 34/34, engine 108/108, tests 32/33 con 1 omitida preexistente; Biome 3 warnings, sin errores; tsc limpio); `scan:phi` "scanned 37 files, skipped 73, hits 0, errors 0" (el conteo final se re-ejecuta sobre el commit).
+**Cifras de verificación (F038):** `npm run verify` exit=0 (api 53/53, rules 83/83, schema 34/34, engine 108/108, tests 32/33 con 1 omitida preexistente; Biome 3 warnings, sin errores; tsc limpio); `scan:phi` "scanned 37 files, skipped 73, hits 0, errors 0" confirmado sobre 05393a5.
