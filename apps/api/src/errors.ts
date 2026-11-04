@@ -4,6 +4,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 export type ErrorCode =
   | "not_found"
   | "bad_request"
+  | "forbidden"
   | "invalid_json"
   | "payload_too_large"
   | "unsupported_media_type"
@@ -13,6 +14,7 @@ export type ErrorCode =
 export const STATUS: Record<ErrorCode, number> = {
   not_found: 404,
   bad_request: 400,
+  forbidden: 403,
   invalid_json: 400,
   payload_too_large: 413,
   unsupported_media_type: 415,
@@ -24,6 +26,7 @@ export const STATUS: Record<ErrorCode, number> = {
 export const MESSAGES: Record<ErrorCode, string> = {
   not_found: "Resource not found.",
   bad_request: "The request is invalid.",
+  forbidden: "The source is not allowed.",
   invalid_json: "The request body is not valid JSON.",
   payload_too_large: "The request body is too large.",
   unsupported_media_type: "The content type is not supported.",
