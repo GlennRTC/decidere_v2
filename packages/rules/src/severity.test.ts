@@ -57,7 +57,10 @@ test("rejects other severity values with invalid_value at the key path and witho
       assert.ok(err instanceof RuleLoadError, `got ${String(err)}`);
       assert.equal(err.code, "invalid_value");
       assert.equal(err.path, "severity");
-      assert.ok(!err.message.includes("info"));
+      assert.equal(err.message, "rule file has an invalid value");
+      const dump = JSON.stringify(err, Object.getOwnPropertyNames(err));
+      for (const v of ["info", "Critical", "true", "[critical]"])
+        assert.ok(!dump.includes(v), `echoed ${v}`);
     }
   }
 });
@@ -98,5 +101,6 @@ test("disabled rules do not appear in severities", () => {
 test("severities cannot be mutated by callers", () => {
   const loaded = load("severity: critical\n");
   assert.throws(() => (loaded.severities as Map<string, string>).set("x", "y"));
+  assert.throws(() => (loaded.severities as Map<string, string>).delete("r.a"));
   assert.throws(() => (loaded.severities as Map<string, string>).clear());
 });
