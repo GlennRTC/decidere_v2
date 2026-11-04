@@ -1,11 +1,12 @@
 import { createHash } from "node:crypto";
-import type { RuleSet } from "@decidere/engine";
+import type { RuleSet, Severity } from "@decidere/engine";
 import { RuleLoadError } from "./errors.ts";
 import type { Citation, ClinicalApproval } from "./schema.ts";
 
 export type RuleMeta = {
   id: string;
   title: string;
+  severity?: Severity;
   citation: Citation;
   clinical_approval: ClinicalApproval;
 };

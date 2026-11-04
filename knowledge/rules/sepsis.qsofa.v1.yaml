@@ -1,6 +1,7 @@
 format_version: 1
 id: sepsis.qsofa.v1
 title: "qSOFA (quick SOFA): tamizaje de riesgo de sepsis"
+severity: critical
 citation:
   source: "Singer M, et al. The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3). JAMA. 2016. doi:10.1001/jama.2016.0287"
   version: "JAMA 2016;315(8):801-810"

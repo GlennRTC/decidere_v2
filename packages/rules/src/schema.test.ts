@@ -104,7 +104,7 @@ test("path format: positional dot paths; unknown_key reports the PARENT path", (
   // Top level: empty path (the parent is the document).
   expectErr(
     mut((d) => {
-      d.severity = "x";
+      d.priority = "x";
     }),
     "unknown_key",
     "",
@@ -182,8 +182,8 @@ test("path format: positional dot paths; unknown_key reports the PARENT path", (
   );
 });
 
-test("rejects unknown keys (typos, severity, Enabled) with fixed message", () => {
-  for (const key of ["severity", "threshhold", "Enabled", "enabled "]) {
+test("rejects unknown keys (typos, priority, Enabled) with fixed message", () => {
+  for (const key of ["priority", "threshhold", "Enabled", "enabled "]) {
     const err = fail(
       mut((d) => {
         d[key] = 1;

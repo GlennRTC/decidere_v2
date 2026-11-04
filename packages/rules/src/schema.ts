@@ -1,3 +1,4 @@
+import type { Severity } from "@decidere/engine";
 import { RuleLoadError, type RuleLoadErrorCode } from "./errors.ts";
 
 export type Citation = { source: string; version: string; section: string };
@@ -10,6 +11,7 @@ export type RuleDoc = {
   format_version: 1;
   id: string;
   title: string;
+  severity?: Severity;
   citation: Citation;
   clinical_approval: ClinicalApproval;
   enabled: boolean;
@@ -187,7 +189,7 @@ export function checkRuleDoc(doc: unknown): RuleDoc {
       "combine",
     ],
     "",
-    ["enabled"],
+    ["enabled", "severity"],
   );
 
   const version = own(d, "format_version");
@@ -197,6 +199,13 @@ export function checkRuleDoc(doc: unknown): RuleDoc {
   const id = str(own(d, "id"), "id");
   if (!RULE_ID.test(id)) fail("invalid_value", "id");
   const title = str(own(d, "title"), "title");
+
+  let severity: Severity | undefined;
+  if (Object.hasOwn(d, "severity")) {
+    const s = own(d, "severity");
+    if (s !== "critical" && s !== "watch") fail("invalid_value", "severity");
+    severity = s as Severity;
+  }
 
   let enabled = true;
   if (Object.hasOwn(d, "enabled")) {
@@ -247,6 +256,7 @@ export function checkRuleDoc(doc: unknown): RuleDoc {
     format_version: 1,
     id,
     title,
+    ...(severity !== undefined && { severity }),
     citation,
     clinical_approval,
     enabled,
