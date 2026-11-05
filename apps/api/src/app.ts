@@ -7,11 +7,14 @@ import Fastify, {
   LogController,
 } from "fastify";
 import { codeFor, errorBody, STATUS } from "./errors.ts";
+import { type IngestDeps, registerIngest } from "./ingest.ts";
 
 export type BuildAppOptions = {
   log?: boolean;
   logStream?: Writable;
   bodyLimit?: number;
+  rules?: IngestDeps["rules"];
+  allowedSources?: IngestDeps["allowedSources"];
 };
 
 const DEFAULT_BODY_LIMIT = 262144;
@@ -127,6 +130,13 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     },
     async () => ({ status: "ok" }),
   );
+
+  if (options.rules) {
+    registerIngest(app, {
+      rules: options.rules,
+      allowedSources: options.allowedSources ?? new Set(),
+    });
+  }
 
   return app;
 }

@@ -8,6 +8,8 @@
     "test": "node --test"
   },
   "dependencies": {
+    "@decidere/engine": "*",
+    "@decidere/rules": "*",
     "@decidere/schema": "*",
     "fastify": "^5.12.8"
   }

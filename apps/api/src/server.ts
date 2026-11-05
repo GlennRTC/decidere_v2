@@ -1,6 +1,8 @@
-// Config: PORT (default 3000) and API_HOST (default 127.0.0.1), read from the environment.
+// Config (environment): PORT (default 3000), API_HOST (default 127.0.0.1),
+// ALLOWED_SOURCES (comma-separated, default sim-1), RULES_DIR (default knowledge/rules).
 import { buildApp } from "./app.ts";
-import { readHost, readPort } from "./config.ts";
+import { readAllowedSources, readHost, readPort } from "./config.ts";
+import { DEFAULT_RULES_DIR, loadActiveRules } from "./rules.ts";
 
 // Log only the error's name and code, never its message or stack (same convention as app.ts).
 const errInfo = (err: unknown): { name?: string; code?: unknown } => {
@@ -9,9 +11,29 @@ const errInfo = (err: unknown): { name?: string; code?: unknown } => {
 };
 
 async function main(): Promise<void> {
-  const port = readPort(process.env);
-  const host = readHost(process.env);
-  const app = buildApp({ log: true });
+  let port: number;
+  let host: string;
+  let allowedSources: ReturnType<typeof readAllowedSources>;
+  try {
+    port = readPort(process.env);
+    host = readHost(process.env);
+    allowedSources = readAllowedSources(process.env);
+  } catch {
+    // The config messages are fixed strings, but a raw stack would print paths.
+    console.error(JSON.stringify({ msg: "invalid configuration" }));
+    process.exit(1);
+  }
+  // Rules load before listening; a bad rule set aborts startup (name/code only logged).
+  let rules: ReturnType<typeof loadActiveRules>;
+  try {
+    rules = loadActiveRules(process.env.RULES_DIR || DEFAULT_RULES_DIR);
+  } catch (err) {
+    console.error(
+      JSON.stringify({ msg: "rules failed to load", err: errInfo(err) }),
+    );
+    process.exit(1);
+  }
+  const app = buildApp({ log: true, rules, allowedSources });
 
   const shutdown = (): void => {
     setTimeout(() => process.exit(1), 5000).unref();
