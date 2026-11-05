@@ -645,11 +645,11 @@
         "Inválido devuelve 4xx estructurado",
         "El runner cuenta inválidos y válidos; cobertura reportada"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 14. Parte de F010. La cobertura se contabiliza en el runner (F050); el contador persistido llega con la persistencia. Review clinico F036: el contador por codigo de error debe cubrir fallos que no pasan por el handler (clientError, cortes)."
+      "notes": "F041 passing para el lado API (2026-11-04, rama feat/f041-invalid-message): matriz de 12 rechazos fijada con canarios y rechazos a nivel de socket con cuerpo estructurado. El criterio \"el runner cuenta invalidos y validos; cobertura reportada\" queda como HANDOFF a F050 (el runner no existe); ver ADR-008 \"Conteo de rechazos\". | Orden 14. Parte de F010. La cobertura se contabiliza en el runner (F050); el contador persistido llega con la persistencia. Review clinico F036: el contador por codigo de error debe cubrir fallos que no pasan por el handler (clientError, cortes)."
     },
     {
       "id": "F042",

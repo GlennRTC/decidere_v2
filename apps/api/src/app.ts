@@ -82,6 +82,39 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
         .header("x-request-id", request.id)
         .send(errorBody(code, request.id));
     },
+    // Socket-level rejections (malformed request line, oversized headers) never reach
+    // a route handler: answer with the same structured body and count them in the log.
+    clientErrorHandler: (error, socket) => {
+      try {
+        // Only HTTP parse errors are rejections. Transport errors (ECONNRESET,
+        // EPIPE, ETIMEDOUT, ...) just close the socket: no response, no count.
+        const code = safeField(() => (error as { code?: unknown }).code) ?? "";
+        if (!code.startsWith("HPE_") && !code.startsWith("ERR_HTTP_")) {
+          socket.destroy();
+          return;
+        }
+        const id = randomUUID();
+        // Parse errors, header overflow (431) and header timeout (408) are all
+        // answered 400 bad_request: the error-code list is closed (ADR-008).
+        app.log.warn(
+          {
+            request_id: id,
+            apiError: { code: "bad_request", status: STATUS.bad_request },
+          },
+          "request failed",
+        );
+        if (socket.writable && !socket.destroyed) {
+          const body = JSON.stringify(errorBody("bad_request", id));
+          socket.end(
+            `HTTP/1.1 400 Bad Request\r\ncontent-type: application/json\r\ncontent-length: ${Buffer.byteLength(body)}\r\ncache-control: no-store\r\nx-request-id: ${id}\r\nconnection: close\r\n\r\n${body}`,
+          );
+        } else {
+          socket.destroy();
+        }
+      } catch {
+        socket.destroy();
+      }
+    },
     // Never trust an inbound request id; always generate one.
     requestIdHeader: false,
     genReqId: () => randomUUID(),
