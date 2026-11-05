@@ -9,7 +9,7 @@ import {
 import { defineRuleSet, evaluateRuleSet } from "./index.ts";
 import type { Severity } from "./policy.ts";
 import { classify, PolicyError } from "./policy.ts";
-import type { Input } from "./types.ts";
+import type { Input, Rule } from "./types.ts";
 
 // Synthetic mechanics only: thresholds are not the clinical rule.
 const cond = (
@@ -19,7 +19,7 @@ const cond = (
   value: number,
 ) => ({ id, label: `label ${id}`, variable, op, value, unit: "u" });
 
-const qsofa = {
+const qsofa: Rule = {
   id: "t.qsofa",
   conditions: [
     cond("a", "resp_rate", ">=", 22),
@@ -28,24 +28,24 @@ const qsofa = {
   ],
   combine: { atLeast: { n: 2, of: ["a", "b", "c"] } },
 };
-const allRule = {
+const allRule: Rule = {
   id: "t.all",
   conditions: [cond("a", "resp_rate", ">=", 22), cond("b", "sbp", "<=", 100)],
   combine: { all: ["a", "b"] },
 };
-const watchRule = {
+const watchRule: Rule = {
   id: "t.watch",
   conditions: [cond("a", "heart_rate", ">", 90)],
   combine: "a",
 };
-const bandless = {
+const bandless: Rule = {
   id: "t.bandless",
   conditions: [cond("a", "no_such_band", ">", 1)],
   combine: "a",
 };
 
 const run = (
-  rules: (typeof qsofa)[],
+  rules: Rule[],
   sev: [string, Severity][],
   input: Input,
   tau?: number,
