@@ -1,4 +1,4 @@
-import type { ClassDecision } from "./policy.ts";
+import type { ClassDecision, ClassId } from "./policy.ts";
 import { PolicyError } from "./policy.ts";
 import type { RuleSet, RuleSetResult } from "./types.ts";
 
@@ -151,4 +151,15 @@ function compute(
     provisional: true,
     version: CERTAINTY_VERSION,
   };
+}
+
+// F048 (ADR-015): below tau, watch and no_alert go to review; critical never moves.
+export function routeByCertainty(
+  cls: ClassId,
+  certainty: Pick<CertaintyBreakdown, "below_tau">,
+): { class: ClassId; routed_from: ClassId | null } {
+  const routed = certainty.below_tau && (cls === "watch" || cls === "no_alert");
+  return routed
+    ? { class: "review", routed_from: cls }
+    : { class: cls, routed_from: null };
 }

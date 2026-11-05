@@ -2,6 +2,7 @@ export type { CertaintyBreakdown } from "./certainty.ts";
 export {
   CERTAINTY_VERSION,
   computeCertainty,
+  routeByCertainty,
   TAU_PROVISIONAL,
   VARIABLE_BANDS,
 } from "./certainty.ts";
