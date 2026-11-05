@@ -9,12 +9,8 @@ import {
 import type { LoadedRuleSet } from "@decidere/rules";
 import { currentInstances, type Message } from "@decidere/schema";
 
-// Replaced by the F042 canonical catalog.
-export const CANONICAL_VARIABLES: ReadonlySet<string> = new Set([
-  "resp_rate",
-  "sbp",
-  "gcs",
-]);
+// Re-exported so existing imports keep working; the source is the F042 catalog.
+export { CANONICAL_VARIABLES } from "@decidere/schema";
 
 export const CLASS_NAMES: Record<ClassId, string> = {
   critical: "crítico",
