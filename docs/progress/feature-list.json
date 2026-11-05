@@ -737,7 +737,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 21. Parte de F008. Handoff de F045 (ADR-013): la certeza por criterios no cambia la clase; que falte paco2/bands_pct impide sin alerta por la política de clase (ADR-010 punto 5), decisión previa a activar SIRS. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation. | F047 passing (sesión 19) = implementado y probado, PROVISIONAL y SIN validación clínica: bandas, TAU_PROVISIONAL=0.5 y semántica de requires_confirmation pendientes del clínico (ADR-014, revisión de IA no clínica). Un caso sin alerta con certeza 1.0 no significa sepsis descartada."
+      "notes": "Orden 21. Parte de F008. Handoff de F045 (ADR-013): la certeza por criterios no cambia la clase; que falte paco2/bands_pct impide sin alerta por la política de clase (ADR-010 punto 5), decisión previa a activar SIRS. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation. | F047 passing (sesión 19) = implementado y probado, PROVISIONAL y SIN validación clínica: bandas, TAU_PROVISIONAL=0.5 y semántica de requires_confirmation pendientes del clínico (ADR-014, revisión de IA no clínica). Un caso sin alerta no significa sepsis descartada; hoy su certeza máxima es 0.5 (GCS limitado a 0.5). Aclaración del criterio 3: un crítico marcado conserva su clase y NO se reenruta (ADR-003); enviarlo a la cola es F048/F016. El estado passing es provisional (certainty-provisional-2)."
     },
     {
       "id": "F048",
@@ -752,7 +752,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 22. Parte de F008. Handoff de F045 (ADR-013): decidir el enrutamiento a revisión al activar SIRS (una revisión pesa más que una vigilancia). | Handoff F047 (ADR-014): τ por variable de entorno con validación 0<τ<=1 al arrancar (τ<=0 desactivaría la bandera en silencio); un no crítico bajo τ va a revisión clínica; consume certainty.below_tau; el orden del dashboard debe mantener arriba al crítico con requires_confirmation (test explícito)."
+      "notes": "Orden 22. Parte de F008. Handoff de F045 (ADR-013): decidir el enrutamiento a revisión al activar SIRS (una revisión pesa más que una vigilancia). | Handoff F047 (ADR-014): τ por variable de entorno con validación 0<τ<=1 al arrancar (τ<=0 desactivaría la bandera en silencio); un no crítico bajo τ va a revisión clínica; consume certainty.below_tau; el orden del dashboard debe mantener arriba al crítico con requires_confirmation (test explícito). | Antes de consumir below_tau, revalidar que un caso qSOFA normal completo tiene certeza 0.5 = borde de τ; validar 0 < τ <= 1; el crítico marcado queda arriba del orden."
     },
     {
       "id": "F049",
