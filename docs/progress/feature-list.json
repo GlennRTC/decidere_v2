@@ -450,7 +450,7 @@
       "priority": "P2",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Doc de uso previsto en F065. Esta feature queda para la clasificación regulatoria (post-MVP, con abogado/regulatorio). | Notas previas: No constituye revisión legal formal."
+      "notes": "Doc de uso previsto en F065. Esta feature queda para la clasificación regulatoria (post-MVP, con abogado/regulatorio). | Notas previas: No constituye revisión legal formal. | Lista consolidada de lo que debe revisar un clínico antes de uso fuera de la demo: docs/CLINICAL_REVIEW_PENDING.md."
     },
     {
       "id": "F029",
