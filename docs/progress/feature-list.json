@@ -733,11 +733,11 @@
         "Un crítico con certeza baja conserva la clase y recibe la bandera 'requiere confirmación' además de ir a revisión",
         "Test explícito de que ningún caso crítico baja a sin alerta por datos faltantes"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 21. Parte de F008. Handoff de F045 (ADR-013): la certeza por criterios no cambia la clase; que falte paco2/bands_pct impide sin alerta por la política de clase (ADR-010 punto 5), decisión previa a activar SIRS. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation."
+      "notes": "Orden 21. Parte de F008. Handoff de F045 (ADR-013): la certeza por criterios no cambia la clase; que falte paco2/bands_pct impide sin alerta por la política de clase (ADR-010 punto 5), decisión previa a activar SIRS. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation. | F047 passing (sesión 19) = implementado y probado, PROVISIONAL y SIN validación clínica: bandas, TAU_PROVISIONAL=0.5 y semántica de requires_confirmation pendientes del clínico (ADR-014, revisión de IA no clínica). Un caso sin alerta con certeza 1.0 no significa sepsis descartada."
     },
     {
       "id": "F048",
@@ -752,7 +752,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 22. Parte de F008. Handoff de F045 (ADR-013): decidir el enrutamiento a revisión al activar SIRS (una revisión pesa más que una vigilancia)."
+      "notes": "Orden 22. Parte de F008. Handoff de F045 (ADR-013): decidir el enrutamiento a revisión al activar SIRS (una revisión pesa más que una vigilancia). | Handoff F047 (ADR-014): τ por variable de entorno con validación 0<τ<=1 al arrancar (τ<=0 desactivaría la bandera en silencio); un no crítico bajo τ va a revisión clínica; consume certainty.below_tau; el orden del dashboard debe mantener arriba al crítico con requires_confirmation (test explícito)."
     },
     {
       "id": "F049",
@@ -767,7 +767,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 26. Parte de F008. Depende de F018."
+      "notes": "Orden 26. Parte de F008. Depende de F018. | Handoff F047 (ADR-014): las bandas por variable (VARIABLE_BANDS) y TAU_PROVISIONAL son entradas de calibración."
     },
     {
       "id": "F050",
@@ -1050,6 +1050,38 @@
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
       "notes": "Hallado en la revisión de F042; candidato a ir con F043."
+    },
+    {
+      "id": "F069",
+      "title": "Chequeo de plausibilidad de valores clínicos en schema/mapper",
+      "description": "Hoy resp_rate 300 pasa y da margen 1 en la certeza; un valor fisiológicamente imposible debe rechazarse o marcarse.",
+      "acceptance_criteria": [
+        "Rangos de plausibilidad por variable canónica definidos y citados, revisados por el clínico",
+        "Un valor fuera de rango no produce certeza alta (se rechaza con validation_failed o se marca) sin reflejar el valor",
+        "Test con resp_rate 300"
+      ],
+      "status": "failing",
+      "priority": "P2",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": true,
+      "notes": "Hallado en la revisión clínica de F047 (hallazgo 6; ADR-014). Implica posible cambio de contrato: pedir aprobación."
+    },
+    {
+      "id": "F070",
+      "title": "confirmation_reason de vocabulario cerrado y textos de UI para certeza y requiere confirmación",
+      "description": "Dar al médico el motivo de la bandera y rotular la certeza sin falso consuelo ni sugerir probabilidad o IA.",
+      "acceptance_criteria": [
+        "confirmation_reason con vocabulario cerrado (low_margin | low_completeness) en la respuesta, sin valores clínicos",
+        "Etiqueta 'certeza de evaluación de la regla' (no probabilidad, no porcentaje, no 'confianza') y texto de requiere confirmación: confirmar a la cabecera, tratar como crítico hasta entonces",
+        "Para sin alerta se muestra 'qSOFA no excluye sepsis'",
+        "Aviso junto a la certeza: 'Demo con datos sintéticos; no aprobado para uso clínico; conformidad con criterios publicados, validación clínica pendiente'; provisional visible",
+        "Textos revisados por el clínico y por /clinical-review"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": true,
+      "requires_clinical_data_contract": true,
+      "notes": "Hallado en la revisión clínica de F047 (hallazgos 1, 2 y 10; ADR-014). Agrega un campo a la respuesta (cambio de contrato): pedir aprobación. Relacionado con F062 y ADR-010 pregunta 9."
     }
   ]
 }
