@@ -25,8 +25,14 @@ if [ -z "${SKIP_INSTALL:-}" ]; then npm ci; fi
 echo "== 2. environment =="
 # Variable names live in .env.example; values are never printed.
 if [ -f .env.example ] && [ ! -f .env ]; then
-  echo "Missing .env -- copy .env.example to .env and fill in the values (never commit it)." >&2
-  exit 1
+  cp .env.example .env
+  echo "Created .env from .env.example (safe defaults, no secrets). Edit it for local overrides; never commit it."
+fi
+if [ -f .env ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . ./.env
+  set +a
 fi
 
 echo "== 3. start API =="
