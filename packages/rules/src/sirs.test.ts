@@ -28,7 +28,7 @@ test("SIRS is a pending watch rule cited to the primary paper", () => {
   });
   assert.equal(
     meta?.citation.source,
-    "Bone RC, et al. Definitions for sepsis and organ failure (ACCP/SCCM Consensus Conference). Chest. 1992. doi:10.1378/chest.101.6.1644 (PMID 1303622)",
+    "Bone RC, et al. Definitions for sepsis and organ failure and guidelines for the use of innovative therapies in sepsis. Chest. 1992. doi:10.1378/chest.101.6.1644 (PMID 1303622)",
   );
   // Open item for the clinician: the primary criteria table was not read directly.
   assert.equal(

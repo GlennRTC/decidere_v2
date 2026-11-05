@@ -3,7 +3,7 @@ id: sepsis.sirs.v1
 title: "SIRS: criterios de respuesta inflamatoria sistémica"
 severity: watch
 citation:
-  source: "Bone RC, et al. Definitions for sepsis and organ failure (ACCP/SCCM Consensus Conference). Chest. 1992. doi:10.1378/chest.101.6.1644 (PMID 1303622)"
+  source: "Bone RC, et al. Definitions for sepsis and organ failure and guidelines for the use of innovative therapies in sepsis. Chest. 1992. doi:10.1378/chest.101.6.1644 (PMID 1303622)"
   version: "Chest 1992;101(6):1644-1655; criteria table not read directly"
   section: "SIRS criteria; cross-checked against secondary sources only: arXiv 1408.6553 and R package cliot sirs_sepsis_criteria"
 clinical_approval:

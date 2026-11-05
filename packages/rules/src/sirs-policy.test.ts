@@ -120,6 +120,19 @@ test("missing paco2 and bands_pct send a clean patient to review", () => {
   assert.equal(decision.reason_code, "all_criteria_clear");
 });
 
+test("all-normal minus paco2 or minus bands_pct is review, not no_alert", () => {
+  const { paco2: _p, ...noPaco2 } = normal;
+  const { bands_pct: _b, ...noBands } = normal;
+  for (const input of [noPaco2, noBands]) {
+    const { decision } = run(input);
+    assert.equal(decision.class, "review");
+    assert.equal(decision.reason_code, "incomplete_for_no_alert");
+  }
+  // A false rule with any unknown leaf is still review, even with RR above 20.
+  const { decision } = run({ ...noPaco2, resp_rate: 22 });
+  assert.equal(decision.class, "review");
+});
+
 test("a single criterion yields no alert under the current policy", () => {
   // The policy only grants partial-criteria vigilancia to critical rules;
   // whether a watch rule should too is an activation decision.
