@@ -132,7 +132,12 @@ test("logs carry no query string, header values or remote address", async () => 
       headers: { authorization: "Bearer xyz789" },
     });
     const logged = text();
-    assert.ok(logged.includes("/nope"), "path should be logged");
+    // F011: an unmatched path can hold client-chosen text, so it is logged as a marker.
+    assert.ok(logged.includes("<unmatched>"), "marker should be logged");
+    assert.ok(
+      !logged.includes("/nope"),
+      "raw unmatched path must not be logged",
+    );
     assert.ok(!logged.includes("abc123"));
     assert.ok(!logged.includes("xyz789"));
     assert.ok(!logged.includes("remoteAddress"));

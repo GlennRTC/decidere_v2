@@ -29,10 +29,14 @@ const safeField = (read: () => unknown) => {
   }
 };
 
-const errSerializer = (err: unknown) => ({
+export const errSerializer = (err: unknown) => ({
   name: safeField(() => (err as { name?: unknown }).name),
   code: safeField(() => (err as { code?: unknown }).code),
 });
+
+// Registered route pattern, or a marker for 404s (the raw path can hold identifiers).
+const routeOf = (req: { routeOptions?: { url?: string } }) =>
+  req.routeOptions?.url ?? "<unmatched>";
 
 const pathOf = (url: string | undefined) => (url ?? "").split("?")[0];
 
@@ -66,7 +70,11 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
             // Only method and path: no query string, headers or remote address.
             // Typed as a full error by pino; intentionally narrower (no message/stack).
             err: errSerializer as unknown as (err: FastifyError) => never,
-            req: (req) => ({ method: req.method, path: pathOf(req.url) }),
+            req: (req) => ({
+              method: req.method,
+              // Never client-chosen text: a registered route or a fixed marker.
+              path: routeOf(req),
+            }),
           },
         }
       : false,

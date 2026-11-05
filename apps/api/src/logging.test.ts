@@ -223,3 +223,35 @@ test("log audit: /health writes no request lines", async () => {
   await app.inject({ method: "GET", url: "/health" });
   assert.equal(auditLogLines(logs(), FORBIDDEN).lines, 0);
 });
+
+for (const path of [
+  "/nope/sentinelq7",
+  "/v1/messages/sentinelq7",
+  "/v1/sentinelq7/x",
+]) {
+  test(`log audit: a sentinel in the path ${path} is logged as <unmatched>`, async () => {
+    const { app, logs } = setup();
+    const res = await app.inject({ method: "GET", url: path });
+    assert.equal(res.statusCode, 404);
+    const audit = auditLogLines(logs(), FORBIDDEN);
+    assert.ok(audit.lines > 0);
+    assert.deepEqual(audit.problems, []);
+    assert.ok(logs().includes('"path":"<unmatched>"'));
+  });
+}
+
+test("log audit: sentinel headers never reach the log", async () => {
+  const { app, logs } = setup();
+  await app.inject({
+    method: "POST",
+    url: "/v1/messages",
+    headers: {
+      "content-type": "application/json",
+      authorization: "Bearer sentinelq7",
+      "x-forwarded-for": "sentinelq7",
+      cookie: "sid=sentinelq7",
+    },
+    payload: J(message(SENTINEL_VALUES)),
+  });
+  assert.deepEqual(auditLogLines(logs(), FORBIDDEN).problems, []);
+});

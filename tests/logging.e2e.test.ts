@@ -94,3 +94,33 @@ test("a real server process logs only approved fields and no sentinel", async ()
   assert.match(stdout, /Server listening at/);
   assert.match(stdout, /"msg":"message interpreted"/);
 });
+
+for (const [name, env, leak] of [
+  ["invalid configuration", { ALLOWED_SOURCES: "Bad Source!" }, "Bad Source"],
+  [
+    "unreadable rules directory",
+    { RULES_DIR: "/nonexistent/sentinelq7" },
+    "sentinelq7",
+  ],
+] as const) {
+  test(`startup failure (${name}) writes only approved lines to stderr`, async () => {
+    const { ALLOWED_SOURCES: _a, RULES_DIR: _r, ...inherited } = process.env;
+    const child = spawn("node", [serverPath], {
+      env: { ...inherited, PORT: String(await freePort()), ...env },
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+    children.push(child);
+    let stderr = "";
+    child.stderr?.on("data", (d) => {
+      stderr += String(d);
+    });
+    const code = await new Promise<number | null>((r) =>
+      child.once("exit", (c) => r(c)),
+    );
+    assert.notEqual(code, 0);
+    const audit = auditLogLines(stderr, [leak]);
+    assert.ok(audit.lines > 0);
+    assert.deepEqual(audit.problems, []);
+    assert.ok(!stderr.includes("    at "), "no stack trace");
+  });
+}

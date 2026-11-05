@@ -29,8 +29,47 @@ export const ALLOWED_MESSAGES: ReadonlySet<string> = new Set([
   "message interpreted",
   "request failed",
   "request error",
+  "rules failed to load",
+  "invalid configuration",
+  "unhandled rejection",
+  "uncaught exception",
+  "shutdown failed",
+  "listen failed",
 ]);
-const LISTEN_LINE = /^Server listening at http:\/\/127\.0\.0\.1:\d+$/;
+
+const UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const int = (v: unknown) => Number.isInteger(v);
+// Value rules for approved paths: the field name alone is not a contract.
+const VALUE_RULES: Record<string, (v: unknown) => boolean> = {
+  level: int,
+  time: int,
+  responseTime: (v) => typeof v === "number" && Number.isFinite(v),
+  message_id: (v) => typeof v === "string" && UUID.test(v),
+  request_id: (v) => typeof v === "string" && UUID.test(v),
+  "results[].case_id": (v) => typeof v === "string" && UUID.test(v),
+  "results[].class": (v) =>
+    ["crítico", "vigilancia", "sin alerta", "revisión clínica"].includes(
+      v as string,
+    ),
+  "results[].certainty": (v) => v === null || typeof v === "number",
+  "results[].rules_fired[]": (v) =>
+    typeof v === "string" && /^[a-z0-9][a-z0-9._-]{0,63}$/.test(v),
+  "req.method": (v) => typeof v === "string" && /^[A-Z]{3,7}$/.test(v),
+  // Only a registered route or the fixed marker; never client-chosen text.
+  "req.path": (v) =>
+    ["/v1/messages", "/health", "<unmatched>"].includes(v as string),
+  "res.statusCode": int,
+  historical_ignored: int,
+  "apiError.code": (v) => typeof v === "string" && /^[a-z_]{1,40}$/.test(v),
+  "apiError.status": int,
+  "apiError.count": int,
+  "err.name": (v) =>
+    typeof v === "string" && /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(v),
+  "err.code": (v) => typeof v === "string" && /^[A-Za-z0-9_]{1,64}$/.test(v),
+};
+// Fastify's own listen line (any interface) plus the fixed messages of server.ts.
+const LISTEN_LINE = /^Server listening at http:\/\/[0-9a-f.:[\]]+:\d+$/;
 
 // Numeric leaves that are legitimately arbitrary numbers.
 const NUMERIC_EXEMPT = new Set(["time", "responseTime"]);
@@ -82,6 +121,8 @@ export function auditLogLines(
         problems.push(`unknown path: ${path}`);
         seen.add(path);
       }
+      const rule = VALUE_RULES[path];
+      if (rule && !rule(value)) problems.push(`bad value shape in ${path}`);
       if (path === "msg") {
         const msg = String(value);
         if (!ALLOWED_MESSAGES.has(msg) && !LISTEN_LINE.test(msg))
