@@ -1045,7 +1045,7 @@
         "Una condición con unidad distinta al ucum del catálogo falla la carga",
         "Test con la regla qSOFA y una unidad alterada"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,

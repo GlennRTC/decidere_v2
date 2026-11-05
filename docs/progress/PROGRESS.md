@@ -198,3 +198,9 @@
 **Cambio de precedencia (refactor de la Tarea 2, `packages/rules/src/files.ts`):** con varios archivos inválidos, el error que se reporta cruzando archivos puede diferir del orden anterior del cargador de reglas.
 **Pregunta clínica abierta:** valores convertidos sin redondear: 13,3 kPa da ~99,76 mm[Hg] y dispara qSOFA `sbp <= 100`; decidir si se redondea y cuánto.
 **Pendiente:** deprecación de 1.0 (sin decidir); `code` de hasta 32 caracteres podría llevar texto libre (solo se refleja en `unmapped`); F068 (Tarea 6).
+
+## 2026-11-05 — Sesión 16 (F068: unidades de condiciones vs catálogo)
+**Feature(s) trabajada(s):** F068 — `loadActiveRules` (`apps/api/src/rules.ts`), `rules-units.test.ts`
+**Qué se hizo:** tras `loadRuleSet`, cada condición debe tener `unit` igual al `ucum` del catálogo de su variable; si no, error `unit_mismatch` con mensaje fijo (sin variable ni unidad). `server.ts` lo registra como `rules failed to load` con solo nombre y código.
+**Verificación realizada:** RED sin el chequeo; `npm run verify` exit=0 (api 181); `scan:phi` "scanned 48 files, skipped 107, hits 0, errors 0".
+**Estado al cerrar:** F068 `passing`. Rama `feat/f043-local-code-mapper`, sin push.
