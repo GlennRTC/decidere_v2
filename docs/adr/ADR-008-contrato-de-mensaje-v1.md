@@ -78,3 +78,10 @@
 - **Sin contador en el proceso:** la API no guarda estado entre peticiones (AGENTS.md). El contador persistido por código llega con F055.
 - **Matriz fijada con tests** (`ingest-invalid.test.ts`): 12 clases de rechazo a nivel de ruta (400, 403, 404, 413, 415, 422) con un canario cada una; ninguno aparece en cuerpo, cabeceras ni logs. El 500 está cubierto en `ingest.test.ts`. A nivel de socket solo se probó un canario en la línea de petición; falta uno en cabeceras sobredimensionadas. `forbidden` (403) está en `errors.ts` y en ADR-008, pero no en la lista cerrada de AGENTS.md: pendiente alinear AGENTS.md (cambio de documento de proyecto, requiere aprobación).
 
+## Campos de log (F011, 2026-11-05)
+- **Conjunto aprobado:** el de AGENTS.md "Logging" (campos clínicos más operativos). Los nombres de campo, aplanados con `[]` para arreglos, viven en `ALLOWED_LOG_PATHS` de `apps/api/src/testing/log-audit.ts`; los mensajes permitidos son un conjunto cerrado más la línea de arranque de Fastify.
+- **Método:** `logging.test.ts` ejecuta 11 clases de petición (éxito, éxito con centinela en la query, todo `null`, 422 por valor y por campo desconocido, 400, 403, 413, 415, 404 con query, 500), una petición con basura a nivel de socket y `/health`, con centinelas numéricos y de texto (valores clínicos, nombre de campo desconocido, `source`, `instance_id`, nombres de variables y unidades). `tests/logging.e2e.test.ts` repite la comprobación sobre la salida estándar de un proceso `server.ts` real. Una mutación (registrar `source` en la línea de éxito) hizo fallar 3 tests.
+- **Cuerpos de error:** en las respuestas 4xx/5xx se comprueba también que ninguna clave ni valor reproduce un centinela.
+- **Cambio:** se quitaron `pid` y `hostname` de las líneas (`base: null`); no son clínicos y no están en el conjunto aprobado.
+- **Abierto (no lo cierra F011):** destino, retención, control de acceso y residencia de los logs en Vercel (F034/F027); opinión legal sobre si `message_id` y `case_id` logueados son datos personales (Ley 1581).
+
