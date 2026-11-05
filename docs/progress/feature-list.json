@@ -176,11 +176,11 @@
         "Los errores expuestos al cliente tampoco reflejan valores recibidos",
         "Los campos logueados son exactamente los definidos en AGENTS.md"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 15. Agregar test canario con valor centinela en logs y errores."
+      "notes": "F011 passing (2026-11-05, rama feat/f011-logging-no-phi): auditor de logs con conjunto aprobado, 11 clases de peticion + socket + /health con centinelas, e2e sobre un proceso real; AGENTS.md define los campos. Abiertos: destino/retencion/residencia de logs (F034/F027) y opinion legal. | Orden 15. Agregar test canario con valor centinela en logs y errores."
     },
     {
       "id": "F012",

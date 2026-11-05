@@ -1,14 +1,11 @@
 // Config (environment): PORT (default 3000), API_HOST (default 127.0.0.1),
 // ALLOWED_SOURCES (comma-separated, default sim-1), RULES_DIR (default knowledge/rules).
-import { buildApp } from "./app.ts";
+import { buildApp, errSerializer } from "./app.ts";
 import { readAllowedSources, readHost, readPort } from "./config.ts";
 import { DEFAULT_RULES_DIR, loadActiveRules } from "./rules.ts";
 
-// Log only the error's name and code, never its message or stack (same convention as app.ts).
-const errInfo = (err: unknown): { name?: string; code?: unknown } => {
-  const { name, code } = (err ?? {}) as { name?: string; code?: unknown };
-  return { name, code };
-};
+// Same bounded serializer as the request logs: name and code only, strings, 64 chars.
+const errInfo = errSerializer;
 
 async function main(): Promise<void> {
   let port: number;
@@ -47,6 +44,10 @@ async function main(): Promise<void> {
   };
   process.on("SIGTERM", shutdown);
   process.on("SIGINT", shutdown);
+  process.on("uncaughtException", (err) => {
+    app.log.error({ err: errInfo(err) }, "uncaught exception");
+    process.exit(1);
+  });
   process.on("unhandledRejection", (err) => {
     app.log.error({ err: errInfo(err) }, "unhandled rejection");
     process.exit(1);

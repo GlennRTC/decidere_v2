@@ -8,6 +8,7 @@ import Fastify, {
 } from "fastify";
 import { codeFor, errorBody, STATUS } from "./errors.ts";
 import { type IngestDeps, registerIngest } from "./ingest.ts";
+import { isApprovedMessage } from "./log-messages.ts";
 
 export type BuildAppOptions = {
   log?: boolean;
@@ -29,10 +30,14 @@ const safeField = (read: () => unknown) => {
   }
 };
 
-const errSerializer = (err: unknown) => ({
+export const errSerializer = (err: unknown) => ({
   name: safeField(() => (err as { name?: unknown }).name),
   code: safeField(() => (err as { code?: unknown }).code),
 });
+
+// Registered route pattern, or a marker for 404s (the raw path can hold identifiers).
+const routeOf = (req: { routeOptions?: { url?: string } }) =>
+  req.routeOptions?.url ?? "<unmatched>";
 
 const pathOf = (url: string | undefined) => (url ?? "").split("?")[0];
 
@@ -41,6 +46,8 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({
     logger: logging
       ? {
+          // No pid/hostname: infrastructure identifiers are not in the approved log fields (F011).
+          base: null,
           hooks: {
             // pino fills msg from err.message when no message is given; Fastify does
             // that (e.g. "Reply was already sent ... in <raw url>"). Use a fixed one.
@@ -56,6 +63,16 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
                 const obj = first instanceof Error ? { err: first } : first;
                 return method.apply(this, [obj, "request error"] as never);
               }
+              // Library lines (drain refusal, "Reply was already sent ... <url>") can
+              // carry client text or unlisted wording: keep only approved messages.
+              if (typeof first === "string") {
+                return method.apply(this, [
+                  isApprovedMessage(first) ? first : "request error",
+                ] as never);
+              }
+              if (typeof args[1] === "string" && !isApprovedMessage(args[1])) {
+                return method.apply(this, [first, "request error"] as never);
+              }
               return method.apply(this, args);
             },
           },
@@ -64,7 +81,11 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
             // Only method and path: no query string, headers or remote address.
             // Typed as a full error by pino; intentionally narrower (no message/stack).
             err: errSerializer as unknown as (err: FastifyError) => never,
-            req: (req) => ({ method: req.method, path: pathOf(req.url) }),
+            req: (req) => ({
+              method: req.method,
+              // Never client-chosen text: a registered route or a fixed marker.
+              path: routeOf(req),
+            }),
           },
         }
       : false,
