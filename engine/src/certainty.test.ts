@@ -102,6 +102,21 @@ describe("margin", () => {
     assert.equal(q({ resp_rate: 24 }).out.margin, 0.5);
     assert.equal(q({ resp_rate: 60 }).out.margin, 1);
   });
+  it("margin for gcs is measured to the half-integer boundary", () => {
+    const gcsRule: Rule = {
+      id: "t.gcs",
+      conditions: [cond("c", "gcs", "<", 15)],
+      combine: "c",
+    };
+    const m = (gcs: number) =>
+      run([gcsRule], [["t.gcs", "watch"]], { gcs }).out.margin;
+    assert.equal(m(15), 0.5);
+    assert.equal(m(14), 0.5);
+    assert.equal(m(13), 1);
+  });
+  it("leaves a non-integer variable unchanged at the threshold", () => {
+    assert.equal(q({ resp_rate: 22 }).out.margin, 0);
+  });
   it("is the minimum over known leaves and ignores unknown leaves", () => {
     assert.equal(q({ resp_rate: 26, sbp: 95 }).out.margin, 0.5);
     assert.equal(q({ resp_rate: 26 }).out.margin, 1);

@@ -69,14 +69,17 @@ describe("certainty never degrades a critical", () => {
 
   it("no qSOFA combination with a reachable critical is no_alert", () => {
     assert.equal(combinations.length, 27);
+    let n = 0;
     for (const input of combinations) {
       const { decision } = decide(input);
+      if (decision.class === "critical") n++;
       assert.ok(
         decision.highest_reachable_class !== "critical" ||
           decision.class !== "no_alert",
         `reachable critical decided no_alert for ${JSON.stringify(input)}`,
       );
     }
+    assert.ok(n > 0);
   });
 
   it("a decided critical is unchanged by computeCertainty", () => {

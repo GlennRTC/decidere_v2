@@ -4,7 +4,7 @@ import type { RuleSet, RuleSetResult } from "./types.ts";
 
 // PROVISIONAL, team-defined certainty (F047, ADR-003): min of three components in [0,1].
 // Pure: no I/O, no clock. Never changes the decided class; only flags a critical below tau.
-export const CERTAINTY_VERSION = "certainty-provisional-1";
+export const CERTAINTY_VERSION = "certainty-provisional-2";
 export const TAU_PROVISIONAL = 0.5;
 
 // Distance from a threshold, in the variable's unit, that counts as full margin.
@@ -19,6 +19,18 @@ export const VARIABLE_BANDS: Readonly<Record<string, number>> = Object.freeze({
   paco2: 4, // mm[Hg]
   bands_pct: 2, // %
 });
+
+// PROVISIONAL: variables on an integer scale. Their margin is measured to the
+// half-integer boundary between the last true and first false value (F047).
+const INTEGER_SCALE: ReadonlySet<string> = new Set(["gcs"]);
+
+// Boundary between true and false integers: `x < 15` is true up to 14, so 14.5.
+const halfIntegerBoundary = (op: unknown, threshold: number): number =>
+  op === "<" || op === ">="
+    ? threshold - 0.5
+    : op === "<=" || op === ">"
+      ? threshold + 0.5
+      : threshold;
 
 export type CertaintyBreakdown = {
   completeness: number;
@@ -105,13 +117,13 @@ function compute(
       const band = Object.hasOwn(VARIABLE_BANDS, variable)
         ? (VARIABLE_BANDS[variable] as number)
         : 0;
+      const threshold = num(own(e, "threshold"));
+      const edge = INTEGER_SCALE.has(variable)
+        ? halfIntegerBoundary(own(e, "op"), threshold)
+        : threshold;
       const m =
         band > 0
-          ? Math.min(
-              1,
-              Math.abs(num(own(e, "observed")) - num(own(e, "threshold"))) /
-                band,
-            )
+          ? Math.min(1, Math.abs(num(own(e, "observed")) - edge) / band)
           : 0;
       margin = Math.min(margin, m);
     }

@@ -44,7 +44,7 @@ test("response carries the three components, their minimum, tau and the provisio
   assert.equal(c.completeness, 1);
   assert.equal(c.value, Math.min(c.completeness, c.margin, c.conflict));
   assert.equal(c.provisional, true);
-  assert.equal(c.version, "certainty-provisional-1");
+  assert.equal(c.version, "certainty-provisional-2");
   assert.equal(typeof c.tau, "number");
 });
 
@@ -58,6 +58,21 @@ test("a normal complete case is sin alerta and requires_confirmation is false", 
   const r = interpret({ resp_rate: 14, sbp: 120, gcs: 15 });
   assert.equal(r.class, "sin alerta");
   assert.equal(r.requires_confirmation, false);
+  assert.equal(r.certainty.value, 0.5);
+});
+
+test("critical with gcs 15 measured keeps margin 0.5 and is not flagged", () => {
+  const r = interpret({ resp_rate: 30, sbp: 80, gcs: 15 });
+  assert.equal(r.class, "crítico");
+  assert.equal(r.certainty.value, 0.5);
+  assert.equal(r.requires_confirmation, false);
+});
+
+test("critical on the resp_rate threshold is flagged requires_confirmation", () => {
+  const r = interpret({ resp_rate: 22, sbp: 80, gcs: 14 });
+  assert.equal(r.class, "crítico");
+  assert.equal(r.certainty.margin, 0);
+  assert.equal(r.requires_confirmation, true);
 });
 
 test("every DELIVERABLE_VARIABLES entry has a band in VARIABLE_BANDS", () => {
@@ -88,6 +103,10 @@ test("POST /v1/messages returns certainty as an object and the log line carries 
   const body = res.json();
   assert.equal(typeof body.results[0].certainty, "object");
   assert.equal(typeof body.results[0].requires_confirmation, "boolean");
+  assert.equal(
+    body.results[0].requires_confirmation,
+    body.results[0].certainty.requires_confirmation,
+  );
   const line = chunks
     .join("")
     .split("\n")
