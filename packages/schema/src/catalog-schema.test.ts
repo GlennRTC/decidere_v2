@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { VARIABLE_CATALOG } from "./catalog.ts";
 import { validMinimal } from "./fixtures.ts";
+import { MESSAGE_VARIABLES } from "./message.schema.ts";
 import { validateMessage } from "./validate.ts";
 
-const IN_SCHEMA = ["resp_rate", "sbp", "gcs"];
+const IN_SCHEMA = [...MESSAGE_VARIABLES];
 
 function messageWith(variable: string, unit: string) {
   const m = validMinimal();

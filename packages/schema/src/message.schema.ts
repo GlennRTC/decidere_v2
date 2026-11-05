@@ -82,3 +82,11 @@ export const messageSchema = {
     },
   },
 } as const;
+
+// Variables the message contract accepts today (a subset of the F042 catalog
+// until F044 widens the schema). Rules may only reference these.
+export const MESSAGE_VARIABLES: ReadonlySet<string> = new Set(
+  messageSchema.properties.instances.items.properties.variables.items.oneOf.map(
+    (shape) => shape.properties.variable.const,
+  ),
+);

@@ -4,7 +4,11 @@ export {
   CATALOG_VERSION,
   VARIABLE_CATALOG,
 } from "./catalog.ts";
-export { messageSchema, SCHEMA_VERSION } from "./message.schema.ts";
+export {
+  MESSAGE_VARIABLES,
+  messageSchema,
+  SCHEMA_VERSION,
+} from "./message.schema.ts";
 export type {
   Message,
   ValidationCode,

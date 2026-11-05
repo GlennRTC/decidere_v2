@@ -1036,6 +1036,20 @@
       "requires_compliance_review": false,
       "requires_clinical_data_contract": true,
       "notes": "Post-MVP. Amplía el contrato (O2, ACVPU)."
+    },
+    {
+      "id": "F068",
+      "title": "El cargador de reglas compara la unidad de cada condición con el UCUM del catálogo",
+      "description": "Una regla con resp_rate en /h hoy carga sin error; debe fallar cerrado.",
+      "acceptance_criteria": [
+        "Una condición con unidad distinta al ucum del catálogo falla la carga",
+        "Test con la regla qSOFA y una unidad alterada"
+      ],
+      "status": "failing",
+      "priority": "P1",
+      "requires_compliance_review": false,
+      "requires_clinical_data_contract": false,
+      "notes": "Hallado en la revisión de F042; candidato a ir con F043."
     }
   ]
 }
