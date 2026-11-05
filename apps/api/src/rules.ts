@@ -5,7 +5,7 @@ import {
   loadMappingSet,
   loadRuleSet,
 } from "@decidere/rules";
-import { MESSAGE_VARIABLES, VARIABLE_CATALOG } from "@decidere/schema";
+import { DELIVERABLE_VARIABLES, VARIABLE_CATALOG } from "@decidere/schema";
 
 export const DEFAULT_RULES_DIR = fileURLToPath(
   new URL("../../../knowledge/rules/", import.meta.url),
@@ -14,7 +14,7 @@ export const DEFAULT_RULES_DIR = fileURLToPath(
 // Fail closed on variables the schema cannot deliver (a rule that never fires),
 // and: without a severity per rule every POST would end in internal_error.
 export function loadActiveRules(dir: string): LoadedRuleSet {
-  const loaded = loadRuleSet(dir, { variables: MESSAGE_VARIABLES });
+  const loaded = loadRuleSet(dir, { variables: DELIVERABLE_VARIABLES });
   if (
     loaded.meta.length === 0 ||
     loaded.severities.size !== loaded.meta.length
@@ -42,4 +42,4 @@ export const DEFAULT_MAPPINGS_DIR = fileURLToPath(
 );
 
 export const loadActiveMappings = (dir: string): LoadedMappings =>
-  loadMappingSet(dir, { variables: MESSAGE_VARIABLES });
+  loadMappingSet(dir, { variables: DELIVERABLE_VARIABLES });
