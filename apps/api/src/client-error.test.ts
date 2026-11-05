@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { connect } from "node:net";
+import { connect, Socket } from "node:net";
 import { Writable } from "node:stream";
 import { test } from "node:test";
 import { loadRuleSet } from "@decidere/rules";
@@ -101,22 +101,59 @@ test("a valid request split across two TCP writes still gets 200", async () => {
   }
 });
 
-test("the client-error handler survives an already-destroyed socket", async () => {
-  const { app } = await start();
+test("a parse error on an already-destroyed socket does not throw and logs no client text", async () => {
+  const { app, logs } = await start();
   try {
-    const handler =
-      (app.initialConfig as unknown as Record<string, unknown>) &&
-      app.server.listeners("clientError")[0];
-    assert.equal(typeof handler, "function");
-    const { Socket } = await import("node:net");
+    const handler = app.server.listeners("clientError")[0] as (
+      e: Error,
+      s: Socket,
+    ) => void;
     const socket = new Socket();
     socket.destroy();
     assert.doesNotThrow(() =>
-      (handler as (e: Error, s: unknown) => void)(
-        new Error("boom canaryzq9"),
+      handler(
+        Object.assign(new Error("boom canaryzq9"), {
+          code: "HPE_INVALID_METHOD",
+        }),
         socket,
       ),
     );
+    assert.ok(!logs().includes("canaryzq9"));
+  } finally {
+    await app.close();
+  }
+});
+
+for (const code of ["ECONNRESET", "EPIPE", "ETIMEDOUT"]) {
+  test(`transport error ${code} only destroys the socket and logs no rejection`, async () => {
+    const { app, logs } = await start();
+    try {
+      const handler = app.server.listeners("clientError")[0] as (
+        e: Error,
+        s: Socket,
+      ) => void;
+      const socket = new Socket();
+      handler(Object.assign(new Error("canaryzq9"), { code }), socket);
+      assert.equal(socket.destroyed, true);
+      assert.ok(!logs().includes("bad_request"));
+      assert.ok(!logs().includes("canaryzq9"));
+    } finally {
+      await app.close();
+    }
+  });
+}
+
+test("the rejection log line carries the same request_id as the response", async () => {
+  const { app, port, logs } = await start();
+  try {
+    const out = await raw(port, ["GARBAGE\r\n\r\n"]);
+    const id = /x-request-id: ([0-9a-f-]{36})/i.exec(out)?.[1] as string;
+    assert.ok(id);
+    const line = logs()
+      .split("\n")
+      .find((l) => l.includes("bad_request")) as string;
+    assert.equal(JSON.parse(line).request_id, id);
+    assert.equal(JSON.parse(line).level, 40); // warn
   } finally {
     await app.close();
   }

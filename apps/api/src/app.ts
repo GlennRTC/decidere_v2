@@ -86,15 +86,21 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     // a route handler: answer with the same structured body and count them in the log.
     clientErrorHandler: (error, socket) => {
       try {
-        if (
-          safeField(() => (error as { code?: unknown }).code) === "ECONNRESET"
-        ) {
+        // Only HTTP parse errors are rejections. Transport errors (ECONNRESET,
+        // EPIPE, ETIMEDOUT, ...) just close the socket: no response, no count.
+        const code = safeField(() => (error as { code?: unknown }).code) ?? "";
+        if (!code.startsWith("HPE_") && !code.startsWith("ERR_HTTP_")) {
           socket.destroy();
           return;
         }
         const id = randomUUID();
-        app.log.error(
-          { apiError: { code: "bad_request", status: STATUS.bad_request } },
+        // Parse errors, header overflow (431) and header timeout (408) are all
+        // answered 400 bad_request: the error-code list is closed (ADR-008).
+        app.log.warn(
+          {
+            request_id: id,
+            apiError: { code: "bad_request", status: STATUS.bad_request },
+          },
           "request failed",
         );
         if (socket.writable && !socket.destroyed) {
