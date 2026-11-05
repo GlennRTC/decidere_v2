@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readdirSync } from "node:fs";
 import { test } from "node:test";
 import { DELIVERABLE_VARIABLES, VARIABLE_CATALOG } from "@decidere/schema";
 import { loadRuleSet } from "./load.ts";
@@ -89,4 +90,8 @@ test("the active rules directory still holds only qSOFA", () => {
   });
   assert.equal(loaded.ruleSet.length, 1);
   assert.equal(loaded.meta[0]?.id, "sepsis.qsofa.v1");
+});
+
+test("knowledge/rules lists exactly the qSOFA file", () => {
+  assert.deepEqual(readdirSync(activeDir).sort(), ["sepsis.qsofa.v1.yaml"]);
 });
