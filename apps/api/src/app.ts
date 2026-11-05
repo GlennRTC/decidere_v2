@@ -41,6 +41,8 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({
     logger: logging
       ? {
+          // No pid/hostname: infrastructure identifiers are not in the approved log fields (F011).
+          base: null,
           hooks: {
             // pino fills msg from err.message when no message is given; Fastify does
             // that (e.g. "Reply was already sent ... in <raw url>"). Use a fixed one.
