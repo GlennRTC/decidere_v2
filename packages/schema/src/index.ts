@@ -6,6 +6,7 @@ export {
 } from "./catalog.ts";
 export {
   CANONICAL_BOUNDS,
+  DELIVERABLE_VARIABLES,
   MESSAGE_VARIABLES,
   messageSchema,
   messageSchema11,

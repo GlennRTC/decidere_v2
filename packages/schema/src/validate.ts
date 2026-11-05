@@ -99,6 +99,7 @@ function mapError(error: ErrorObject | undefined): ValidationError {
     case "discriminator": // params carry the received tag: never forwarded
     case "enum":
     case "const":
+    case "uniqueItems":
       return { path, code: "invalid_value" };
     case "type":
       return { path, code: "invalid_type" };

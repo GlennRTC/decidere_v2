@@ -6,6 +6,11 @@ export const SCHEMA_VERSION_11 = "1.1";
 const RESP_RATE = { min: 0, max: 200 } as const; // provisional
 const SBP = { min: 0, max: 400 } as const; // provisional
 const GCS = { min: 3, max: 15 } as const;
+const HEART_RATE = { min: 0, max: 350 } as const; // provisional
+const TEMPERATURE = { min: 25, max: 45 } as const; // provisional
+const WBC = { min: 0, max: 1000 } as const; // provisional
+const PACO2 = { min: 0, max: 300 } as const; // provisional
+const BANDS_PCT = { min: 0, max: 100 } as const; // provisional
 
 export const CANONICAL_BOUNDS: ReadonlyMap<
   string,
@@ -14,7 +19,17 @@ export const CANONICAL_BOUNDS: ReadonlyMap<
   ["resp_rate", RESP_RATE],
   ["sbp", SBP],
   ["gcs", GCS],
+  ["heart_rate", HEART_RATE],
+  ["temperature", TEMPERATURE],
+  ["wbc", WBC],
+  ["paco2", PACO2],
+  ["bands_pct", BANDS_PCT],
 ]);
+
+// Variables the mapper may deliver: every one with canonical bounds.
+export const DELIVERABLE_VARIABLES: ReadonlySet<string> = new Set(
+  CANONICAL_BOUNDS.keys(),
+);
 
 const uuidV4 = {
   type: "string",
@@ -144,14 +159,42 @@ export const messageSchema11 = {
             maxItems: 50,
             items: variableShape11,
           },
+          orders: {
+            type: "array",
+            maxItems: 20,
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["type", "t_offset_min"],
+              properties: {
+                type: { enum: ["blood_culture", "antibiotic"] },
+                t_offset_min: offset,
+              },
+            },
+          },
+          diagnoses_icd10: {
+            type: "array",
+            maxItems: 20,
+            uniqueItems: true,
+            items: {
+              type: "string",
+              // Source: CMS ICD-10-CM Official Guidelines FY2025, Section I.A.2
+              // (read 2026-11-05): codes are 3-7 characters, each a letter or
+              // digit; with the decimal point at most 8. NOT confirmed by that
+              // document: letter first, digit second (kept from WHO ICD-10
+              // convention; a stricter-than-source choice, reviewable).
+              // No maxLength: Ajv checks it before pattern, so over-long free
+              // text would be out_of_range; the pattern already caps it at 8.
+              pattern: "^[A-Z][0-9][0-9A-Z](\\.[0-9A-Z]{1,4})?$",
+            },
+          },
         },
       },
     },
   },
 } as const;
 
-// Variables the message contract accepts today (a subset of the F042 catalog
-// until F044 widens the schema). Rules may only reference these.
+// Variables contract 1.0 accepts by name (frozen at qSOFA, ADR-012; catalog-schema.test.ts depends on this set). Rules and mapping tables may reference DELIVERABLE_VARIABLES.
 export const MESSAGE_VARIABLES: ReadonlySet<string> = new Set(
   messageSchema.properties.instances.items.properties.variables.items.oneOf.map(
     (shape) => shape.properties.variable.const,

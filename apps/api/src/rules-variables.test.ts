@@ -5,7 +5,7 @@ import path from "node:path";
 import { test } from "node:test";
 import { DEFAULT_RULES_DIR, loadActiveRules } from "./rules.ts";
 
-test("an active rule on a catalog variable the schema rejects fails to load", () => {
+test("an active rule on a variable the contract cannot deliver fails to load", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "rules-"));
   try {
     const yaml = fs
@@ -13,7 +13,7 @@ test("an active rule on a catalog variable the schema rejects fails to load", ()
         path.join(DEFAULT_RULES_DIR, "sepsis.qsofa.v1.yaml"),
         "utf8",
       )
-      .replace("variable: resp_rate", "variable: heart_rate");
+      .replace("variable: resp_rate", "variable: not_a_variable");
     fs.writeFileSync(path.join(tmp, "sepsis.qsofa.v1.yaml"), yaml);
     assert.throws(() => loadActiveRules(tmp));
   } finally {

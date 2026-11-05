@@ -18,7 +18,18 @@ after(() => {
   for (const r of roots) fs.rmSync(r, { recursive: true, force: true });
 });
 
-const opts = { variables: new Set(["resp_rate", "sbp", "gcs"]) };
+const opts = {
+  variables: new Set([
+    "resp_rate",
+    "sbp",
+    "gcs",
+    "heart_rate",
+    "temperature",
+    "wbc",
+    "paco2",
+    "bands_pct",
+  ]),
+};
 const repoDir = path.resolve(
   import.meta.dirname,
   "../../../knowledge/mappings",

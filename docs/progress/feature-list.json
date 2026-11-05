@@ -689,11 +689,11 @@
         "Tests de válido e inválido para las variables nuevas",
         "Decisión documentada sobre PaCO2 y bandas de SIRS (omitidas o no) y su efecto en la completitud"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 18. Parte de F003. Cambio de contrato: aprobación del usuario."
+      "notes": "Orden 18. Parte de F003. Cambio de contrato: aprobación del usuario. La forma de orders/diagnoses_icd10 ya está en el contrato 1.1 (ADR-012)."
     },
     {
       "id": "F045",
@@ -721,7 +721,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 20. Parte de F006. BLOQUEADA por decisión clínica."
+      "notes": "Orden 20. Parte de F006. BLOQUEADA por decisión clínica. La forma de los datos (orders, diagnoses_icd10) ya está en el contrato 1.1 (F044, ADR-012)."
     },
     {
       "id": "F047",

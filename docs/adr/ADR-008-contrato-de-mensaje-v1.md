@@ -90,3 +90,5 @@
 - **Menores diferidos:** `time` y `responseTime` sin cota; `reqId` sin regla de forma; la regla de `req.method` rechaza métodos HTTP reales poco comunes (`PROPFIND`); `POST /health` (404) no deja líneas; el test de cabeceras no comprueba que haya líneas; el timeout de 8 s del e2e no se cancela; la carrera de `freePort`; con `API_HOST=0.0.0.0` se loguean IPs de interfaz; el cuerpo 503 durante el apagado y el doble conteo de una subida abortada son de F036/F041; falta verificar el stderr en Node 22.18 (CI) por avisos experimentales del runtime.
 
 **Nota (2026-11-05, ADR-011):** el contrato 1.1 (aditivo) agrega códigos locales y el código de validación `incompatible_unit`; en 1.1 `value` admite decimales. 1.0 no cambia.
+
+**Nota (2026-11-05, ADR-012):** el contrato 1.1 acepta además cinco variables de SIRS por mapeo y, por instancia, `orders` y `diagnoses_icd10` (validados, nunca reflejados ni registrados). Ver ADR-012.
