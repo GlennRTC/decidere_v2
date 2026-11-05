@@ -1,6 +1,11 @@
 import { Ajv, type ErrorObject } from "ajv";
-import { messageSchema, SCHEMA_VERSION } from "./message.schema.ts";
-import type { Message, ValidationError } from "./types.ts";
+import {
+  messageSchema,
+  messageSchema11,
+  SCHEMA_VERSION,
+  SCHEMA_VERSION_11,
+} from "./message.schema.ts";
+import type { Message, MessageV11, ValidationError } from "./types.ts";
 
 // Own instance (never Fastify's): no coercion, no stripping, no defaults.
 // Compiled once at module load. Never exported.
@@ -13,40 +18,57 @@ const ajv = new Ajv({
   discriminator: true,
 });
 const check = ajv.compile(messageSchema);
+const check11 = ajv.compile(messageSchema11);
 
 export function validateMessage(
   input: unknown,
-): { ok: true; value: Message } | { ok: false; errors: ValidationError[] } {
+):
+  | { ok: true; value: Message | MessageV11 }
+  | { ok: false; errors: ValidationError[] } {
+  const version =
+    typeof input === "object" && input !== null && "schema_version" in input
+      ? input.schema_version
+      : undefined;
   if (
-    typeof input === "object" &&
-    input !== null &&
-    "schema_version" in input &&
-    input.schema_version !== SCHEMA_VERSION
+    version !== undefined &&
+    version !== SCHEMA_VERSION &&
+    version !== SCHEMA_VERSION_11
   ) {
     return {
       ok: false,
       errors: [{ path: "/schema_version", code: "unsupported_version" }],
     };
   }
-  if (!check(input))
-    return { ok: false, errors: [mapError(check.errors?.[0])] };
-  const message = input as Message;
+  const run = version === SCHEMA_VERSION_11 ? check11 : check;
+  if (!run(input)) return { ok: false, errors: [mapError(run.errors?.[0])] };
+  const message = input as Message | MessageV11;
   const duplicate = findDuplicate(message);
   if (duplicate) return { ok: false, errors: [duplicate] };
   return { ok: true, value: message };
 }
 
-export function currentInstances(message: Message): Message["instances"] {
-  return message.instances.filter((instance) => instance.kind === "current");
+export function currentInstances<M extends Message | MessageV11>(
+  message: M,
+): M["instances"] {
+  return message.instances.filter(
+    (instance) => instance.kind === "current",
+  ) as M["instances"];
 }
 
-// Reports the first later duplicate (same variable + offset in one instance).
+// Reports the first later duplicate (same variable or code + offset in one instance).
 // Path carries indices only. Read-only over the input.
-function findDuplicate(message: Message): ValidationError | undefined {
+function findDuplicate(
+  message: Message | MessageV11,
+): ValidationError | undefined {
   for (const [i, instance] of message.instances.entries()) {
     const seen = new Set<string>();
-    for (const [j, v] of instance.variables.entries()) {
-      const key = `${v.variable}|${v.t_offset_min}`;
+    for (const [j, v] of (
+      instance.variables as (
+        | Message["instances"][number]["variables"][number]
+        | MessageV11["instances"][number]["variables"][number]
+      )[]
+    ).entries()) {
+      const key = `${"code" in v ? v.code : v.variable}|${v.t_offset_min}`;
       if (seen.has(key)) {
         return {
           path: `/instances/${i}/variables/${j}`,

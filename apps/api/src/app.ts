@@ -15,7 +15,14 @@ export type BuildAppOptions = {
   logStream?: Writable;
   bodyLimit?: number;
   rules?: IngestDeps["rules"];
+  mappings?: IngestDeps["mappings"];
   allowedSources?: IngestDeps["allowedSources"];
+};
+
+// Explicit, not loaded from an empty directory: every code is unmapped.
+const EMPTY_MAPPINGS: IngestDeps["mappings"] = {
+  version: "map-empty",
+  tables: new Map(),
 };
 
 const DEFAULT_BODY_LIMIT = 262144;
@@ -188,6 +195,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   if (options.rules) {
     registerIngest(app, {
       rules: options.rules,
+      mappings: options.mappings ?? EMPTY_MAPPINGS,
       allowedSources: options.allowedSources ?? new Set(),
     });
   }

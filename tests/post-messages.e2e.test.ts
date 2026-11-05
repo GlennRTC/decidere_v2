@@ -141,3 +141,51 @@ test("an invalid ALLOWED_SOURCES aborts with a structured line, no stack", async
   assert.ok(!stderr().includes("    at "));
   assert.ok(!stderr().includes("Bad Source"));
 });
+
+test("a real server maps a contract 1.1 message with the default mappings", async () => {
+  const port = await freePort();
+  const { exited } = start(port, { MAPPINGS_DIR: "" });
+  await waitHealthy(port, exited);
+  const res = await fetch(`http://127.0.0.1:${port}/v1/messages`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      schema_version: "1.1",
+      message_id: "3b1f6c52-8d4e-4a97-b2c1-5e07d9a4f863",
+      source: "sim-1",
+      instances: [
+        {
+          instance_id: IDS[0],
+          kind: "current",
+          variables: [
+            { code: "RR", value: 24, unit: "/min", t_offset_min: 0 },
+            { code: "SBP", value: 13.3, unit: "kPa", t_offset_min: 0 },
+            { code: "GCS", value: 15, unit: "{score}", t_offset_min: 0 },
+          ],
+        },
+      ],
+    }),
+  });
+  assert.equal(res.status, 200);
+  const j = (await res.json()) as {
+    mapping_version: string;
+    results: { class: string; unmapped: string[] }[];
+  };
+  assert.equal(j.results[0].class, "crítico");
+  assert.deepEqual(j.results[0].unmapped, []);
+  assert.match(j.mapping_version, /^map-[0-9a-f]{16}$/);
+});
+
+test("startup aborts with only the fixed line when MAPPINGS_DIR is broken", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "maps-"));
+  writeFileSync(join(dir, "sim-1.yaml"), "not: [valid");
+  const { exited, stderr } = start(await freePort(), { MAPPINGS_DIR: dir });
+  const outcome = await Promise.race([
+    exited,
+    new Promise<string>((r) => setTimeout(() => r("still running"), 8000)),
+  ]);
+  assert.ok(typeof outcome === "number" && outcome !== 0);
+  assert.match(stderr(), /"msg":"rules failed to load"/);
+  assert.ok(!stderr().includes("    at "));
+  assert.ok(!stderr().includes(dir));
+});

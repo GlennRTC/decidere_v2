@@ -1,4 +1,20 @@
 export const SCHEMA_VERSION = "1.0";
+export const SCHEMA_VERSION_11 = "1.1";
+
+// Canonical bounds: the single copy, used by the 1.0 shapes and exported for
+// the mapper (applied after unit conversion).
+const RESP_RATE = { min: 0, max: 200 } as const; // provisional
+const SBP = { min: 0, max: 400 } as const; // provisional
+const GCS = { min: 3, max: 15 } as const;
+
+export const CANONICAL_BOUNDS: ReadonlyMap<
+  string,
+  { min: number; max: number }
+> = new Map<string, { min: number; max: number }>([
+  ["resp_rate", RESP_RATE],
+  ["sbp", SBP],
+  ["gcs", GCS],
+]);
 
 const uuidV4 = {
   type: "string",
@@ -71,11 +87,62 @@ export const messageSchema = {
               type: "object",
               discriminator: { propertyName: "variable" },
               oneOf: [
-                variableShape("resp_rate", "/min", 0, 200), // provisional
-                variableShape("sbp", "mm[Hg]", 0, 400), // provisional
-                variableShape("gcs", "{score}", 3, 15),
+                variableShape(
+                  "resp_rate",
+                  "/min",
+                  RESP_RATE.min,
+                  RESP_RATE.max,
+                ),
+                variableShape("sbp", "mm[Hg]", SBP.min, SBP.max),
+                variableShape("gcs", "{score}", GCS.min, GCS.max),
               ],
             },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+// Contract 1.1: sender-local codes; the mapper resolves them to canonical
+// variables. No free text: code and unit are pattern-bound.
+const variableShape11 = {
+  type: "object",
+  additionalProperties: false,
+  required: ["code", "value", "unit", "t_offset_min"],
+  properties: {
+    code: {
+      type: "string",
+      minLength: 1,
+      maxLength: 32,
+      pattern: "^[A-Za-z0-9._-]{1,32}$",
+    },
+    value: { type: ["number", "null"], minimum: -1e6, maximum: 1e6 },
+    unit: {
+      type: "string",
+      minLength: 1,
+      maxLength: 16,
+      pattern: "^[A-Za-z0-9/%*\\[\\]{}._^-]{1,16}$",
+    },
+    t_offset_min: offset,
+  },
+} as const;
+
+export const messageSchema11 = {
+  ...messageSchema,
+  properties: {
+    ...messageSchema.properties,
+    schema_version: { const: SCHEMA_VERSION_11 },
+    instances: {
+      ...messageSchema.properties.instances,
+      items: {
+        ...messageSchema.properties.instances.items,
+        properties: {
+          ...messageSchema.properties.instances.items.properties,
+          variables: {
+            type: "array",
+            maxItems: 50,
+            items: variableShape11,
           },
         },
       },
