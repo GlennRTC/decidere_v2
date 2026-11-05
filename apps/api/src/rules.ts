@@ -14,6 +14,7 @@ export const DEFAULT_RULES_DIR = fileURLToPath(
 // Fail closed on variables the schema cannot deliver (a rule that never fires),
 // and: without a severity per rule every POST would end in internal_error.
 export function loadActiveRules(dir: string): LoadedRuleSet {
+  // A rule on a variable only contract 1.1 can deliver loads, but never fires for a 1.0 message or a 1.1 source whose mapping table lacks the code.
   const loaded = loadRuleSet(dir, { variables: DELIVERABLE_VARIABLES });
   if (
     loaded.meta.length === 0 ||

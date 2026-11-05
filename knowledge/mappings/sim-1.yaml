@@ -1,6 +1,6 @@
 format_version: 1
 source: sim-1
-source_note: "kPa to mm[Hg]: UCUM ucum-essence.xml (ucum-org/ucum repository) defines m[Hg] as 133.3220 kPa, so mm[Hg] = 133.3220 Pa; kPa = 1000 Pa; factor = 1000 / 133.3220. Verified 2026-11-05. 10*9/L to 10*3/uL: same file defines L as 1 l, prefix u as 1e-6 and 10* as 10; 10*9/L = 10*3/uL, factor 1. Verified 2026-11-05."
+source_note: "kPa to mm[Hg]: UCUM ucum-essence.xml (ucum-org/ucum repository) defines m[Hg] as 133.3220 kPa, so mm[Hg] = 133.3220 Pa; kPa = 1000 Pa; factor = 1000 / 133.3220. Verified 2026-11-05. 10*9/L to 10*3/uL: same file defines L as 1 l, prefix u as 1e-6 and 10* as 10; 10*9/L = 10*3/uL, factor 1; exponent grammar (10*9 = 10^9) not read from the spec. Verified 2026-11-05."
 entries:
   - code: RR
     variable: resp_rate
