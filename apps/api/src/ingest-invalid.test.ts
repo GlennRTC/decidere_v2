@@ -13,7 +13,9 @@ const CANARY = "canaryzq9";
 const MESSAGE_ID = "3b1f6c52-8d4e-4a97-b2c1-5e07d9a4f863";
 const INSTANCE_ID = "9c2e7a14-61bd-4f08-a3d5-0b8e41c97f26";
 
-type Json = Record<string, any>;
+type Json = Record<string, unknown> & {
+  instances: { variables: Record<string, unknown>[]; [k: string]: unknown }[];
+};
 function valid(): Json {
   return {
     schema_version: "1.0",
@@ -58,7 +60,7 @@ type Row = {
   contentType?: string;
   payload: () => string;
 };
-const json = (m: Json) => JSON.stringify(m);
+const json = (m: Record<string, unknown>) => JSON.stringify(m);
 
 const rows: Row[] = [
   {

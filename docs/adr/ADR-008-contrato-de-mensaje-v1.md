@@ -71,3 +71,10 @@
 - **Logs:** solo `message_id` (tras validar, nunca en ramas de error), `case_id`, clase, certeza, ids de reglas disparadas y conteos. Destino, retención y control de acceso de los logs: **pendiente de documentar** (Vercel, residencia sin decidir).
 - **Semántica para el emisor:** cualquier respuesta no-2xx significa que el mensaje NO fue interpretado; reintentar o alertar por otro canal. Un 5xx no indica evaluación parcial.
 - **Abierto (no cerrado por F040):** contador de rechazos por código (F041/F011), unicidad de `instance_id`, preguntas clínicas y legales de arriba, solo adultos (sin campo de edad).
+
+## Conteo de rechazos (F041, 2026-11-04)
+- **Cómo cuenta el runner (F050):** cada rechazo es una respuesta HTTP con `error.code`; el runner cuenta por ese código. Cubre los 4xx de la ruta (400 `invalid_json`, 403 `forbidden`, 404, 413, 415, 422), el 500 y, desde F041, los rechazos a nivel de socket (línea de petición malformada, cabeceras sobredimensionadas), que ahora responden 400 `bad_request` con el cuerpo estructurado y `x-request-id`, y dejan una línea de log `apiError {code, status}` sin texto del cliente.
+- **Sin respuesta:** un corte antes de que haya petición (`ECONNRESET`) no envía respuesta; el runner debe tratar la ausencia de respuesta como rechazo/fallo del envío, no como mensaje interpretado.
+- **Sin contador en el proceso:** la API no guarda estado entre peticiones (AGENTS.md). El contador persistido por código llega con F055.
+- **Matriz fijada con tests** (`ingest-invalid.test.ts`): 12 clases de rechazo con un canario cada una; ninguno aparece en cuerpo, cabeceras ni logs.
+
