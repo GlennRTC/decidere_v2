@@ -194,8 +194,7 @@ export const messageSchema11 = {
   },
 } as const;
 
-// Variables the message contract accepts today (a subset of the F042 catalog
-// until F044 widens the schema). Rules may only reference these.
+// Variables contract 1.0 accepts by name (frozen at qSOFA, ADR-012; catalog-schema.test.ts depends on this set). Rules and mapping tables may reference DELIVERABLE_VARIABLES.
 export const MESSAGE_VARIABLES: ReadonlySet<string> = new Set(
   messageSchema.properties.instances.items.properties.variables.items.oneOf.map(
     (shape) => shape.properties.variable.const,

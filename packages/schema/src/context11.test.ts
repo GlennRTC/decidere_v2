@@ -53,6 +53,7 @@ test("context violations map to closed codes, indices only", () => {
     [
       "21 codes",
       (i) => {
+        // A00..A20 all match the pattern: the only error is maxItems
         i.diagnoses_icd10 = Array.from(
           { length: 21 },
           (_, n) => `A${String(n).padStart(2, "0")}`,
@@ -138,7 +139,7 @@ test("1.0 rejects orders and diagnoses_icd10 as unknown_field", () => {
     ["diagnoses_icd10", []],
   ] as const) {
     const input = structuredClone(base) as Record<string, unknown>;
-    (input.instances as Record<string, unknown>[])[0]![key] = value;
+    (input.instances as [Record<string, unknown>])[0][key] = value;
     assert.deepEqual(errorsOf(input), [
       { path: "/instances/0", code: "unknown_field" },
     ]);

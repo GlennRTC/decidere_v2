@@ -120,3 +120,18 @@ test("a rule may use a deliverable SIRS variable but not an unknown one", () => 
     fs.rmSync(tmp, { recursive: true });
   }
 });
+
+test("the mapped instance carries only id, kind and variables", () => {
+  const input = msg([v("HR", 95, "/min")]);
+  Object.assign(input.instances[0] as object, {
+    orders: [{ type: "blood_culture", t_offset_min: -5 }],
+    diagnoses_icd10: ["Z99.9"],
+  });
+  const r = mapMessage(input, mappings);
+  assert.ok(r.ok);
+  assert.deepEqual(Object.keys(r.value.message.instances[0] ?? {}).sort(), [
+    "instance_id",
+    "kind",
+    "variables",
+  ]);
+});

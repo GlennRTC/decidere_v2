@@ -85,7 +85,11 @@ export function mapMessage(
       });
     }
     unmapped.push([...skipped]);
-    instances.push({ ...instance, variables });
+    instances.push({
+      instance_id: instance.instance_id,
+      kind: instance.kind,
+      variables,
+    });
   }
   // ponytail: canonical values may be decimals; the 1.0 type already allows
   // number, but its variable-name enum is wider than a plain string here.
