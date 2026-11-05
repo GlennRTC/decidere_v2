@@ -11,6 +11,7 @@ export type IngestDeps = {
   rules: LoadedRuleSet;
   mappings: LoadedMappings;
   allowedSources: ReadonlySet<string>;
+  tau?: number;
 };
 
 // Payload, source, instance_id and clinical values are never logged. message_id is
@@ -103,6 +104,7 @@ function registerRoute(app: FastifyInstance, deps: IngestDeps): void {
           version: mapped.value.mapping_version,
           unmapped: mapped.value.unmapped,
         },
+        deps.tau,
       );
       if (out.results.length === 0)
         return replyValidationFailed(request, reply, [
