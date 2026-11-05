@@ -1,5 +1,10 @@
 import { fileURLToPath } from "node:url";
-import { type LoadedRuleSet, loadRuleSet } from "@decidere/rules";
+import {
+  type LoadedMappings,
+  type LoadedRuleSet,
+  loadMappingSet,
+  loadRuleSet,
+} from "@decidere/rules";
 import { MESSAGE_VARIABLES } from "@decidere/schema";
 
 export const DEFAULT_RULES_DIR = fileURLToPath(
@@ -20,3 +25,10 @@ export function loadActiveRules(dir: string): LoadedRuleSet {
   }
   return loaded;
 }
+
+export const DEFAULT_MAPPINGS_DIR = fileURLToPath(
+  new URL("../../../knowledge/mappings/", import.meta.url),
+);
+
+export const loadActiveMappings = (dir: string): LoadedMappings =>
+  loadMappingSet(dir, { variables: MESSAGE_VARIABLES });

@@ -28,10 +28,12 @@ export type CaseResult = {
   certainty: null; // F047
   rules_fired: string[];
   trace: RuleResult[];
+  unmapped: string[];
 };
 
 export type Interpretation = {
   message_id: string;
+  mapping_version: string;
   rule_set: { version: string; approval: "pending" | "approved" };
   policy: { version: string; provisional: true };
   historical_ignored: number;
@@ -62,6 +64,10 @@ export function interpretMessage(
   message: Message,
   loaded: LoadedRuleSet,
   newCaseId: () => string = randomUUID,
+  mapping: { version: string; unmapped: string[][] } = {
+    version: "identity",
+    unmapped: [],
+  },
 ): Interpretation {
   const current = currentInstances(message);
   const results = current.map((instance): CaseResult => {
@@ -76,10 +82,12 @@ export function interpretMessage(
       certainty: null,
       rules_fired: evaluated.fired,
       trace: evaluated.rules,
+      unmapped: mapping.unmapped[message.instances.indexOf(instance)] ?? [],
     };
   });
   return {
     message_id: message.message_id,
+    mapping_version: mapping.version,
     rule_set: { version: loaded.rule_set_version, approval: loaded.approval },
     policy: { version: POLICY_VERSION, provisional: true },
     historical_ignored: message.instances.length - current.length,

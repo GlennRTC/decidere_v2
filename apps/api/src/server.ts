@@ -1,8 +1,14 @@
 // Config (environment): PORT (default 3000), API_HOST (default 127.0.0.1),
-// ALLOWED_SOURCES (comma-separated, default sim-1), RULES_DIR (default knowledge/rules).
+// ALLOWED_SOURCES (comma-separated, default sim-1), RULES_DIR (default knowledge/rules),
+// MAPPINGS_DIR (default knowledge/mappings).
 import { buildApp, errSerializer } from "./app.ts";
 import { readAllowedSources, readHost, readPort } from "./config.ts";
-import { DEFAULT_RULES_DIR, loadActiveRules } from "./rules.ts";
+import {
+  DEFAULT_MAPPINGS_DIR,
+  DEFAULT_RULES_DIR,
+  loadActiveMappings,
+  loadActiveRules,
+} from "./rules.ts";
 
 // Same bounded serializer as the request logs: name and code only, strings, 64 chars.
 const errInfo = errSerializer;
@@ -22,15 +28,20 @@ async function main(): Promise<void> {
   }
   // Rules load before listening; a bad rule set aborts startup (name/code only logged).
   let rules: ReturnType<typeof loadActiveRules>;
+  let mappings: ReturnType<typeof loadActiveMappings>;
   try {
     rules = loadActiveRules(process.env.RULES_DIR || DEFAULT_RULES_DIR);
+    // Same fixed message: the log-message list is closed.
+    mappings = loadActiveMappings(
+      process.env.MAPPINGS_DIR || DEFAULT_MAPPINGS_DIR,
+    );
   } catch (err) {
     console.error(
       JSON.stringify({ msg: "rules failed to load", err: errInfo(err) }),
     );
     process.exit(1);
   }
-  const app = buildApp({ log: true, rules, allowedSources });
+  const app = buildApp({ log: true, rules, mappings, allowedSources });
 
   const shutdown = (): void => {
     setTimeout(() => process.exit(1), 5000).unref();
