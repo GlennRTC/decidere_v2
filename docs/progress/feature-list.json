@@ -703,11 +703,11 @@
         "Id estable sepsis.sirs.v1 con cita",
         "clinical_approval = pending"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 19. Parte de F006."
+      "notes": "Orden 19. Parte de F006. Transcripción verificada por tests; INACTIVA (knowledge/rules-candidate/) y sin aprobación clínica (ADR-013)."
     },
     {
       "id": "F046",
@@ -721,7 +721,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 20. Parte de F006. BLOQUEADA por decisión clínica. La forma de los datos (orders, diagnoses_icd10) ya está en el contrato 1.1 (F044, ADR-012)."
+      "notes": "Orden 20. Parte de F006. BLOQUEADA por decisión clínica. La forma de los datos (orders, diagnoses_icd10) ya está en el contrato 1.1 (F044, ADR-012). Handoff de F045 (ADR-013): SIRS sin criterio de infección no debería alertar por sí sola al activarse."
     },
     {
       "id": "F047",
@@ -737,7 +737,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 21. Parte de F008. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation."
+      "notes": "Orden 21. Parte de F008. Handoff de F045 (ADR-013): completitud por criterios para que la falta de paco2/bands_pct no bloquee SIRS. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation."
     },
     {
       "id": "F048",
@@ -752,7 +752,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 22. Parte de F008."
+      "notes": "Orden 22. Parte de F008. Handoff de F045 (ADR-013): decidir el enrutamiento a revisión al activar SIRS (una revisión pesa más que una vigilancia)."
     },
     {
       "id": "F049",

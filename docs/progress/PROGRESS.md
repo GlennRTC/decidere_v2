@@ -215,3 +215,13 @@
 **Handoffs:** F045 (SIRS sobre las cinco variables; una regla solo-1.1 nunca dispara para 1.0), F046 (usa `orders`/`diagnoses_icd10`, hoy sin consumidor), F047 (completitud por criterios, requiere confirmación clínica).
 
 **Revisión de cumplimiento F044 (agente de IA, no un clínico):** 0 bloqueantes, 3 mayores, 7 menores; todo documentado en ADR-012 (Consecuencias), sin cambios de código ni de tests. Mayor 1: `orders`/`diagnoses_icd10` se validan y luego se ignoran hasta F046, sin señal en la respuesta; riesgo aceptado, y agregar un campo fijo tipo `context_ignored` queda como decisión abierta del usuario (cambio de contrato). Mayor 2: F012/F055 deben evaluar la reidentificación por combinación de códigos y órdenes antes de persistir; pregunta legal abierta, sin marco asumido. Mayor 3: handoff a F046 para extender `log-audit.ts` con ICD-10 y tipos de orden. Menores: texto libre residual en `code`/`unit`, patrón ICD solo de forma, órdenes duplicadas, confirmar el patrón con el clínico, entre otros (ver ADR-012). F044 `passing` tras `verify` y `scan:phi` sobre el árbol final.
+
+## 2026-11-05 — Sesión 18 (F045: regla SIRS v1 candidata, inactiva)
+**Feature(s) trabajada(s):** F045 — `knowledge/rules-candidate/sepsis.sirs.v1.yaml`, `packages/rules/src/sirs.test.ts`, `sirs-policy.test.ts`, `apps/api/src/rules-candidate.test.ts`; ADR-013; plan `docs/superpowers/plans/2026-11-05-f045-sirs-rule.md`
+**Qué se hizo:** SIRS (2 de 4 criterios: temperatura, FC, FR o PaCO2, leucocitos o bandas) transcrita con id `sepsis.sirs.v1`, `severity: watch` provisional y `clinical_approval: pending`, en un directorio que la API no carga. Tests fijan la política de clase y que `knowledge/rules/` solo contiene qSOFA (`rule_set_version` sigue `rs-810ea5889733ed08`).
+**Qué significa `passing`:** la transcripción está verificada por tests. NO está aprobada clínicamente y la regla está INACTIVA.
+**Fuente:** Bone RC et al., Chest 1992 (PMID 1303622); la tabla primaria NO se pudo leer, umbrales contrastados solo con fuentes secundarias (arXiv 1408.6553, paquete R cliot).
+**Verificación realizada:** `npm run verify && npm run scan:phi` exit=0 (api 195, rules 120, schema 55, engine 144, tests 41 con 1 omitida preexistente; Biome 3 warnings = línea base); `scan:phi` "scanned 49 files, skipped 118, hits 0, errors 0".
+**Estado al cerrar:** F045 `passing` (transcripción). Rama `feat/f045-sirs-rule`, sin push.
+**Preguntas clínicas abiertas:** leer la fuente primaria; severidad; SIRS sin criterio de infección; vigencia frente a Sepsis-3.
+**Handoffs:** F046 (proxy de infección), F047 (completitud por criterios), F048 (enrutamiento); lista de tests a actualizar al activar en ADR-013.
