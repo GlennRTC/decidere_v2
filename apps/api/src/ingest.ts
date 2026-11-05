@@ -89,6 +89,11 @@ function registerRoute(app: FastifyInstance, deps: IngestDeps): void {
       const checked = validateMessage(body);
       if (!checked.ok)
         return replyValidationFailed(request, reply, checked.errors);
+      // 1.1 has no mapper yet (F043 Task 5): keep answering it as unsupported.
+      if (checked.value.schema_version !== "1.0")
+        return replyValidationFailed(request, reply, [
+          { path: "/schema_version", code: "unsupported_version" },
+        ]);
       const out = interpretMessage(checked.value, deps.rules);
       if (out.results.length === 0)
         return replyValidationFailed(request, reply, [

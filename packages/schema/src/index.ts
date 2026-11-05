@@ -5,12 +5,16 @@ export {
   VARIABLE_CATALOG,
 } from "./catalog.ts";
 export {
+  CANONICAL_BOUNDS,
   MESSAGE_VARIABLES,
   messageSchema,
+  messageSchema11,
   SCHEMA_VERSION,
+  SCHEMA_VERSION_11,
 } from "./message.schema.ts";
 export type {
   Message,
+  MessageV11,
   ValidationCode,
   ValidationError,
 } from "./types.ts";

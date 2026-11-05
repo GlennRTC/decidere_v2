@@ -66,3 +66,27 @@ export function withHistorical() {
   });
   return message;
 }
+
+// Contract 1.1: sender-local codes, decimals allowed.
+export function validLocal() {
+  return {
+    schema_version: "1.1",
+    message_id: MESSAGE_ID,
+    source: "sim-1",
+    instances: [
+      {
+        instance_id: INSTANCE_ID,
+        kind: "current",
+        variables: [
+          { code: "RR", value: 24.5, unit: "/min", t_offset_min: 0 },
+          { code: "SBP", value: null, unit: "kPa", t_offset_min: -5 },
+        ] as {
+          code: string;
+          value: number | null;
+          unit: string;
+          t_offset_min: number;
+        }[],
+      },
+    ],
+  };
+}
