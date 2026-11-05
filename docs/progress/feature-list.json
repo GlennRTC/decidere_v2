@@ -675,11 +675,11 @@
         "Unidad incompatible produce error estructurado",
         "Cada interpretación incluye mapping_version"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 17. Parte de F004. ADR-002 solo versiona reglas: el mapeo también cambia la clasificación."
+      "notes": "Orden 17. Parte de F004. ADR-002 solo versiona reglas: el mapeo también cambia la clasificación. Verificada 2026-11-05 (verify + scan:phi); ver ADR-011. Abierto: redondeo de valores convertidos (pregunta clínica)."
     },
     {
       "id": "F044",

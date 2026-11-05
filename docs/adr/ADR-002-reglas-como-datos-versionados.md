@@ -33,3 +33,5 @@ Implementado en `packages/rules` (`@decidere/rules`, F037). El cargador y el cá
 - **`approval`:** `"approved"` solo si todas las reglas activas están aprobadas; si no, `"pending"`. `approved` exige `approver` y `guideline_version` no vacíos; `pending` permite `null`. Sin fechas ni notas libres.
 - **Opciones:** `options.variables` es obligatorio y debe ser un `Set`; si no, `invalid_options`. Un `Set` vacío es válido y falla cerrado en el motor.
 - **Pendiente (F040):** llamar a `loadRuleSet(dir, {variables})` antes de escuchar, fallar el arranque ante `RuleLoadError`, y devolver `rule_set_version` y `approval` en la respuesta del POST. También fallar el arranque salvo que toda regla activa tenga `severity` (`loaded.severities.size === loaded.meta.length`); si no, cada POST sería `internal_error` (ADR-010).
+
+**Nota (2026-11-05, ADR-011):** el mapeo de códigos locales también cambia la clasificación; por eso cada interpretación guarda además `mapping_version`.
