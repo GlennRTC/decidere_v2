@@ -181,3 +181,11 @@
 **Revisión externa de rama (agente de IA, Opus):** sin Critical; 3 Important arreglados con tests (stderr auditado en operación normal, números clínicos como texto e ids de regla, mensajes de librerías sustituidos por `request error`); menores diferidos en ADR-008.
 **Pendiente:** destino, retención, acceso y residencia de los logs (F034/F027, opinión legal Ley 1581); `time` con milisegundos junto a `message_id`/`case_id` permite cruzar con los registros del emisor; test del manejador `uncaughtException`.
 **Handoffs:** F047 (`certainty` numérico ya cabe en `results[].certainty`); toda línea de log nueva debe pasar por `ALLOWED_LOG_PATHS`.
+
+## 2026-11-05 — Sesión 14 (F042: catálogo canónico de variables)
+**Feature(s) trabajada(s):** F042 — `packages/schema/src/catalog.ts` (+ tests), `CANONICAL_VARIABLES` de `apps/api` ahora viene del catálogo; plan `docs/superpowers/plans/2026-11-05-f042-variable-catalog.md`
+**Qué se hizo:** catálogo `catalog-1` con 8 variables (`resp_rate`, `sbp`, `gcs`, `heart_rate`, `temperature`, `wbc`, `paco2`, `bands_pct`), cada una con LOINC, UCUM, fuente y fecha de verificación. PaCO2 y bandas se incluyeron aquí por decisión del usuario. El contrato del mensaje no cambia (el schema sigue aceptando solo `resp_rate`, `sbp`, `gcs`).
+**Verificación realizada:** nombres LOINC con NLM Clinical Tables; UCUM (`/min`, `mm[Hg]`, `Cel`, `10*3/uL`, `%`, `{score}`) con tx.fhir.org; loinc.org devuelve 403 a fetch automático. `npm run verify` exit=0 (api 158, rules 96, schema 42, engine 144, tests 38 + 1 omitida); `scan:phi` "scanned 44 files, skipped 100, hits 0, errors 0".
+**Estado al cerrar:** F042 `passing`. Rama `feat/f042-variable-catalog`, apilada sobre `feat/f011-logging-no-phi`, sin push.
+**Preguntas clínicas abiertas:** bandas por conteo manual (764-1) frente al automatizado; unidad de `paco2` (mm[Hg]) y `bands_pct` (%) por confirmar; `{score}` es anotación UCUM, no unidad; `wbc` en 10*3/uL (conversión desde 10*9/L es de F043).
+**Handoffs:** F043 (mapper consume `VARIABLE_CATALOG`; `mapping_version`), F044 (ampliar el schema a las 8 variables y `diagnoses_icd10`), F045 (SIRS usa `heart_rate`, `temperature`, `wbc`, `paco2`, `bands_pct`).
