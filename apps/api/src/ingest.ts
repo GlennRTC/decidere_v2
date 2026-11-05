@@ -115,7 +115,7 @@ function registerRoute(app: FastifyInstance, deps: IngestDeps): void {
           results: out.results.map((r) => ({
             case_id: r.case_id,
             class: r.class,
-            certainty: r.certainty,
+            certainty: r.certainty.value,
             rules_fired: r.rules_fired,
           })),
         },

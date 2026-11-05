@@ -177,7 +177,7 @@ test("certainty is null and policy.provisional is true", () => {
     ),
     loaded,
   );
-  assert.equal(out.results[0].certainty, null);
+  assert.equal(out.results[0].certainty.provisional, true);
   assert.equal(out.policy.provisional, true);
   assert.equal(out.policy.version, "policy-provisional-1");
   assert.equal(out.rule_set.approval, "pending");

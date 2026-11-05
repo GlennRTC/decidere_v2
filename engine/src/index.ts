@@ -1,3 +1,10 @@
+export type { CertaintyBreakdown } from "./certainty.ts";
+export {
+  CERTAINTY_VERSION,
+  computeCertainty,
+  TAU_PROVISIONAL,
+  VARIABLE_BANDS,
+} from "./certainty.ts";
 export { defineRuleSet } from "./define.ts";
 export { evaluateRuleSet } from "./evaluate.ts";
 export type {
