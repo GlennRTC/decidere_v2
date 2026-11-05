@@ -1,4 +1,14 @@
-export { messageSchema, SCHEMA_VERSION } from "./message.schema.ts";
+export type { CatalogEntry } from "./catalog.ts";
+export {
+  CANONICAL_VARIABLES,
+  CATALOG_VERSION,
+  VARIABLE_CATALOG,
+} from "./catalog.ts";
+export {
+  MESSAGE_VARIABLES,
+  messageSchema,
+  SCHEMA_VERSION,
+} from "./message.schema.ts";
 export type {
   Message,
   ValidationCode,
