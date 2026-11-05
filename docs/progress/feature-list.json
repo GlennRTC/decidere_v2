@@ -737,7 +737,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 21. Parte de F008. Handoff de F045 (ADR-013): completitud por criterios para que la falta de paco2/bands_pct no bloquee SIRS. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation."
+      "notes": "Orden 21. Parte de F008. Handoff de F045 (ADR-013): la certeza por criterios no cambia la clase; que falte paco2/bands_pct impide sin alerta por la política de clase (ADR-010 punto 5), decisión previa a activar SIRS. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation."
     },
     {
       "id": "F048",
