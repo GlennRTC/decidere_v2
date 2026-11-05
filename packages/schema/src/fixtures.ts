@@ -90,3 +90,21 @@ export function validLocal() {
     ],
   };
 }
+
+// Contract 1.1 with per-instance context: synthetic orders and ICD-10 codes.
+export function validLocalWithContext() {
+  const message = validLocal();
+  return {
+    ...message,
+    instances: [
+      {
+        ...message.instances[0],
+        orders: [
+          { type: "blood_culture", t_offset_min: -30 },
+          { type: "antibiotic", t_offset_min: 0 },
+        ] as { type: string; t_offset_min: number }[],
+        diagnoses_icd10: ["A41.9", "J18.9"] as string[],
+      },
+    ],
+  };
+}

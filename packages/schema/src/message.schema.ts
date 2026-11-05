@@ -159,6 +159,35 @@ export const messageSchema11 = {
             maxItems: 50,
             items: variableShape11,
           },
+          orders: {
+            type: "array",
+            maxItems: 20,
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["type", "t_offset_min"],
+              properties: {
+                type: { enum: ["blood_culture", "antibiotic"] },
+                t_offset_min: offset,
+              },
+            },
+          },
+          diagnoses_icd10: {
+            type: "array",
+            maxItems: 20,
+            uniqueItems: true,
+            items: {
+              type: "string",
+              // Source: CMS ICD-10-CM Official Guidelines FY2025, Section I.A.2
+              // (read 2026-11-05): codes are 3-7 characters, each a letter or
+              // digit; with the decimal point at most 8. NOT confirmed by that
+              // document: letter first, digit second (kept from WHO ICD-10
+              // convention; a stricter-than-source choice, reviewable).
+              // No maxLength: Ajv checks it before pattern, so over-long free
+              // text would be out_of_range; the pattern already caps it at 8.
+              pattern: "^[A-Z][0-9][0-9A-Z](\\.[0-9A-Z]{1,4})?$",
+            },
+          },
         },
       },
     },
