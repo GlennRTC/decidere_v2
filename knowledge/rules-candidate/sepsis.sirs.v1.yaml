@@ -1,0 +1,85 @@
+format_version: 1
+id: sepsis.sirs.v1
+title: "SIRS: criterios de respuesta inflamatoria sistémica"
+severity: watch
+citation:
+  source: "Bone RC, et al. Definitions for sepsis and organ failure (ACCP/SCCM Consensus Conference). Chest. 1992. doi:10.1378/chest.101.6.1644 (PMID 1303622)"
+  version: "Chest 1992;101(6):1644-1655; criteria table not read directly"
+  section: "SIRS criteria; cross-checked against secondary sources only: arXiv 1408.6553 and R package cliot sirs_sepsis_criteria"
+clinical_approval:
+  status: pending
+  approver: null
+  guideline_version: null
+conditions:
+  - {
+      id: temp_alta,
+      label: "Temperatura alta",
+      variable: temperature,
+      op: ">",
+      value: 38,
+      unit: "Cel",
+    }
+  - {
+      id: temp_baja,
+      label: "Temperatura baja",
+      variable: temperature,
+      op: "<",
+      value: 36,
+      unit: "Cel",
+    }
+  - {
+      id: fc_alta,
+      label: "Frecuencia cardíaca alta",
+      variable: heart_rate,
+      op: ">",
+      value: 90,
+      unit: "/min",
+    }
+  - {
+      id: fr_alta,
+      label: "Frecuencia respiratoria alta",
+      variable: resp_rate,
+      op: ">",
+      value: 20,
+      unit: "/min",
+    }
+  - {
+      id: paco2_baja,
+      label: "PaCO2 baja",
+      variable: paco2,
+      op: "<",
+      value: 32,
+      unit: "mm[Hg]",
+    }
+  - {
+      id: wbc_alto,
+      label: "Leucocitos altos",
+      variable: wbc,
+      op: ">",
+      value: 12,
+      unit: "10*3/uL",
+    }
+  - {
+      id: wbc_bajo,
+      label: "Leucocitos bajos",
+      variable: wbc,
+      op: "<",
+      value: 4,
+      unit: "10*3/uL",
+    }
+  - {
+      id: bandas_altas,
+      label: "Formas inmaduras (bandas) altas",
+      variable: bands_pct,
+      op: ">",
+      value: 10,
+      unit: "%",
+    }
+combine:
+  atLeast:
+    n: 2
+    of:
+      - { any: [temp_alta, temp_baja] }
+      - fc_alta
+      - { any: [fr_alta, paco2_baja] }
+      - { any: [wbc_alto, wbc_bajo, bandas_altas] }
