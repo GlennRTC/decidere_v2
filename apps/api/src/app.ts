@@ -82,6 +82,33 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
         .header("x-request-id", request.id)
         .send(errorBody(code, request.id));
     },
+    // Socket-level rejections (malformed request line, oversized headers) never reach
+    // a route handler: answer with the same structured body and count them in the log.
+    clientErrorHandler: (error, socket) => {
+      try {
+        if (
+          safeField(() => (error as { code?: unknown }).code) === "ECONNRESET"
+        ) {
+          socket.destroy();
+          return;
+        }
+        const id = randomUUID();
+        app.log.error(
+          { apiError: { code: "bad_request", status: STATUS.bad_request } },
+          "request failed",
+        );
+        if (socket.writable && !socket.destroyed) {
+          const body = JSON.stringify(errorBody("bad_request", id));
+          socket.end(
+            `HTTP/1.1 400 Bad Request\r\ncontent-type: application/json\r\ncontent-length: ${Buffer.byteLength(body)}\r\ncache-control: no-store\r\nx-request-id: ${id}\r\nconnection: close\r\n\r\n${body}`,
+          );
+        } else {
+          socket.destroy();
+        }
+      } catch {
+        socket.destroy();
+      }
+    },
     // Never trust an inbound request id; always generate one.
     requestIdHeader: false,
     genReqId: () => randomUUID(),
