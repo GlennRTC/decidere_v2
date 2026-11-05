@@ -6,6 +6,11 @@ export const SCHEMA_VERSION_11 = "1.1";
 const RESP_RATE = { min: 0, max: 200 } as const; // provisional
 const SBP = { min: 0, max: 400 } as const; // provisional
 const GCS = { min: 3, max: 15 } as const;
+const HEART_RATE = { min: 0, max: 350 } as const; // provisional
+const TEMPERATURE = { min: 25, max: 45 } as const; // provisional
+const WBC = { min: 0, max: 1000 } as const; // provisional
+const PACO2 = { min: 0, max: 300 } as const; // provisional
+const BANDS_PCT = { min: 0, max: 100 } as const; // provisional
 
 export const CANONICAL_BOUNDS: ReadonlyMap<
   string,
@@ -14,7 +19,17 @@ export const CANONICAL_BOUNDS: ReadonlyMap<
   ["resp_rate", RESP_RATE],
   ["sbp", SBP],
   ["gcs", GCS],
+  ["heart_rate", HEART_RATE],
+  ["temperature", TEMPERATURE],
+  ["wbc", WBC],
+  ["paco2", PACO2],
+  ["bands_pct", BANDS_PCT],
 ]);
+
+// Variables the mapper may deliver: every one with canonical bounds.
+export const DELIVERABLE_VARIABLES: ReadonlySet<string> = new Set(
+  CANONICAL_BOUNDS.keys(),
+);
 
 const uuidV4 = {
   type: "string",
