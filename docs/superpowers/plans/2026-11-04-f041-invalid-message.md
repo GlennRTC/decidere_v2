@@ -15,13 +15,15 @@
 - Closed error codes and fixed messages stay as in `apps/api/src/errors.ts`; no value, key or parser text is ever reflected (ADR-001/008).
 - No state in memory between requests (AGENTS.md "Stack"): no counters in the API process.
 - Do not edit existing tests. Synthetic data only. Code and commits in English, docs in Spanish. Branch `feat/f041-invalid-message`, stacked on `feat/f040-post-messages`. No push without approval.
-- Fastify option for socket-level errors: verify its name and signature in the installed version before coding (not verified when this plan was written).
+- Fastify option for socket-level errors: `clientErrorHandler?: (error: ConnectionError, socket: Socket) => void` (verified in `node_modules/fastify/fastify.d.ts:210`, Fastify 5.12.8). Check at runtime that it replaces Node's default 400 before relying on it.
 
 ## Review Focus
 
 1. Each invalid class below leaks no canary in body, headers or logs.
 2. A request cut mid-body or with a malformed HTTP line gets a structured 400 with `x-request-id`, not Node's bare `HTTP/1.1 400 Bad Request`.
-3. A valid message is never rejected by the new code (the happy path test from F040 stays green).
+3. A valid message is never rejected by the new code: Task 2 re-runs `ingest.test.ts` and `tests/post-messages.e2e.test.ts` unchanged.
+4. A client that sends a valid request in several slow TCP chunks is not treated as a client error (Task 2 test: a split valid request still gets 200).
+5. Socket-level handler never throws or leaks the Node error text, even for a destroyed socket (Task 2 test: write to an already-destroyed socket does not crash the process).
 
 ---
 
@@ -59,9 +61,9 @@
 **Interfaces:**
 - Produces: a client-error handler that writes a raw HTTP/1.1 400 response with `content-type: application/json`, `cache-control: no-store`, `x-request-id` (fresh UUID), body `errorBody("bad_request", id)`, then closes the socket; and logs one line `{ apiError: { code: "bad_request", status: 400 } }` with no error text.
 
-- [ ] **Step 1: Write failing tests** with a real listening app and `node:net`: (a) a malformed request line (`"GARBAGE\r\n\r\n"`) gets a response whose body parses to `{"error":{"code":"bad_request",...}}` with an `x-request-id`; (b) logs hold the apiError line and no byte of the sent garbage.
+- [ ] **Step 1: Write failing tests** with a real listening app and `node:net`: (a) a malformed request line (`"GARBAGE\r\n\r\n"`) gets a response whose body parses to `{"error":{"code":"bad_request",...}}` with an `x-request-id`; (b) logs hold the apiError line and no byte of the sent garbage; (c) a valid request split across two TCP writes still gets 200; (d) a handler call with an already-destroyed socket does not throw.
 - [ ] **Step 2: Run** → FAIL (Node's default bare 400).
-- [ ] **Step 3: Implement** the handler through the Fastify option verified above, using `errorBody` and `STATUS` from `errors.ts`; write with `socket.end` only if the socket is writable.
+- [ ] **Step 3: Implement** the handler through `clientErrorHandler`, using `errorBody` and `STATUS` from `errors.ts`; write with `socket.end` only if the socket is writable.
 - [ ] **Step 4: Run** `npm test -w apps/api` → PASS, no existing test edited.
 - [ ] **Step 5: Commit** `feat(api): answer socket-level rejections with a structured 400`.
 
