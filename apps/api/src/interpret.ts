@@ -7,6 +7,8 @@ import {
   evaluateRuleSet,
   POLICY_VERSION,
   type RuleResult,
+  routeByCertainty,
+  TAU_PROVISIONAL,
 } from "@decidere/engine";
 import type { LoadedRuleSet } from "@decidere/rules";
 import { currentInstances, type Message } from "@decidere/schema";
@@ -25,6 +27,7 @@ export type CaseResult = {
   case_id: string;
   class: string;
   reason_code: string;
+  routed_from: string | null;
   highest_reachable_class: ClassId;
   conflict: boolean;
   requires_confirmation: boolean;
@@ -71,16 +74,24 @@ export function interpretMessage(
     version: "identity",
     unmapped: [],
   },
+  tau: number = TAU_PROVISIONAL,
 ): Interpretation {
   const current = currentInstances(message);
   const results = current.map((instance): CaseResult => {
     const evaluated = evaluateRuleSet(loaded.ruleSet, engineInput(instance));
     const decision = classify(evaluated, loaded.severities);
-    const certainty = computeCertainty(loaded.ruleSet, evaluated, decision);
+    const certainty = computeCertainty(
+      loaded.ruleSet,
+      evaluated,
+      decision,
+      tau,
+    );
+    const routed = routeByCertainty(decision.class, certainty);
     return {
       case_id: newCaseId(),
-      class: CLASS_NAMES[decision.class],
-      reason_code: decision.reason_code,
+      class: CLASS_NAMES[routed.class],
+      reason_code: routed.routed_from ? "low_certainty" : decision.reason_code,
+      routed_from: routed.routed_from ? CLASS_NAMES[routed.routed_from] : null,
       highest_reachable_class: decision.highest_reachable_class,
       conflict: decision.conflict,
       requires_confirmation: certainty.requires_confirmation,

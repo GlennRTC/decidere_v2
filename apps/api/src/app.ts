@@ -17,6 +17,7 @@ export type BuildAppOptions = {
   rules?: IngestDeps["rules"];
   mappings?: IngestDeps["mappings"];
   allowedSources?: IngestDeps["allowedSources"];
+  tau?: IngestDeps["tau"];
 };
 
 // Explicit, not loaded from an empty directory: every code is unmapped.
@@ -197,6 +198,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
       rules: options.rules,
       mappings: options.mappings ?? EMPTY_MAPPINGS,
       allowedSources: options.allowedSources ?? new Set(),
+      tau: options.tau,
     });
   }
 

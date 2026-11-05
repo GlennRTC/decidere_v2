@@ -1,8 +1,9 @@
 // Config (environment): PORT (default 3000), API_HOST (default 127.0.0.1),
 // ALLOWED_SOURCES (comma-separated, default sim-1), RULES_DIR (default knowledge/rules),
-// MAPPINGS_DIR (default knowledge/mappings).
+// MAPPINGS_DIR (default knowledge/mappings), CERTAINTY_TAU (provisional routing
+// threshold, 0 < tau <= 1, default 0.5).
 import { buildApp, errSerializer } from "./app.ts";
-import { readAllowedSources, readHost, readPort } from "./config.ts";
+import { readAllowedSources, readHost, readPort, readTau } from "./config.ts";
 import {
   DEFAULT_MAPPINGS_DIR,
   DEFAULT_RULES_DIR,
@@ -17,10 +18,12 @@ async function main(): Promise<void> {
   let port: number;
   let host: string;
   let allowedSources: ReturnType<typeof readAllowedSources>;
+  let tau: number;
   try {
     port = readPort(process.env);
     host = readHost(process.env);
     allowedSources = readAllowedSources(process.env);
+    tau = readTau(process.env);
   } catch {
     // The config messages are fixed strings, but a raw stack would print paths.
     console.error(JSON.stringify({ msg: "invalid configuration" }));
@@ -41,7 +44,7 @@ async function main(): Promise<void> {
     );
     process.exit(1);
   }
-  const app = buildApp({ log: true, rules, mappings, allowedSources });
+  const app = buildApp({ log: true, rules, mappings, allowedSources, tau });
 
   const shutdown = (): void => {
     setTimeout(() => process.exit(1), 5000).unref();
