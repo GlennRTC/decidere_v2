@@ -289,11 +289,11 @@
         "Todos los seeds son sintéticos, con IDs opacos y tiempos relativos; el hook PHI no se evade",
         "Ningún dato de MIMIC ni de PhysioNet commiteado"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 23. Agregar test de que el hook PHI no se evade. Etiquetas provisionales mientras los etiquetadores sean placeholders. | Notas previas: Etiquetadores y árbitro: usar placeholders (Etiquetador A, Etiquetador B, Árbitro) hasta nombrar personas reales. No cambiar la clase esperada de un seed para que pase."
+      "notes": "Passing significa: 46 casos sintéticos PROVISIONALES (seeds/cases.json, seeds/build.ts, README, ADR-016), etiquetadores placeholder, aprobación clínica PENDIENTE; el oráculo de los tests es circular respecto a ADR-010 (consistencia con la política provisional, no corrección clínica). Orden 23. Agregar test de que el hook PHI no se evade. Etiquetas provisionales mientras los etiquetadores sean placeholders. | Notas previas: Etiquetadores y árbitro: usar placeholders (Etiquetador A, Etiquetador B, Árbitro) hasta nombrar personas reales. No cambiar la clase esperada de un seed para que pase."
     },
     {
       "id": "F019",
@@ -309,7 +309,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Script en F051. El etiquetado independiente es tarea humana paralela. | Notas previas: Depende de F018. Es un proceso con humanos: el software solo lo soporta. Etiquetadores/árbitro como placeholders por ahora."
+      "notes": "El archivo de seeds ya trae etiquetadores placeholder (placeholder-A, placeholder-B, sin árbitro) que hay que reemplazar. | Script en F051. El etiquetado independiente es tarea humana paralela. | Notas previas: Depende de F018. Es un proceso con humanos: el software solo lo soporta. Etiquetadores/árbitro como placeholders por ahora."
     },
     {
       "id": "F020",
@@ -784,7 +784,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 24. Absorbe F020 y F021. | Handoff F039 (BLOQUEANTE si se ignora): el runner debe reportar aparte los seeds esperados critico que caen en revision clinica; NO cuentan como aciertos, de lo contrario la metrica de sensibilidad de critico 100% se cumple en silencio. | Aclaracion F039: para seeds esperados critico que caen en revision clinica NO aplica 'casos en revision se reportan, no se penalizan' de AGENTS.md; el runner sale con codigo distinto de 0, los reporta aparte y etiqueta con policy_version provisional, sin presentarlos como hito cumplido (proponer al usuario conciliar AGENTS.md)."
+      "notes": "Consumir seeds/build.ts y seeds/cases.json; reportar aparte las divergencias de casos límite (categoría boundary esperado watch o no_alert que caen en revisión clínica, ADR-016); imprimir las marcas provisionales (labeling, placeholders, aprobación pendiente) en el encabezado del reporte; no tocar las etiquetas. | Orden 24. Absorbe F020 y F021. | Handoff F039 (BLOQUEANTE si se ignora): el runner debe reportar aparte los seeds esperados critico que caen en revision clinica; NO cuentan como aciertos, de lo contrario la metrica de sensibilidad de critico 100% se cumple en silencio. | Aclaracion F039: para seeds esperados critico que caen en revision clinica NO aplica 'casos en revision se reportan, no se penalizan' de AGENTS.md; el runner sale con codigo distinto de 0, los reporta aparte y etiqueta con policy_version provisional, sin presentarlos como hito cumplido (proponer al usuario conciliar AGENTS.md)."
     },
     {
       "id": "F051",
