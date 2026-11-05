@@ -32,6 +32,14 @@ F045 (SIRS) necesita frecuencia cardíaca, temperatura, leucocitos, PaCO2 y band
 - F045/F046 pueden construirse sin tocar el contrato otra vez.
 - Un código ICD-10 válido pero fuera del patrón se rechaza hasta ampliar el patrón.
 - Riesgo aceptado: cotas, el trato de bandas y la regla de completitud son provisionales.
+- **Riesgo aceptado (revisión de cumplimiento, mayor 1):** `orders` y `diagnoses_icd10` se validan y luego se ignoran hasta F046, sin ninguna señal en la respuesta; un emisor puede suponer que se evaluaron. No se agrega campo de respuesta (cambio de contrato, sin consumidor aún). Decisión abierta para el usuario: un campo fijo sin contenido, como `context_ignored` (booleano o conteo, nunca tipos, códigos ni offsets).
+- **Reidentificación (mayor 2):** antes de persistir, F012/F055 deben evaluar el riesgo de reidentificación por la combinación de hasta 20 códigos ICD-10 (incluidos los raros) más hasta 20 órdenes con offsets relativos (p. ej. cardinalidad máxima, agrupación o lista de códigos permitidos). ADR-001 y AGENTS.md cubren fechas, no combinaciones de códigos.
+- **Pregunta legal abierta (no se resuelve aquí; no se asume marco):** si los códigos ICD-10 y las órdenes por instancia, aun sin identificadores directos, son datos de salud sensibles en la jurisdicción de cada despliegue, y qué cardinalidad o agrupación es aceptable persistir.
+- `code` (32 caracteres) y `unit` (16) aún pueden llevar texto libre, mismo riesgo residual que ADR-011; `unmapped` no debe persistirse sin revisión en F012.
+- El patrón ICD valida solo la forma, no la existencia del código ni la lista de códigos (`A99.ZZZZ` pasa).
+- Órdenes duplicadas (mismo tipo y offset) se aceptan y pueden ser ruido para F046.
+- El patrón ICD, más estricto que la fuente, debe confirmarse con el clínico antes de F046.
+- **Handoff (mayor 3):** cuando F046 consuma órdenes/ICD-10, extender `apps/api/src/testing/log-audit.ts` con una comprobación de cadenas ICD-10 y tipos de orden en stdout y stderr; hoy la garantía descansa solo en `ingest-sirs.test.ts`.
 
 **Preguntas clínicas abiertas:** cotas correctas; bandas por conteo manual o automatizado; si las órdenes necesitan resultado (cultivo positivo, antibiótico administrado vs. ordenado); la regla de completitud por criterios.
 

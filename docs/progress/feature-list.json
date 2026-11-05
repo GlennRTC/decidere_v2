@@ -689,7 +689,7 @@
         "Tests de válido e inválido para las variables nuevas",
         "Decisión documentada sobre PaCO2 y bandas de SIRS (omitidas o no) y su efecto en la completitud"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
