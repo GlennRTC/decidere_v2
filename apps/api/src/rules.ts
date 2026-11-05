@@ -5,7 +5,7 @@ import {
   loadMappingSet,
   loadRuleSet,
 } from "@decidere/rules";
-import { MESSAGE_VARIABLES } from "@decidere/schema";
+import { MESSAGE_VARIABLES, VARIABLE_CATALOG } from "@decidere/schema";
 
 export const DEFAULT_RULES_DIR = fileURLToPath(
   new URL("../../../knowledge/rules/", import.meta.url),
@@ -22,6 +22,17 @@ export function loadActiveRules(dir: string): LoadedRuleSet {
     throw Object.assign(new Error("every active rule needs a severity"), {
       code: "missing_severity",
     });
+  }
+  const ucum = new Map(VARIABLE_CATALOG.map((e) => [e.variable, e.ucum]));
+  for (const rule of loaded.ruleSet) {
+    for (const c of rule.conditions) {
+      if (ucum.get(c.variable) !== c.unit) {
+        throw Object.assign(
+          new Error("a rule condition unit differs from the catalog"),
+          { code: "unit_mismatch" },
+        );
+      }
+    }
   }
   return loaded;
 }
