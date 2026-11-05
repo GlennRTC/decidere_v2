@@ -225,3 +225,45 @@ test("accepts the listen line on any interface and the server.ts messages", () =
   ])
     assert.deepEqual(auditLogLines(line({ ...ok, msg }), []).problems, [], msg);
 });
+
+test("rejects a clinical number passed as a string in an allowed field", () => {
+  const rules = line({
+    ...ok,
+    msg: "message interpreted",
+    results: [
+      {
+        case_id: UUID,
+        class: "crítico",
+        certainty: null,
+        rules_fired: ["197"],
+      },
+    ],
+  });
+  assert.equal(auditLogLines(rules, [197]).problems.length, 1);
+  const code = line({ ...ok, err: { name: "Error", code: "197" } });
+  assert.equal(auditLogLines(code, [197]).problems.length, 1);
+  // Exact equality only: a longer string that merely contains the digits is fine.
+  const fine = line({ ...ok, err: { name: "Error", code: "E1970" } });
+  assert.deepEqual(auditLogLines(fine, [197]).problems, []);
+});
+
+test("rejects a rule id that is not one of the loaded ids when a set is given", () => {
+  const raw = line({
+    ...ok,
+    msg: "message interpreted",
+    results: [
+      {
+        case_id: UUID,
+        class: "crítico",
+        certainty: null,
+        rules_fired: ["sepsis.sirs.v9"],
+      },
+    ],
+  });
+  assert.deepEqual(auditLogLines(raw, []).problems, []);
+  assert.equal(
+    auditLogLines(raw, [], { ruleIds: new Set(["sepsis.qsofa.v1"]) }).problems
+      .length,
+    1,
+  );
+});

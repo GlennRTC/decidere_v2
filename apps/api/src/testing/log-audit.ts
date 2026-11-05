@@ -1,3 +1,5 @@
+import { isApprovedMessage } from "../log-messages.ts";
+
 // Test support: checks captured log output against the approved field set (F011).
 // The set mirrors AGENTS.md "Logging". Arrays flatten with "[]".
 export const ALLOWED_LOG_PATHS: ReadonlySet<string> = new Set([
@@ -21,20 +23,6 @@ export const ALLOWED_LOG_PATHS: ReadonlySet<string> = new Set([
   "apiError.count",
   "err.name",
   "err.code",
-]);
-
-export const ALLOWED_MESSAGES: ReadonlySet<string> = new Set([
-  "incoming request",
-  "request completed",
-  "message interpreted",
-  "request failed",
-  "request error",
-  "rules failed to load",
-  "invalid configuration",
-  "unhandled rejection",
-  "uncaught exception",
-  "shutdown failed",
-  "listen failed",
 ]);
 
 const UUID =
@@ -68,8 +56,6 @@ const VALUE_RULES: Record<string, (v: unknown) => boolean> = {
     typeof v === "string" && /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(v),
   "err.code": (v) => typeof v === "string" && /^[A-Za-z0-9_]{1,64}$/.test(v),
 };
-// Fastify's own listen line (any interface) plus the fixed messages of server.ts.
-const LISTEN_LINE = /^Server listening at http:\/\/[0-9a-f.:[\]]+:\d+$/;
 
 // Numeric leaves that are legitimately arbitrary numbers.
 const NUMERIC_EXEMPT = new Set(["time", "responseTime"]);
@@ -92,6 +78,7 @@ function leaves(value: unknown, path: string, out: Leaf[]): void {
 export function auditLogLines(
   raw: string,
   forbidden: readonly (string | number)[],
+  options: { ruleIds?: ReadonlySet<string> } = {},
 ): { lines: number; problems: string[] } {
   const problems: string[] = [];
   let lines = 0;
@@ -121,11 +108,17 @@ export function auditLogLines(
         problems.push(`unknown path: ${path}`);
         seen.add(path);
       }
+      if (
+        path === "results[].rules_fired[]" &&
+        options.ruleIds &&
+        !options.ruleIds.has(String(value))
+      )
+        problems.push("rule id is not a loaded rule");
       const rule = VALUE_RULES[path];
       if (rule && !rule(value)) problems.push(`bad value shape in ${path}`);
       if (path === "msg") {
         const msg = String(value);
-        if (!ALLOWED_MESSAGES.has(msg) && !LISTEN_LINE.test(msg))
+        if (!isApprovedMessage(msg))
           problems.push(`unknown msg: ${msg.slice(0, 40)}`);
       }
       for (const f of forbidden) {
@@ -137,6 +130,10 @@ export function auditLogLines(
           problems.push(`forbidden string in ${path}`);
         if (typeof f === "number" && value === f && !NUMERIC_EXEMPT.has(path))
           problems.push(`forbidden number in ${path}`);
+        // A clinical number smuggled as text into an allowed field (exact match only,
+        // so random UUID digits cannot trip it).
+        if (typeof f === "number" && value === String(f))
+          problems.push(`forbidden number as text in ${path}`);
       }
     }
   }

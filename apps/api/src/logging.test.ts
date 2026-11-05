@@ -255,3 +255,32 @@ test("log audit: sentinel headers never reach the log", async () => {
   });
   assert.deepEqual(auditLogLines(logs(), FORBIDDEN).problems, []);
 });
+
+test("log audit: Fastify messages outside the approved set are replaced by a fixed one", async () => {
+  const { app, logs } = setup();
+  // Shapes Fastify uses for its own lines (drain refusal, reply.js with the raw URL).
+  app.log.warn(
+    { res: { statusCode: 503 } },
+    "request aborted - refusing sentinelq7",
+  );
+  app.log.error("Reply was already sent in /patients/sentinelq7?x=1");
+  const audit = auditLogLines(logs(), FORBIDDEN);
+  assert.equal(audit.lines, 2);
+  assert.deepEqual(audit.problems, []);
+  assert.ok(!logs().includes("sentinelq7"));
+});
+
+test("log audit: rule ids in the success line are the loaded rule ids", async () => {
+  const { app, logs } = setup();
+  await app.inject({
+    method: "POST",
+    url: "/v1/messages",
+    headers: { "content-type": "application/json" },
+    payload: J(message(SENTINEL_VALUES)),
+  });
+  const ruleIds = new Set(rules.meta.map((m) => m.id));
+  const audit = auditLogLines(logs(), FORBIDDEN, { ruleIds });
+  assert.ok(audit.lines > 0);
+  assert.deepEqual(audit.problems, []);
+  assert.ok(logs().includes("sepsis.qsofa.v1"));
+});

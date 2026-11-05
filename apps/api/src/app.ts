@@ -8,6 +8,7 @@ import Fastify, {
 } from "fastify";
 import { codeFor, errorBody, STATUS } from "./errors.ts";
 import { type IngestDeps, registerIngest } from "./ingest.ts";
+import { isApprovedMessage } from "./log-messages.ts";
 
 export type BuildAppOptions = {
   log?: boolean;
@@ -61,6 +62,16 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
               ) {
                 const obj = first instanceof Error ? { err: first } : first;
                 return method.apply(this, [obj, "request error"] as never);
+              }
+              // Library lines (drain refusal, "Reply was already sent ... <url>") can
+              // carry client text or unlisted wording: keep only approved messages.
+              if (typeof first === "string") {
+                return method.apply(this, [
+                  isApprovedMessage(first) ? first : "request error",
+                ] as never);
+              }
+              if (typeof args[1] === "string" && !isApprovedMessage(args[1])) {
+                return method.apply(this, [first, "request error"] as never);
               }
               return method.apply(this, args);
             },

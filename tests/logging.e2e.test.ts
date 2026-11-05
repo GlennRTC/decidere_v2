@@ -59,10 +59,14 @@ test("a real server process logs only approved fields and no sentinel", async ()
   const { ALLOWED_SOURCES: _a, RULES_DIR: _r, ...inherited } = process.env;
   const child = spawn("node", [serverPath], {
     env: { ...inherited, PORT: String(port) },
-    stdio: ["ignore", "pipe", "ignore"],
+    stdio: ["ignore", "pipe", "pipe"],
   });
   children.push(child);
   let stdout = "";
+  let stderr = "";
+  child.stderr?.on("data", (d) => {
+    stderr += String(d);
+  });
   child.stdout?.on("data", (d) => {
     stdout += String(d);
   });
@@ -91,6 +95,17 @@ test("a real server process logs only approved fields and no sentinel", async ()
 
   const audit = auditLogLines(stdout, FORBIDDEN);
   assert.deepEqual(audit.problems, []);
+  // Normal operation writes nothing else to stderr. Node's own runtime warnings
+  // (type stripping on older Node) are not ours; anything else must be approved JSON.
+  const ours = stderr
+    .split("\n")
+    .filter(
+      (l) =>
+        l.trim() !== "" &&
+        !/ExperimentalWarning|--trace-warnings|^\(node:/.test(l),
+    )
+    .join("\n");
+  assert.equal(ours, "", "unexpected stderr output");
   assert.match(stdout, /Server listening at/);
   assert.match(stdout, /"msg":"message interpreted"/);
 });
