@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto";
 import {
+  type CertaintyBreakdown,
   type ClassId,
   classify,
+  computeCertainty,
   evaluateRuleSet,
   POLICY_VERSION,
   type RuleResult,
@@ -25,7 +27,8 @@ export type CaseResult = {
   reason_code: string;
   highest_reachable_class: ClassId;
   conflict: boolean;
-  certainty: null; // F047
+  requires_confirmation: boolean;
+  certainty: CertaintyBreakdown;
   rules_fired: string[];
   trace: RuleResult[];
   unmapped: string[];
@@ -73,13 +76,15 @@ export function interpretMessage(
   const results = current.map((instance): CaseResult => {
     const evaluated = evaluateRuleSet(loaded.ruleSet, engineInput(instance));
     const decision = classify(evaluated, loaded.severities);
+    const certainty = computeCertainty(loaded.ruleSet, evaluated, decision);
     return {
       case_id: newCaseId(),
       class: CLASS_NAMES[decision.class],
       reason_code: decision.reason_code,
       highest_reachable_class: decision.highest_reachable_class,
       conflict: decision.conflict,
-      certainty: null,
+      requires_confirmation: certainty.requires_confirmation,
+      certainty,
       rules_fired: evaluated.fired,
       trace: evaluated.rules,
       unmapped: mapping.unmapped[message.instances.indexOf(instance)] ?? [],
