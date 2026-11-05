@@ -3,7 +3,8 @@ import { PolicyError } from "./policy.ts";
 import type { RuleSet, RuleSetResult } from "./types.ts";
 
 // PROVISIONAL, team-defined certainty (F047, ADR-003): min of three components in [0,1].
-// Pure: no I/O, no clock. Never changes the decided class; only flags a critical below tau.
+// Pure: no I/O, no clock. computeCertainty never changes the decided class; it only flags
+// a critical below tau. Routing below tau is routeByCertainty (F048, ADR-015).
 export const CERTAINTY_VERSION = "certainty-provisional-2";
 export const TAU_PROVISIONAL = 0.5;
 

@@ -261,7 +261,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar). | Handoff F039: ordenar la cola por highest_reachable_class, no solo por clase; un review con critico alcanzable es 'posible critico, datos incompletos'; definir quien revisa y en cuanto tiempo."
+      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar). | Handoff F039: ordenar la cola por highest_reachable_class, no solo por clase; un review con critico alcanzable es 'posible critico, datos incompletos'; definir quien revisa y en cuanto tiempo. | Handoff F048 (ADR-015): los casos enrutados llegan con routed_from y reason_code low_certainty; ordenar la cola por highest_reachable_class; no rankear una vigilancia enrutada como un review could_escalate."
     },
     {
       "id": "F017",
@@ -373,7 +373,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022. | Handoff F039: mostrar el review con highest_reachable_class critical como 'posible critico, datos incompletos'; no ocultarlo detras de vigilancia."
+      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022. | Handoff F039: mostrar el review con highest_reachable_class critical como 'posible critico, datos incompletos'; no ocultarlo detras de vigilancia. | Handoff F048 (ADR-015): un critico con requires_confirmation queda arriba del orden."
     },
     {
       "id": "F024",
@@ -748,11 +748,11 @@
         "Debajo de τ un no crítico va a revisión; un crítico conserva la clase",
         "τ provisional marcado como tal"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 22. Parte de F008. Handoff de F045 (ADR-013): decidir el enrutamiento a revisión al activar SIRS (una revisión pesa más que una vigilancia). | Handoff F047 (ADR-014): τ por variable de entorno con validación 0<τ<=1 al arrancar (τ<=0 desactivaría la bandera en silencio); un no crítico bajo τ va a revisión clínica; consume certainty.below_tau; el orden del dashboard debe mantener arriba al crítico con requires_confirmation (test explícito). | Antes de consumir below_tau, revalidar que un caso qSOFA normal completo tiene certeza 0.5 = borde de τ; validar 0 < τ <= 1; el crítico marcado queda arriba del orden."
+      "notes": "Orden 22. Parte de F008. Handoff de F045 (ADR-013): decidir el enrutamiento a revisión al activar SIRS (una revisión pesa más que una vigilancia). | Handoff F047 (ADR-014): τ por variable de entorno con validación 0<τ<=1 al arrancar (τ<=0 desactivaría la bandera en silencio); un no crítico bajo τ va a revisión clínica; consume certainty.below_tau; el orden del dashboard debe mantener arriba al crítico con requires_confirmation (test explícito). | Antes de consumir below_tau, revalidar que un caso qSOFA normal completo tiene certeza 0.5 = borde de τ; validar 0 < τ <= 1; el crítico marcado queda arriba del orden. | Passing (sesion 20, ADR-015) = implementado y probado; PROVISIONAL y SIN validacion clinica. Borde tau=0.5: qSOFA normal completo tiene certeza exactamente 0.5 y con < estricto queda sin alerta. Volumen de cola sin medir (F049). reason_code de la politica se sobrescribe con low_certainty (F070)."
     },
     {
       "id": "F049",
@@ -767,7 +767,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 26. Parte de F008. Depende de F018. | Handoff F047 (ADR-014): las bandas por variable (VARIABLE_BANDS) y TAU_PROVISIONAL son entradas de calibración."
+      "notes": "Orden 26. Parte de F008. Depende de F018. | Handoff F047 (ADR-014): las bandas por variable (VARIABLE_BANDS) y TAU_PROVISIONAL son entradas de calibración. | Handoff F048 (ADR-015): reportar el porcentaje enrutado a revision con tau 0.4/0.5/0.6 sobre los seeds (calibracion, no validacion; con <100 seeds sin estadistica)."
     },
     {
       "id": "F050",
@@ -1081,7 +1081,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Hallado en la revisión clínica de F047 (hallazgos 1, 2 y 10; ADR-014). Agrega un campo a la respuesta (cambio de contrato): pedir aprobación. Relacionado con F062 y ADR-010 pregunta 9."
+      "notes": "Hallado en la revisión clínica de F047 (hallazgos 1, 2 y 10; ADR-014). Agrega un campo a la respuesta (cambio de contrato): pedir aprobación. Relacionado con F062 y ADR-010 pregunta 9. | Handoff F048 (ADR-015): insignia routed_from; componentes de certeza junto al motivo de enrutamiento; texto de tau sin validar; opcion routed_reason_code para conservar el reason_code de la politica."
     }
   ]
 }

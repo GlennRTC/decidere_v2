@@ -238,3 +238,21 @@
 **Preguntas clínicas abiertas:** significado de certeza y de la bandera; cada banda; margen sobre todas las hojas o las determinantes; completitud por criterios; τ = 0.5; texto de `sin alerta`; el "peor caso" solo está cubierto por `highest_reachable_class`. Lista completa en ADR-014.
 **Handoffs:** F048 (τ por entorno con `0 < τ <= 1`, enrutamiento de no críticos, consumir `certainty.below_tau`, orden del dashboard con el crítico marcado arriba, con test); F049 (bandas y `TAU_PROVISIONAL` como entradas de calibración); nuevas F069 (plausibilidad, P2) y F070 (`confirmation_reason` y textos de UI, P1, revisión de cumplimiento).
 **Fuera de alcance (hallazgos menores diferidos, no corregidos aquí):** menores diferidos: test vacuoso de `__proto__`; `as never` redundante; τ Infinity/negativo aceptado; título obsoleto en `interpret.test.ts:169` (renombrar requiere aprobación del usuario); y los abiertos de ADR-014 (nombre `conflict` duplicado, log sin redondear, hoja no referenciada en `combine`). Dos menores se corrigieron en la ola final: el test de 27 combinaciones podía pasar vacuo (ahora exige al menos un crítico) y faltaba comprobar que `requires_confirmation` coincide con `certainty.requires_confirmation` en el POST.
+
+## 2026-11-05 — Sesión 20 (F048: enrutamiento a revisión con τ provisional)
+**Feature(s) trabajada(s):** F048 — `engine/src/certainty.ts` (`routeByCertainty`), `apps/api/src/config.ts` (`readTau`), `interpret.ts`, `ingest.ts`, `app.ts`, `server.ts`; ADR-015; plan `docs/superpowers/plans/2026-11-05-f048-tau-routing.md`
+**Qué se hizo:** `CERTAINTY_TAU` por entorno (`0 < τ <= 1`, regex decimal estricta, defecto 0.5, cadena vacía cae al defecto; inválido impide arrancar). Bajo τ, `vigilancia` y `sin alerta` pasan a `revisión clínica` con `routed_from` y `reason_code: "low_certainty"`; un crítico y una revisión de política no se tocan. Sin subir `POLICY_VERSION` ni `CERTAINTY_VERSION`. Único cambio de código en esta tarea: el comentario de encabezado de `certainty.ts` (sin cambio de lógica).
+**Qué significa `passing`:** implementado y probado; PROVISIONAL y SIN validación clínica. En τ = 0.5 un qSOFA normal completo tiene certeza exactamente 0.5 y con `<` estricto queda `sin alerta`. El volumen de la cola no está medido.
+**Verificación realizada:** `npm run verify` exit=0 (api 214, rules 121, schema 55, engine 170, tests 41 con 40 pasadas y 1 omitida preexistente; 0 fallidos; Biome 3 warnings = línea base). `npm run scan:phi` exit=0, "scanned 50 files, skipped 128, hits 0, errors 0" (repetido con ADR-015 y esta sesión incluidos: mismo resultado, exit=0).
+**Estado al cerrar:** F048 `passing` (provisional). Rama `feat/f048-tau-routing`, sin push.
+**Revisión de seguridad clínica (agente de IA `clinical-informatics-auditor`, NO un clínico; lectura estática):** 0 bloqueantes, 4 mayores, 6 menores; detalle en ADR-015. Mayores: `reason_code` de la política sobrescrito (diferido a F070, `routed_reason_code`); vigilancia definida bajo revisión (ADR-010 pregunta 4); volumen de cola frágil y sin medir; sin texto de quién cambia τ ni `.env.example`.
+**Preguntas clínicas abiertas:** si una vigilancia definida debe reenrutarse; un τ aparte para la confirmación del crítico; calibración de τ.
+**Pendiente:** decisión del usuario sobre `.env.example` (no existe; crearlo rompe `scripts/init.sh` y 3 tests de init-sh), AGENTS.md exige los nombres allí.
+**Handoffs:** F016, F023, F049, F070 (notas en `feature-list.json`; ver ADR-015).
+**Menores diferidos (6, no corregidos):**
+1. `config-tau.test.ts:57-58`: la exención del valor "0" es redundante con la igualdad exacta; faltan tests para "0.0", "1.0" y ".5".
+2. `certainty.ts` encabezado obsoleto (corregido en esta tarea, solo comentario).
+3. `route.test.ts:118-126`: el test de totalidad no afirma consistencia de `routed_from`.
+4. Sin test de arranque para un `CERTAINTY_TAU` inválido en `server.ts` (solo `readTau` unitario).
+5. `routing.test.ts`: el test de 27 combinaciones no afirma `routed_from === null` para críticos.
+6. Menores de la revisión clínica: cadena vacía aceptada y τ sin registrar al arrancar; `tau` opcional en `IngestDeps`/`BuildAppOptions` cae a 0.5; invariancia del crítico ligada a la aritmética de qSOFA (revisar al activar SIRS).
