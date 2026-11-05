@@ -57,9 +57,10 @@ Nunca datos de personas reales, ni derivados de MIMIC o PhysioNet. El hook PHI n
 
 ## Casos límite frente a la capa de certeza
 
-Los seeds `boundary` cercanos al umbral (FR 21, TAS 101-104, etc.) se etiquetan por los criterios publicados. La capa de certeza (ADR-015, τ = 0.5 provisional) enruta a `revisión clínica` los `no_alert` y `watch` con valores a menos de media banda de un umbral, de modo que el motor puede devolver `review` donde la etiqueta dice `no_alert` o `watch`. No es un error del motor ni un acierto: es una divergencia conocida entre dos capas.
+Los seeds `boundary` cercanos al umbral (FR 21, TAS 101-104, etc.) se etiquetan por los criterios publicados. La capa de certeza (ADR-015, τ = 0.5 provisional) enruta a `revisión clínica` los `no_alert` y `watch` con valores a menos de media banda de un umbral por AMBOS lados (lado sin alerta: FR 21 y TAS 101-104; lado vigilancia: FR 22 y 23, TAS 96-100), de modo que el motor puede devolver `review` donde la etiqueta dice `no_alert` o `watch`. No es un error del motor ni un acierto: es una divergencia conocida entre dos capas.
 
-- F050 deriva estas divergencias solo (categoría `boundary` con esperado `watch` o `no_alert` y resultado `revisión clínica`), las reporta aparte y NO reetiqueta.
+- F050 deriva estas divergencias de la RESPUESTA, no de la categoría: esperado `watch` o `no_alert`, resultado `revisión clínica`, `routed_from` igual a la clase esperada y `reason_code` `low_certainty`. Sirve para cualquier categoría y cualquier τ, y también atrapa `con-sbp-low-01` (caso contradictorio). Las reporta aparte y NO reetiqueta.
+- Línea base medida con el motor real en τ = 0.5 (por defecto): 9 de 46 seeds se enrutan a `revisión clínica` con `routed_from` igual a la clase esperada: bnd-rr-21-01, bnd-rr-22-01, bnd-sbp-101-01, bnd-sbp-100-01, bnd-21-101-15-01, bnd-22-101-15-01, bnd-21-101-14-01, bnd-21-100-15-01, con-sbp-low-01. Los 16 seeds esperados `critical` se devuelven como `crítico` en τ 0.4, 0.5 y 0.6. En τ = 0.6 todo caso completo con Glasgow 15 que sea `sin alerta` o `vigilancia` (certeza exactamente 0.5) se enruta: 23 divergencias, incluidos 8 de 8 `clear_negative`, por el salto estructural de τ de ADR-015. F050 debe imprimir τ en el encabezado del reporte, junto con las marcas provisionales.
 - Un `boundary` crítico conserva su clase (ADR-003; recibe `requires_confirmation`), así que no diverge.
 - Un seed esperado `critical` que cae en revisión sí hace fallar el runner (ADR-010, F050).
 
