@@ -18,14 +18,14 @@ Sistema que alerta al médico de urgencias cuando un paciente presenta una condi
 2. La API valida el schema y el mapper traduce códigos locales a variables canónicas.
 3. El motor de reglas evalúa las reglas activas (definidas por clínicos, versionadas) y devuelve clase, traza de evaluación y certeza.
 4. La respuesta síncrona del POST contiene la interpretación. En paralelo el dashboard se entera por polling (posteriormente push (SSE) pero de momento fuera del alcance).
-5. Clases de salida: `crítico`, `vigilancia`, `sin alerta`, `revisión clínica`. Los casos con certeza baja van a la cola de revisión.
+5. Clases de salida: `crítico`, `vigilancia`, `sin alerta`, `revisión clínica`. Los casos con certeza baja van a la cola de revisión, salvo un crítico: conserva su clase con la bandera "requiere confirmación" (ADR-003).
 
 ### Métricas de éxito del MVP
 
 - **Cobertura**: 100% de los mensajes válidos termina en una clase o en revisión. Ningún caso se pierde.
 - **Sensibilidad de la clase crítico sobre seeds**: 100%. Un crítico no detectado es el error inaceptable.
 - **Conformidad con criterios publicados** (Sepsis-3/SSC): 99% (a confirmar). Con menos de 100 casos, 99% equivale a cero discrepancias; definir con el clínico si se acepta 1 o 2.
-- **Casos en revisión clínica**: se reportan, no se penalizan. Un caso ambiguo bien derivado es resultado correcto.
+- **Casos en revisión clínica**: se reportan, no se penalizan. Un caso ambiguo bien derivado es resultado correcto. Excepción: un seed esperado `crítico` que cae en revisión clínica NO es un acierto; se reporta aparte y hace fallar el runner (ADR-010, F050).
 
 ### Gold standard
 
@@ -88,6 +88,7 @@ decidere-mvp/
 ├── apps/api/        # Fastify: ingesta POST, validación, orquestación, auth (valida JWT)
 ├── apps/web/        # React + Vite: dashboard, cola de revisión, mapeo, analítica, visor de reglas
 ├── packages/schema/ # schema del mensaje (episodios/instancias) y tipos compartidos
+├── packages/rules/  # cargador de reglas YAML: esquema cerrado, rule_set_version, approval
 ├── engine/          # evaluador puro (sin I/O): traza + certeza
 ├── knowledge/       # reglas YAML versionadas + cita de la guía
 ├── seeds/           # generador + casos simulados + clase esperada + criterio citado
@@ -102,7 +103,7 @@ decidere-mvp/
 - **ADR-003**: la certeza se calcula de forma determinística, sin LLM ni costo por token.
 - **ADR-004**: la API es el único punto de entrada y el motor no hace I/O.
 
-> Los ADR-001 a 004, ADR-005 y ADR-006 están en `docs/adr/` con estado "propuesto" hasta su aprobación.
+> Los ADR-001 a 008 están en `docs/adr/` con estado "aceptado" (aprobados por el usuario el 2026-11-03).
 
 ## Protocolo de inicio de sesión (léelo primero, cada vez)
 
@@ -111,7 +112,7 @@ Si estás retomando este proyecto sin contexto de una sesión anterior, sigue es
 1. `pwd` — confirma el directorio de trabajo real, no asumas.
 2. Lee `git log --oneline -20` y `docs/progress/PROGRESS.md` para entender qué se hizo en la sesión anterior y por qué (no solo qué archivos cambiaron).
 3. Lee `docs/progress/feature-list.json` y elige la feature de mayor prioridad con `"status": "failing"`. No trabajes en varias features a la vez — una por sesión, terminada y verificada, es mejor que tres a medias.
-4. Corre `./scripts/init.sh` para levantar el entorno (servidor dev, dependencias) — no asumas que el entorno ya está corriendo de la sesión anterior.
+4. Corre `./scripts/init.sh` (smoke check: instala dependencias con `npm ci`, arranca la API, comprueba `/health` y la detiene; variables `API_PORT` y `SKIP_INSTALL`). Para un servidor dev que siga arriba usa `npm run dev -w apps/api` (variables `PORT` y `API_HOST`). No asumas que el entorno ya está corriendo de la sesión anterior.
 5. Corre una verificación básica end-to-end (no solo `npm test`) antes de tocar código, para detectar si algo ya está roto de forma no documentada. Si algo está roto y no está en `PROGRESS.md`, documéntalo antes de seguir.
 6. Implementa la feature elegida. Al terminar: corre los tests, marca `"status": "passing"` en `feature-list.json` **solo si la verificaste tú mismo, no porque "debería funcionar"**, actualiza `PROGRESS.md` con qué se hizo y qué queda pendiente, y haz commit con mensaje descriptivo.
 
@@ -158,7 +159,7 @@ La certeza se calcula con tres componentes:
 - **Margen**: cercanía de los valores a los umbrales de decisión.
 - **Conflicto**: reglas que apuntan a clases distintas.
 
-Si la certeza cae bajo un umbral configurable, el caso va a revisión clínica. La fórmula exacta y el umbral se calibran con los casos límite del gold standard.
+Si la certeza cae bajo un umbral configurable, el caso va a revisión clínica, salvo un crítico, que nunca se degrada: conserva su clase y recibe la bandera "requiere confirmación" (ADR-003). La fórmula exacta y el umbral se calibran con los casos límite del gold standard.
 
 ### Reglas clínicas (sepsis / infección)
 
@@ -169,7 +170,7 @@ Si la certeza cae bajo un umbral configurable, el caso va a revisión clínica. 
 
 ### Convenciones del proyecto
 
-- Errores: un mensaje inválido nunca se descarta en silencio. Devuelve una respuesta de error estructurada y queda contabilizado (la cobertura debe ser 100%). Nunca lanzar strings.
+- Errores: un mensaje inválido nunca se descarta en silencio. Devuelve una respuesta de error estructurada y queda contabilizado (la cobertura debe ser 100%). Nunca lanzar strings. Cuerpo `{"error":{"code","message","request_id","details"?}}` con códigos cerrados (`not_found`, `bad_request`, `invalid_json`, `payload_too_large`, `unsupported_media_type`, `validation_failed`, `forbidden`, `internal_error`; estados 404/400/400/413/415/422/403/500) y mensajes fijos; `details` (solo en `validation_failed`) son pares `{path, code}` de `@decidere/schema`. Nunca se refleja un valor, una clave ni un mensaje del parser (ADR-001, ADR-008).
 - Logging: logger estructurado; se registran `message_id`, `case_id`, clase, certeza e ids de reglas disparadas. Nunca el payload completo, ni PHI, ni valores clínicos de la solicitud.
 - Textos de la UI: el visor de evaluación de reglas se llama **"red de evaluación de reglas"**. No es una red neuronal entrenada y no se describe como IA, ML ni red neuronal; la demo no debe sugerirlo.
 - Config y secretos: por variable de entorno; nombres en `.env.example`. Nunca valores reales en el repo.
@@ -185,7 +186,7 @@ Este harness no asume ningún país, idioma o marco regulatorio por defecto — 
 
 ## Comandos de proyecto
 
-`npm run verify` es el comando único de verificación (lint + typecheck + tests + build) y el mismo que correrá CI.
+`npm run verify` es el comando único de verificación (lint + typecheck + tests + build) y el mismo que corre CI. CI además corre `npm run scan:phi` (heurísticas PHI sobre los archivos versionados) y un escaneo de secretos con gitleaks sobre todo el historial; ambos fallan el job ante un hallazgo.
 
 ```bash
 npm ci               # instalar dependencias desde el lockfile
@@ -193,6 +194,7 @@ npm test             # tests
 npm run lint         # lint (Biome)
 npm run build        # build
 npm run verify       # verificación única: lint + typecheck + tests + build
+npm run scan:phi     # escaneo PHI de archivos versionados (también en CI)
 ```
 
 ## Equipo de subagentes especializados

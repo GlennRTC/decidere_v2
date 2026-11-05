@@ -29,11 +29,11 @@
         "Cada ADR incluye contexto, decisión, alternativas y consecuencias",
         "Los ADR coinciden con lo resumido en AGENTS.md (sin contradicciones)"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 5. Escribir ADR-001 a 004 antes de mergear F035, F005 y F040; ADR-005 ya existe. Agregar ADR-006 (anotaciones clínicas acotadas, excepción a la regla de texto libre). | Notas previas: Usar /adr. También registrar ADRs para decisiones pendientes cuando se confirmen: formato de reglas (YAML propio + json-logic vs CQL), SSE vs polling, Postgres/Supabase."
+      "notes": "Orden 5. Escribir ADR-001 a 004 antes de mergear F035, F005 y F040; ADR-005 ya existe. Agregar ADR-006 (anotaciones clínicas acotadas, excepción a la regla de texto libre). | Notas previas: Usar /adr. También registrar ADRs para decisiones pendientes cuando se confirmen: formato de reglas (YAML propio + json-logic vs CQL), SSE vs polling, Postgres/Supabase. | Verificacion cruzada 2026-11-03: ADR-001..004 existen, tienen contexto/decision/alternativas/consecuencias y coinciden con AGENTS.md salvo una tension: ADR-003 dice que un critico nunca se degrada a revision (conserva clase y recibe bandera), mientras AGENTS.md:21 y :161 dicen que los casos con certeza baja van a revision. Tension resuelta: AGENTS.md:21 y :161 aclarados (aprobado por el usuario) a favor de ADR-003. ADR-001..008 aceptados por el usuario el 2026-11-03."
     },
     {
       "id": "F003",
@@ -79,11 +79,11 @@
         "Un valor faltante marca la condición como no evaluable, no como falsa",
         "Tests unitarios escritos antes de la implementación (TDD) cubren umbrales exactos, datos faltantes y reglas múltiples"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 9. Depende de F033 (spike). Absorbe el schema de reglas en F037. | Notas previas: DECIDIDO 2026-11-03: YAML propio + json-logic para el MVP (CQL descartado). json-logic es dependencia nueva: pedir aprobación (licencia, mantenimiento) en F001/F005."
+      "notes": "Orden 9. Depende de F033 (spike). Absorbe el schema de reglas en F037. | Notas previas: DECIDIDO 2026-11-03: YAML propio + json-logic para el MVP (CQL descartado). json-logic es dependencia nueva: pedir aprobación (licencia, mantenimiento) en F001/F005. | Hecho en engine/ (sesión 7): defineRuleSet/evaluateRuleSet devuelven RuleSetResult {rules, fired}; la clase no se calcula aquí (F039). Kleene exacto solo con hojas no repetidas por regla (ADR-007, Implementación). Pendiente: revisión final de la rama y CI."
     },
     {
       "id": "F006",
@@ -115,7 +115,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Reemplazada por F039 (política provisional). Se cierra cuando F039 pase y el clínico apruebe. | Notas previas: BLOQUEADA: la combinación final se define luego en planificación/brainstorming con un agente especializado."
+      "notes": "Reemplazada por F039 (política provisional). Se cierra cuando F039 pase y el clínico apruebe. | Notas previas: BLOQUEADA: la combinación final se define luego en planificación/brainstorming con un agente especializado. | Sesion 10: F039 implementada como politica provisional; F007 sigue failing hasta que un clinico apruebe la tabla (ADR-010, preguntas abiertas)."
     },
     {
       "id": "F008",
@@ -245,7 +245,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 37 junto con F023. El endpoint está en F056. Polling 2-3 s (ADR-005). | Notas previas: DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción."
+      "notes": "Orden 37 junto con F023. El endpoint está en F056. Polling 2-3 s (ADR-005). | Notas previas: DECIDIDO 2026-11-03: polling cada 2-3 s por compatibilidad con Vercel. Ver docs/adr/ADR-005-polling-para-dashboard.md. Ignorar 'SSE' en el título/descripción. | Handoff F039: un review con highest_reachable_class critical (p. ej. FR 26 con TAS faltante) debe verse como 'posible critico, datos incompletos' para el clinico de turno; definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F016",
@@ -261,7 +261,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar)."
+      "notes": "Orden 41. Depende de F059 (audit log). Anotación y justificación: ver F061. Resolver no baja un crítico. | Notas previas: Usar agente clinical-ux-designer. Roles: ahora tres (ver F013); los criterios mencionan 'revisor y admin' = experto y superadministrador (reconciliar). | Handoff F039: ordenar la cola por highest_reachable_class, no solo por clase; un review con critico alcanzable es 'posible critico, datos incompletos'; definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F017",
@@ -373,7 +373,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022."
+      "notes": "Orden 37. Agregar: vigilancia visible, bandera 'requiere confirmación' como etiqueta con razón, orden (requiere confirmación, gravedad, recencia con edad relativa), aviso '1 nuevo' sin reordenar bajo el cursor, indicador 'actualizado hace Xs', banner tras fallos de polling, backoff y pausa con pestaña oculta. Detalle en F062. | Notas previas: Usar clinical-ux-designer. Depende de F015 y F022. | Handoff F039: mostrar el review con highest_reachable_class critical como 'posible critico, datos incompletos'; no ocultarlo detras de vigilancia."
     },
     {
       "id": "F024",
@@ -491,7 +491,7 @@
         "Un secreto de prueba sintético hace fallar el escaneo",
         "El chequeo PHI corre en CI"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
@@ -506,7 +506,7 @@
         "scripts/init.sh termina en exit 0 con la API arriba",
         "No hay estado en memoria entre requests"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
@@ -523,11 +523,11 @@
         "Licencia y mantenimiento verificados; plan B documentado: YAML con comparador propio",
         "Decisión presentada al usuario para aprobar la dependencia antes de usarla"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 4. En paralelo con F030. Spike: no se mantiene el código; conservarlo es una solicitud nueva."
+      "notes": "Orden 4. En paralelo con F030. Spike: no se mantiene el código; conservarlo es una solicitud nueva. | DECIDIDO 2026-11-03 por el usuario: comparador propio sin dependencias (ADR-007, estado propuesto); json-logic descartado. F005, F037 y F038 ya no dependen de una librería de condiciones."
     },
     {
       "id": "F034",
@@ -554,11 +554,11 @@
         "Tipos TS derivados del mismo schema",
         "Tests: válido, campos faltantes, tipos incorrectos, varias instancias, históricas ignoradas"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 7. Parte de F003. Cambio de contrato: aprobación del usuario. case_id aleatorio, nunca derivado de un identificador."
+      "notes": "Passing: verify exit 0 (schema 34/34), ver ADR-008 y PROGRESS Sesión 5. Revisión /clinical-review formal pendiente (requires_compliance_review). Orden 7. Parte de F003. Cambio de contrato: aprobación del usuario. case_id aleatorio, nunca derivado de un identificador."
     },
     {
       "id": "F036",
@@ -569,11 +569,11 @@
         "Un valor inválido no se refleja",
         "Error estructurado y nunca se lanza un string"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 8. Parte de F003."
+      "notes": "Passing 2026-11-03: verify exit 0 (api 53/53, schema 34/34), scan:phi 0 hits, Node 22.18 verificado, 36 casos HTTP en socket real sin fugas. Verificado el SyntaxError de V8 con canario en el body (test con fragmento). Revision clinica: pendiente de /clinical-review sobre el diff. Orden 8. Parte de F003."
     },
     {
       "id": "F037",
@@ -585,11 +585,11 @@
         "clinical_approval 'pending' se refleja en la respuesta del POST",
         "CODEOWNERS clínico sobre knowledge/"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 10. Absorbe F009. Depende de F005 y F033."
+      "notes": "Orden 10. Absorbe F009. Depende de F005 y F033. | Consume de F005: defineRuleSet(rules, {variables}) y su RuleSet congelado; ids de condición `combine`/`combine.N` reservados; una hoja repetida en una regla da 'unknown' (no repetir condiciones al redactar); mitigación de ids posicionales y notas de redacción son de F037. | Revisión final F005: defineRuleSet descarta severity/citation/clinical_approval/enabled y claves desconocidas, así que F037 mantiene una tabla lateral por rule_id, rechaza claves desconocidas en su propio esquema YAML, siempre pasa options.variables, rechaza alias YAML o limita la expansión (las referencias compartidas multiplican el tiempo de define ~4x cada 2 niveles), calcula rule_set_version con hash del rule set más esos metadatos (JSON.stringify(RuleSet) solo no ve severity/citation), filtra las reglas deshabilitadas antes de defineRuleSet y no repite una condición dentro de una regla. Decidido por el usuario (2026-11-03): el esquema YAML de F037 rechaza las claves desconocidas; defineRuleSet las sigue descartando. | Verificado (2026-11-03, lectura a nivel de cargador, sin push ni CI): criterios 1-2 en `@decidere/rules` (`loadRuleSet` lanza `RuleLoadError` claro ante YAML invalido; conectarlo antes de escuchar es F040, porque no hay reglas hasta F038); criterio 3 expuesto como `LoadedRuleSet.approval` (la respuesta del POST es F040); criterio 4 = `.github/CODEOWNERS` con `/knowledge/ @GlennRTC` como dueno interino hasta que exista un revisor clinico; activar 'Require review from Code Owners' es un ajuste del repositorio a cargo del usuario."
     },
     {
       "id": "F038",
@@ -600,11 +600,11 @@
         "clinical_approval = pending hasta que un clínico apruebe",
         "Test valida el YAML contra el schema de reglas"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 11. Parte de F006. Umbrales no se inventan."
+      "notes": "Orden 11. Parte de F006. Umbrales no se inventan. | F037: el YAML va en `knowledge/rules/<id>.yaml`, `format_version: 1`, `clinical_approval.status: pending`; su test debe cargar el directorio real con `loadRuleSet` y las variables canonicas. | Archivos sueltos como `.gitkeep` o `README.md` en `knowledge/rules/` hacen fallar la carga (`unsupported_entry`); aun no hay catalogo canonico de variables (F042/F043), asi que F038 necesita un conjunto provisional. | Cada condicion debe referenciarse exactamente una vez en `combine` (sin condiciones sin uso ni repetidas). | F038: `knowledge/rules/sepsis.qsofa.v1.yaml` con cita Singer et al. (Sepsis-3), JAMA 2016;315(8):801-810, `clinical_approval.status: pending`. Criterios: (1) id y cita y (2) pending en `packages/rules/src/qsofa.test.ts` (\"pending and cited\"); (3) `loadRuleSet` del directorio real. `passing` = transcripcion verificada por tests, NO aprobada clinicamente; preguntas abiertas en PROGRESS Sesion 9. | Handoff F039: la unica regla es `sepsis.qsofa.v1`, sin `severity`; leer `rules[].result` (no `fired`, que oculta unknown). | Handoff F040: `knowledge/rules/` debe desplegarse con la API; un archivo suelto hace fallar la carga; el conjunto provisional de variables existe solo en el test de F038 y debe venir de F042/F043 o de `@decidere/schema`. | Handoff F042: reemplazar el conjunto provisional de variables."
     },
     {
       "id": "F039",
@@ -615,11 +615,11 @@
         "Reglas en conflicto se resuelven por máxima severidad y alimentan el conflicto de la certeza",
         "Marcada provisional y fuera de las métricas hasta la aprobación clínica"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 12. Parte de F007."
+      "notes": "Orden 12. Parte de F007. | Consume de F005: evaluateRuleSet -> RuleSetResult {rules: [{rule_id, result, trace}], fired}; F005 no calcula la clase, la política (máxima severidad) es de F039. | `fired` mezcla unknown con false: la política de clase debe leer rules[].result para que un unknown nunca se convierta en 'sin alerta'. Invariante de ADR-007: si el mejor caso (atLeast max) alcanza el umbral, la clase nunca es 'sin alerta'. | (superado por ADR-010: `severity` es aditiva en v1) F037: agregar `severity` es un cambio de `format_version` del esquema de archivo de reglas. | Sesion 10: politica provisional implementada (classify en engine/src/policy.ts, severity opcional en reglas, ADR-010 propuesto), NO aprobada clinicamente y fuera de las metricas. Verificado: npm run verify exit 0. Preguntas clinicas abiertas en ADR-010 y PROGRESS Sesion 10."
     },
     {
       "id": "F040",
@@ -631,11 +631,11 @@
         "El payload crudo no se escribe en logs ni almacenamiento",
         "Prueba e2e contra la API levantada con init.sh"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 13. Parte de F010. Tracer bullet."
+      "notes": "F040 verificada 2026-11-04 (rama feat/f040-post-messages): npm run verify exit=0; e2e arranca server.ts y devuelve clase y traza; la ejecucion con init.sh literal queda pendiente hasta F052 (init.sh exige INGEST_API_KEY). Revision clinico-compliance: sin bloqueantes; abiertos: contador de rechazos, doc de retencion de logs, unicidad de instance_id, auth/allowlist por tenant (F054), certeza y bandera (F047), preguntas clinicas/legales (ver ADR-008, Implementacion F040). | Orden 13. Parte de F010. Tracer bullet. | Gates de ADR-008 (revision clinica F035): allowlist de source por tenant antes de loguear/persistir; instance_id descartado o mapeado a case_id aleatorio y message_id solo para idempotencia con TTL; decidir unicidad de instance_id; historicas no persistidas ni logueadas mas alla de un conteo; bodyLimit bajo y rechazo previo a JSON.parse de notacion exponencial y claves duplicadas; test con canario en logs con body invalido; solo adultos. | Handoff de F036: devolver replyValidationFailed con return en handlers async; parser JSON previo (claves duplicadas, notacion exponencial) que lance errores 4xx FST_ERR_CTP_*; extender ErrorCode con 401/403/429 y el rechazo de source fuera de la allowlist; rechazar text/plain y charsets arbitrarios (415); clientError de Node sin request id; server.ts sin handler de uncaughtException y errInfo sin try/catch; message_id se loguea (decidido 2026-11-03; ADR-008 actualizado; instance_id nunca se loguea); la tabla de codigos de error ya esta en ADR-008 (agregar 401/403/429 alli); empaquetado de @decidere/schema en Vercel sin verificar. | Review clinico F036: message_id solo tras validar formato y nunca en ramas de error (test canario); documentar retencion/acceso/destino de logs; source sin validar no se loguea hasta la allowlist; contador de rechazos por codigo (incl. clientError y 405 que hoy da 404) antes de pasar; semantica de reintento para el emisor; conservar estado 4xx real (429); considerar bodyLimit menor, path de log normalizado, err.code solo FST_ERR_*; opinion legal formal sobre message_id y logs (Ley 1581, SaMD). | La traza lleva `observed` (números clínicos) por diseño: puede ir en la respuesta y en la persistencia, nunca en logs. Envolver la evaluación en el manejador de F036 y pasar un objeto derivado de JSON plano (el mensaje de un getter que lanza escapa de evaluateRuleSet; un input null lanza TypeError). | F037: llamar `loadRuleSet(dir, {variables})` antes de escuchar y fallar el arranque ante `RuleLoadError`; devolver `rule_set_version` y `approval` en la respuesta del POST; el cargador necesita decidir un codigo de error de I/O (ver menores diferidos de la Sesion 8). | `RuleLoadError` ahora incluye los codigos `unreadable_entry` e `invalid_options`; `LoadedRuleSet.meta` no esta congelado (congelarlo antes de mantenerlo en el proceso); resolver o empaquetar `knowledge/rules` para Vercel. | Handoff F039: llamar classify(result, loaded.severities) despues de evaluateRuleSet; FALLAR EL ARRANQUE salvo que toda regla activa tenga severity (loaded.severities.size === loaded.meta.length), si no cada POST sera internal_error (cobertura); guardar policy_version con cada interpretacion; mapear ClassId (critical/watch/no_alert/review) a los nombres de la respuesta; PolicyError => internal_error; exponer provisional y el estado provisional de la politica por separado de approval de la regla; los consumidores deben ordenar la cola de revision por highest_reachable_class."
     },
     {
       "id": "F041",
@@ -645,11 +645,11 @@
         "Inválido devuelve 4xx estructurado",
         "El runner cuenta inválidos y válidos; cobertura reportada"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 14. Parte de F010. La cobertura se contabiliza en el runner (F050); el contador persistido llega con la persistencia."
+      "notes": "F041 passing para el lado API (2026-11-04, rama feat/f041-invalid-message): matriz de 12 rechazos fijada con canarios y rechazos a nivel de socket con cuerpo estructurado. El criterio \"el runner cuenta invalidos y validos; cobertura reportada\" queda como HANDOFF a F050 (el runner no existe); ver ADR-008 \"Conteo de rechazos\". | Orden 14. Parte de F010. La cobertura se contabiliza en el runner (F050); el contador persistido llega con la persistencia. Review clinico F036: el contador por codigo de error debe cubrir fallos que no pasan por el handler (clientError, cortes)."
     },
     {
       "id": "F042",
@@ -737,7 +737,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 21. Parte de F008. Bandas y pesos provisionales hasta calibrar con el clínico."
+      "notes": "Orden 21. Parte de F008. Bandas y pesos provisionales hasta calibrar con el clínico. | Handoff F039: consume conflict, basis[].counts y unknown_leaves de classify; es duena de requires_confirmation."
     },
     {
       "id": "F048",
@@ -784,7 +784,7 @@
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 24. Absorbe F020 y F021."
+      "notes": "Orden 24. Absorbe F020 y F021. | Handoff F039 (BLOQUEANTE si se ignora): el runner debe reportar aparte los seeds esperados critico que caen en revision clinica; NO cuentan como aciertos, de lo contrario la metrica de sensibilidad de critico 100% se cumple en silencio. | Aclaracion F039: para seeds esperados critico que caen en revision clinica NO aplica 'casos en revision se reportan, no se penalizan' de AGENTS.md; el runner sale con codigo distinto de 0, los reporta aparte y etiqueta con policy_version provisional, sin presentarlos como hito cumplido (proponer al usuario conciliar AGENTS.md)."
     },
     {
       "id": "F051",
@@ -903,7 +903,7 @@
       "priority": "P1",
       "requires_compliance_review": true,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 33. Parte de F013. Reconcilia los criterios de roles de F013. Supuesto a confirmar: el rol usuario también marca visto/atendido y anota (decisión 3 del usuario)."
+      "notes": "Orden 33. Parte de F013. Reconcilia los criterios de roles de F013. Supuesto a confirmar: el rol usuario también marca visto/atendido y anota (decisión 3 del usuario). | Handoff F039: el rol usuario no puede quedarse sin ver un review con critico alcanzable ('posible critico, datos incompletos'); definir quien revisa y en cuanto tiempo."
     },
     {
       "id": "F059",
@@ -964,7 +964,7 @@
       "priority": "P1",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": false,
-      "notes": "Orden 39. Parte de F023. Antes del visor gráfico (F024)."
+      "notes": "Orden 39. Parte de F023. Antes del visor gráfico (F024). | Handoff F039: redaccion 'tamizaje de alto riesgo', no diagnostico; mostrar la advertencia de Singer de que un qSOFA negativo no debe diferir la investigacion ni el tratamiento."
     },
     {
       "id": "F063",

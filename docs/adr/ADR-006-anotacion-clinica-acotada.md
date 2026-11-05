@@ -1,6 +1,6 @@
 # ADR-006: Anotación clínica acotada (excepción a "sin texto libre")
 **Fecha:** 2026-11-03
-**Estado:** propuesto
+**Estado:** aceptado
 
 **Contexto:** El clínico necesita registrar su decisión y justificarla cuando su criterio difiere del sistema (sobre un crítico, o al resolver un caso de la cola). Eso es texto libre, que ADR-001 excluye por riesgo de reidentificación.
 
