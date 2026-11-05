@@ -142,13 +142,9 @@ test("an invalid ALLOWED_SOURCES aborts with a structured line, no stack", async
   assert.ok(!stderr().includes("Bad Source"));
 });
 
-const mappingsDir = fileURLToPath(
-  new URL("../knowledge/mappings", import.meta.url),
-);
-
 test("a real server maps a contract 1.1 message with the default mappings", async () => {
   const port = await freePort();
-  const { exited } = start(port, { MAPPINGS_DIR: mappingsDir });
+  const { exited } = start(port, { MAPPINGS_DIR: "" });
   await waitHealthy(port, exited);
   const res = await fetch(`http://127.0.0.1:${port}/v1/messages`, {
     method: "POST",

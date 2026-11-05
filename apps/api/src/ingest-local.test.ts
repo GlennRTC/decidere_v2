@@ -98,7 +98,8 @@ test("an allowlisted source without a table is 200 with every code unmapped", as
   assert.equal(res.statusCode, 200);
   const r = res.json().results[0];
   assert.deepEqual(r.unmapped, ["RR", "SBP", "GCS"]);
-  assert.notEqual(r.class, "crítico");
+  assert.equal(r.class, "revisión clínica");
+  assert.equal(r.highest_reachable_class, "critical");
 });
 
 test("an instance with only unmapped variables does not break the engine", async () => {
@@ -106,6 +107,8 @@ test("an instance with only unmapped variables does not break the engine", async
   const res = await post(app, local([{ code: "XYZ", value: 1, unit: "1" }]));
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.json().results[0].unmapped, ["XYZ"]);
+  assert.equal(res.json().results[0].class, "revisión clínica");
+  assert.equal(res.json().results[0].highest_reachable_class, "critical");
 });
 
 test("a 1.0 message keeps its class and carries mapping_version", async () => {

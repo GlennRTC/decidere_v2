@@ -1,6 +1,6 @@
 format_version: 1
 source: sim-1
-source_note: "kPa to mm[Hg]: UCUM ucum-essence.xml defines m[Hg] as 133.3220 kPa (so mm[Hg] = 133.3220 Pa) and kPa as 1000 Pa; factor = 1000 / 133.3220. Verified 2026-11-05 at ucum.org/ucum (Table 18) and the ucum-org/ucum repository."
+source_note: "kPa to mm[Hg]: UCUM ucum-essence.xml (ucum-org/ucum repository) defines m[Hg] as 133.3220 kPa, so mm[Hg] = 133.3220 Pa; kPa = 1000 Pa; factor = 1000 / 133.3220. Verified 2026-11-05."
 entries:
   - code: RR
     variable: resp_rate
@@ -8,7 +8,7 @@ entries:
     variable: sbp
     units:
       - unit: kPa
-        factor: 7.5006376
+        factor: 7.500637554192106
         offset: 0
   - code: GCS
     variable: gcs
