@@ -659,11 +659,11 @@
         "Cada variable con LOINC y UCUM y fuente citada",
         "Ningún código escrito de memoria sin verificar"
       ],
-      "status": "failing",
+      "status": "passing",
       "priority": "P0",
       "requires_compliance_review": false,
       "requires_clinical_data_contract": true,
-      "notes": "Orden 16. Parte de F004."
+      "notes": "Orden 16. Parte de F004. | Catálogo catalog-1 en packages/schema (8 variables, incl. paco2 y bands_pct); verificado 2026-11-05 con NLM Clinical Tables y tx.fhir.org, no con loinc.org (403)."
     },
     {
       "id": "F043",

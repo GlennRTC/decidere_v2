@@ -37,7 +37,7 @@
 
 **Límites conocidos y riesgos aceptados:**
 - Las claves duplicadas en el JSON no se detectan. `JSON.parse` pierde precisión: `22.0` y `2e1` pasan como enteros, y `1e-400` se vuelve 0, que en `resp_rate` se lee como apnea.
-- Los rangos numéricos son provisionales; el rango GCS 3..15 es la definición de la escala, por confirmar contra la fuente primaria. La ventana de 7 días aplica también a las históricas. No hay conversión de unidades ni verificación UCUM (F042).
+- Los rangos numéricos son provisionales; el rango GCS 3..15 es la definición de la escala, por confirmar contra la fuente primaria. La ventana de 7 días aplica también a las históricas. No hay conversión de unidades (F043). Catálogo `catalog-1` en `packages/schema` (F042, LOINC/UCUM verificados); el contrato 1.0 no cambia y `loinc` entra al mensaje en 1.1 con F043.
 - El patrón de `source` no prueba opacidad: acepta, por ejemplo, un texto con nombre y fecha. Hasta F040 el riesgo queda abierto. Los UUID son v4 solo en forma y deben ir en minúsculas.
 - No se exige unicidad de `instance_id` dentro del mensaje; F040 debe decidirlo (cambiarlo es cambio de contrato).
 - Solo se devuelve el primer error. Un tag `variable` ausente reporta `invalid_value`, no `required`.
