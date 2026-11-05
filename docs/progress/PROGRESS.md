@@ -249,10 +249,11 @@
 **Preguntas clínicas abiertas:** si una vigilancia definida debe reenrutarse; un τ aparte para la confirmación del crítico; calibración de τ.
 **Pendiente:** decisión del usuario sobre `.env.example` (no existe; crearlo rompe `scripts/init.sh` y 3 tests de init-sh), AGENTS.md exige los nombres allí.
 **Handoffs:** F016, F023, F049, F070 (notas en `feature-list.json`; ver ADR-015).
-**Menores diferidos (6, no corregidos):**
-1. `config-tau.test.ts:57-58`: la exención del valor "0" es redundante con la igualdad exacta; faltan tests para "0.0", "1.0" y ".5".
-2. `certainty.ts` encabezado obsoleto (corregido en esta tarea, solo comentario).
-3. `route.test.ts:118-126`: el test de totalidad no afirma consistencia de `routed_from`.
-4. Sin test de arranque para un `CERTAINTY_TAU` inválido en `server.ts` (solo `readTau` unitario).
-5. `routing.test.ts`: el test de 27 combinaciones no afirma `routed_from === null` para críticos.
-6. Menores de la revisión clínica: cadena vacía aceptada y τ sin registrar al arrancar; `tau` opcional en `IngestDeps`/`BuildAppOptions` cae a 0.5; invariancia del crítico ligada a la aritmética de qSOFA (revisar al activar SIRS).
+**Menores diferidos (5, no corregidos) y 1 corregido:**
+1. `config-tau.test.ts` línea 41: la exención del valor "0" es redundante con la igualdad exacta; faltan tests para "0.0", "1.0" y ".5".
+2. `route.test.ts` (aprox. líneas 42-49): el test de totalidad no afirma consistencia de `routed_from`.
+3. Sin test de arranque para un `CERTAINTY_TAU` inválido en `server.ts` (solo `readTau` unitario).
+4. `routing.test.ts`: el test de 27 combinaciones no afirma `routed_from === null` para críticos.
+5. Menores de la revisión clínica: cadena vacía aceptada y τ sin registrar al arrancar; `tau` opcional en `IngestDeps`/`BuildAppOptions` cae a 0.5; la CLASE del crítico nunca cambia por estructura (`routeByCertainty` solo toca `vigilancia`/`sin alerta`), y lo que depende de la aritmética de qSOFA (completitud >= 0.667) es solo si un crítico con datos faltantes recibe `requires_confirmation`, y solo para τ < 0.667 (revisar al activar SIRS).
+**Corregido:** el encabezado obsoleto de `certainty.ts` (solo comentario, en esta tarea).
+**Revisión final:** ejercitó la regla real sobre 1,259 combinaciones FR/TAS/GCS x 10 valores de τ (12,590 evaluaciones): 0 críticos cambiaron de clase, 0 `routed_from` incoherentes, 0 discrepancias de τ. Hallazgos documentados en ADR-015: la ventana de enrutamiento en τ = 0.5 es de media banda (FR 21, TAS 101-104; una vigilancia con FR 22-23 o TAS 96-100 siempre se enruta) y el salto estructural de τ por encima de 0.5 (GCS entero con banda 1: ningún caso completo es `sin alerta` para τ en (0.5, 1]; 36 -> 0 `sin alerta`).
