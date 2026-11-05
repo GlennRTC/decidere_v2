@@ -204,3 +204,12 @@
 **Qué se hizo:** tras `loadRuleSet`, cada condición debe tener `unit` igual al `ucum` del catálogo de su variable; si no, error `unit_mismatch` con mensaje fijo (sin variable ni unidad). `server.ts` lo registra como `rules failed to load` con solo nombre y código.
 **Verificación realizada:** RED sin el chequeo; `npm run verify` exit=0 (api 181); `scan:phi` "scanned 48 files, skipped 107, hits 0, errors 0".
 **Estado al cerrar:** F068 `passing`. Rama `feat/f043-local-code-mapper`, sin push.
+
+## 2026-11-05 — Sesión 17 (F044: contrato con variables de SIRS y contexto clínico)
+**Feature(s) trabajada(s):** F044 — `packages/schema` (cotas y forma 1.1), `packages/rules` (`DELIVERABLE_VARIABLES`), `knowledge/mappings/sim-1.yaml`, `apps/api/src/ingest-sirs.test.ts`; ADR-012; plan `docs/superpowers/plans/2026-11-05-f044-sirs-contract.md`
+**Qué se hizo:** el contrato 1.1 acepta `heart_rate`, `temperature`, `wbc`, `paco2`, `bands_pct` por mapeo y, por instancia, `orders` y `diagnoses_icd10`; `sim-1.yaml` mapea los cinco códigos y convierte `10*9/L`; la salida mapeada tiene forma 1.0, así que el contexto nunca llega al motor ni a la respuesta ni a los logs. Decisión de completitud por criterios (ADR-012, handoff a F047).
+**Verificación realizada:** `ingest-sirs.test.ts` 6/6 (todos pasaron en la primera corrida: el comportamiento ya existía por las tareas 1-3; no hubo RED). `npm run verify` exit=0 (api 193, rules 106, schema 55, engine 144, tests 41 con 1 omitida preexistente; Biome 4 warnings = 3 de línea base + 1 diferido); `scan:phi` "scanned 48 files, skipped 112, hits 0, errors 0".
+**Estado al cerrar:** F044 NO marcada `passing`: falta la revisión de cumplimiento. Rama `feat/f044-sirs-contract`, sin push.
+**Ediciones a tests existentes (con aprobación del usuario):** `apps/api/src/rules-variables.test.ts` y `packages/rules/src/mappings.test.ts`.
+**Preguntas abiertas:** cotas provisionales; bandas manual vs. automatizado; si las órdenes necesitan resultado; regla de completitud por criterios; el patrón ICD-10 es más estricto que la fuente (ver ADR-012); gramática de exponentes UCUM no leída.
+**Handoffs:** F045 (SIRS sobre las cinco variables; una regla solo-1.1 nunca dispara para 1.0), F046 (usa `orders`/`diagnoses_icd10`, hoy sin consumidor), F047 (completitud por criterios, requiere confirmación clínica).
