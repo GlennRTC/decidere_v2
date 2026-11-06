@@ -292,3 +292,19 @@
 6. Sin e2e para "el servidor levantado no arranca" (ruta verificada a mano: sale con 2).
 7. `x-api-key` viaja en claro si `SEED_API_URL` es http remoto (nota para F052).
 8. Pequeña carrera en `freePort` (el puerto puede ocuparse entre cerrar la sonda y arrancar).
+
+## 2026-11-06 — Sesión 24 (F049: barrido de τ sobre los seeds)
+**Feature(s) trabajada(s):** F049 — `tests/runner/sweep*.ts`, script `seeds:tau`, ADR-017 (propuesto); plan `docs/superpowers/plans/2026-11-06-f049-tau-sweep.md`
+**Qué se hizo:** `npm run seeds:tau` barre τ de 0.1 a 1.0 (un proceso de la API por τ) sobre el subconjunto de calibración (36 de 46 seeds; 10 de 46 reservados, 21.7 %; criterio "cerca de 30%" solo aproximado, decide el usuario; ninguna persona ha leído la salida de `--held-out`) y aplica la regla provisional de estabilidad. Calibración, no validación; τ provisional, no validado. No se cambió `TAU_PROVISIONAL`, bandas ni versiones.
+**Evidencia (corrida real, subconjunto de calibración):** 7/36 a revisión en τ 0.3, 0.4 y 0.5; 17/36 en 0.6 a 1.0 (salto estructural, ADR-015 punto 7). Candidato 0.5: seguro sí, variación máxima 27.8 puntos, estable NO. Candidato 0.4: seguro sí, variación 0.0, estable sí. Candidato 0.3: seguro sí, variación 5.6, estable sí. Ningún crítico en revisión ni sin detectar en ningún τ. Referencias sobre los 46: 9 enrutados en 0.5, 23 en 0.6, 16/16 críticos detectados.
+**Integridad del reservado:** los agregados del reservado para τ 0.4 a 0.6 son derivables de cifras públicas anteriores a la partición (referencias sobre los 46 menos la calibración; ADR-016 nombra los 9 ids enrutados), así que una lectura posterior de `--held-out` es una verificación de consistencia, no una prueba independiente. La suite e2e corre el barrido sobre los seeds reales (solo calibración por defecto); el test de `--held-out` usa un archivo sintético en `os.tmpdir()`.
+**Efecto de 0.5 a 0.4:** bajar τ quita la bandera "requiere confirmación" a los críticos con certeza en [0.4, 0.5) (2 de 13 en calibración: la columna pasa de 5 a 3); el enrutamiento es el mismo (7/36 ambos). La recomendación de 0.4 sigue de cómo se construye la regla provisional (0.5 falla solo porque 0.6 cae en el salto de ADR-015 punto 7), no de un beneficio medido.
+**Recomendación (solo para revisión):** candidato 0.4 para revisión clínica, con los límites y el compromiso de seguridad de ADR-017. No hay τ elegido: F049 sigue `failing`.
+**Decisiones abiertas (ADR-017):** (a) cambiar o no `TAU_PROVISIONAL`; (b) cambiar o no la banda de Glasgow (sube `CERTAINTY_VERSION`); (c) quién corre `--held-out` y cuándo; (d) revisión clínica de la regla de estabilidad (`STABILITY_MAX_DELTA` = 10 puntos).
+**Menores diferidos (aún sin corregir):**
+1. Las líneas base 7/36 y 17/36 solo se afirman de forma indirecta mediante la variación de 27.8.
+2. Banderas duplicadas aceptadas.
+3. El id reservado se verifica por subcadena.
+4. Unos 30 arranques de la API con plazo de 120 s pueden ser lentos en CI.
+(Corregidos en la ola final: regex de la columna `a revisión`, e2e de la ruta de salida 1, `--held-out` con `--candidate` sale 2, motivo "un solo vecino".)
+**Pendiente:** elegir τ con usuario y clínico; luego leer `--held-out` una vez; cerrar F049.
