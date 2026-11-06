@@ -22,6 +22,7 @@
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present && npm run typecheck",
     "verify": "npm run lint && npm run typecheck && npm test && npm run build",
-    "scan:phi": "python3 scripts/scan_phi.py $(git ls-files)"
+    "scan:phi": "python3 scripts/scan_phi.py $(git ls-files)",
+    "seeds:run": "node tests/runner/run.ts"
   }
 }

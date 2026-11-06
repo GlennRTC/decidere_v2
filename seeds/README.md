@@ -7,7 +7,7 @@ Casos sintéticos para el runner e2e (F050). Resultado de referencia: **conformi
 ## Archivos
 
 - `cases.json`: un `SeedFile`.
-- `build.ts`: tipos (`SeedFile`, `SeedCase`, ...), `opaqueId` y `buildMessage(case)`, que arma un mensaje del contrato 1.1 listo para `POST /v1/messages`. F050 debe consumir estos dos archivos.
+- `build.ts`: tipos (`SeedFile`, `SeedCase`, ...), `opaqueId` y `buildMessage(case)`, que arma un mensaje del contrato 1.1 listo para `POST /v1/messages`. El runner (F050) consume estos dos archivos.
 
 ## Formato
 
@@ -59,10 +59,21 @@ Nunca datos de personas reales, ni derivados de MIMIC o PhysioNet. El hook PHI n
 
 Los seeds `boundary` cercanos al umbral (FR 21, TAS 101-104, etc.) se etiquetan por los criterios publicados. La capa de certeza (ADR-015, τ = 0.5 provisional) enruta a `revisión clínica` los `no_alert` y `watch` con valores a menos de media banda de un umbral por AMBOS lados (lado sin alerta: FR 21 y TAS 101-104; lado vigilancia: FR 22 y 23, TAS 96-100), de modo que el motor puede devolver `review` donde la etiqueta dice `no_alert` o `watch`. No es un error del motor ni un acierto: es una divergencia conocida entre dos capas.
 
-- F050 deriva estas divergencias de la RESPUESTA, no de la categoría: esperado `watch` o `no_alert`, resultado `revisión clínica`, `routed_from` igual a la clase esperada y `reason_code` `low_certainty`. Sirve para cualquier categoría y cualquier τ, y también atrapa `con-sbp-low-01` (caso contradictorio). Las reporta aparte y NO reetiqueta.
-- Línea base medida con el motor real en τ = 0.5 (por defecto): 9 de 46 seeds se enrutan a `revisión clínica` con `routed_from` igual a la clase esperada: bnd-rr-21-01, bnd-rr-22-01, bnd-sbp-101-01, bnd-sbp-100-01, bnd-21-101-15-01, bnd-22-101-15-01, bnd-21-101-14-01, bnd-21-100-15-01, con-sbp-low-01. Los 16 seeds esperados `critical` se devuelven como `crítico` en τ 0.4, 0.5 y 0.6. En τ = 0.6 todo caso completo con Glasgow 15 que sea `sin alerta` o `vigilancia` (certeza exactamente 0.5) se enruta: 23 divergencias, incluidos 8 de 8 `clear_negative`, por el salto estructural de τ de ADR-015. F050 debe imprimir τ en el encabezado del reporte, junto con las marcas provisionales.
+- El runner (F050) deriva estas divergencias de la RESPUESTA, no de la categoría: esperado `watch` o `no_alert`, resultado `revisión clínica`, `routed_from` igual a la clase esperada y `reason_code` `low_certainty`. Sirve para cualquier categoría y cualquier τ, y también atrapa `con-sbp-low-01` (caso contradictorio). Las reporta aparte y NO reetiqueta.
+- Línea base medida con el motor real en τ = 0.5 (por defecto): 9 de 46 seeds se enrutan a `revisión clínica` con `routed_from` igual a la clase esperada: bnd-rr-21-01, bnd-rr-22-01, bnd-sbp-101-01, bnd-sbp-100-01, bnd-21-101-15-01, bnd-22-101-15-01, bnd-21-101-14-01, bnd-21-100-15-01, con-sbp-low-01. Los 16 seeds esperados `critical` se devuelven como `crítico` en τ 0.4, 0.5 y 0.6. En τ = 0.6 todo caso completo con Glasgow 15 que sea `sin alerta` o `vigilancia` (certeza exactamente 0.5) se enruta: 23 divergencias, incluidos 8 de 8 `clear_negative`, por el salto estructural de τ de ADR-015. El reporte imprime τ en el encabezado, junto con las marcas provisionales.
 - Un `boundary` crítico conserva su clase (ADR-003; recibe `requires_confirmation`), así que no diverge.
-- Un seed esperado `critical` que cae en revisión sí hace fallar el runner (ADR-010, F050).
+- Un seed esperado `critical` que cae en revisión sí hace fallar el runner (ADR-010, F050); con el motor real esa ruta no es alcanzable (un crítico nunca va a revisión) y solo la cubren los tests unitarios.
+
+## Cómo correr el runner
+
+`npm run seeds:run [archivo]` (por defecto `seeds/cases.json`) levanta la API, envía cada seed a `POST /v1/messages` y imprime el reporte (cobertura, sensibilidad de crítico, conformidad con criterios publicados, divergencias por certeza). Estado: provisional.
+
+Variables de entorno:
+- `SEED_API_URL`: si existe, no se levanta servidor y se usa esa URL; τ se imprime desde la respuesta del servidor y, si no viene, como `desconocido` (servidor externo).
+- `SEED_API_KEY`: se envía en la cabecera `x-api-key` (nombre provisional; la API no la verifica hasta F052). Nunca se imprime.
+- `CERTAINTY_TAU`: τ del servidor levantado; solo se pasa si está definida y no vacía (si no, el servidor usa su valor por defecto, `0.5`). El encabezado imprime el τ que informa la respuesta.
+
+Códigos de salida: `0` todo cubierto, ningún crítico esperado fuera de `crítico` y sin discrepancias sin explicar; `1` un crítico esperado devolvió otra clase (incluida `revisión clínica`), cobertura menor a 100% o una discrepancia sin explicar; `2` el runner no pudo correr (servidor no arranca, URL inalcanzable, archivo de seeds ilegible, vacío o con ids repetidos), con un mensaje fijo y sin payloads. El modo continuo (F021) no está construido.
 
 ## Fuera de alcance
 
