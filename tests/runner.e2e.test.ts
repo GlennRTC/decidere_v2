@@ -49,6 +49,11 @@ test("default seeds: exit 0, label, tau 0.5 and the 9 baseline divergences", () 
   assert.match(r.out, /Resultado: OK/);
   assert.doesNotMatch(r.out + r.err, /x-api-key|synthetic-key-canary/i);
   assert.doesNotMatch(r.out, /\bIA\b|precisi[oó]n/i);
+  assert.doesNotMatch(r.out, /mm\[Hg\]|\/min|\{score\}/);
+  assert.doesNotMatch(
+    r.out,
+    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
+  );
 });
 
 test("tau 0.6 keeps criticals and shows the 23-divergence baseline", () => {
@@ -108,4 +113,31 @@ test("a missing seeds file exits 2", () => {
   const r = run([join(tmpdir(), "no-such-seeds-file.json")]);
   assert.equal(r.code, 2);
   assert.match(r.err, /^seeds runner: could not run\n$/);
+});
+
+function seedsFile(cases: unknown[]): string {
+  const file = join(mkdtempSync(join(tmpdir(), "seeds-")), "seeds.json");
+  writeFileSync(file, JSON.stringify({ labeling: "provisional", cases }));
+  return file;
+}
+
+test("an empty seeds file exits 2 with the fixed message", () => {
+  const r = run([seedsFile([])]);
+  assert.equal(r.code, 2);
+  assert.match(r.err, /^seeds runner: could not run\n$/);
+  assert.equal(r.out, "");
+});
+
+test("duplicate case ids exit 2 with the fixed message", () => {
+  const dup = {
+    id: "dup-01",
+    category: "clear_negative",
+    expected_class: "no_alert",
+    criterion: "synthetic duplicate for the runner test",
+    instances: [{ kind: "current", vitals: [] }],
+  };
+  const r = run([seedsFile([dup, dup])]);
+  assert.equal(r.code, 2);
+  assert.match(r.err, /^seeds runner: could not run\n$/);
+  assert.equal(r.out, "");
 });

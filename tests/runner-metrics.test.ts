@@ -117,3 +117,15 @@ test("observe is total", () => {
   assert.equal(observe(500, {}).class, null);
   assert.equal(observe(200, { results: [] }).class, null);
 });
+
+test("missed criticals are listed by id", () => {
+  const r = run([
+    [mk("s1", "critical"), obs("sin alerta")],
+    [mk("s2", "critical"), obs("crítico")],
+    [mk("s3", "critical"), obs("vigilancia")],
+  ]);
+  assert.deepEqual(
+    r.criticals_missed.map((o) => o.id),
+    ["s1", "s3"],
+  );
+});

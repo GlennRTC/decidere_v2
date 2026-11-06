@@ -280,3 +280,15 @@
 **Resultado con el motor real (τ = 0.5):** cobertura 46/46, sensibilidad 16/16, conformidad 37/46 con 9 divergencias por certeza y 0 discrepancias sin explicar. En τ = 0.6: 23 divergencias (línea base de regresión, salto estructural de ADR-015).
 **Qué significa `passing`:** conformidad con criterios publicados; validación clínica pendiente. Etiquetas provisionales, no es cifra estadística.
 **Pendiente / fuera de alcance:** modo continuo (F021, no construido); la cabecera `x-api-key` es provisional hasta F052; la ruta "crítico esperado en revisión" no es alcanzable con el motor real y solo la cubren tests unitarios.
+
+### Sesión 23 — ronda de correcciones tras la revisión final (F050)
+**Corregido:** el runner sale con 2 si el archivo de seeds está vacío o tiene ids repetidos; la sección de conformidad desglosa con dígitos (coinciden / derivadas por certeza / discrepancias sin explicar) y aclara que las cifras miden consistencia con la política provisional; línea aparte de datos sintéticos y τ provisional; lista de críticos esperados no detectados; τ del encabezado tomado de la respuesta (respaldo: variable de entorno, luego `desconocido`) y `CERTAINTY_TAU` solo se pasa si no está vacía; plazo de 10 s con `Date.now()` para esperar `/health`; `API_HOST` 127.0.0.1; `spawn(process.execPath)` con camino de error; el e2e verifica que no salen unidades ni UUID.
+**Pendiente (no corregido):**
+1. Los textos "provisional" y kappa del encabezado están fijos; deben derivarse de `labelers`/`clinical_approval` cuando llegue F051 (handoff F051).
+2. Huecos de tests de la tarea 1: negativo con `reason_code` equivocado; `observe` con entrada null, arreglo o no objeto.
+3. Aserciones débiles en el render y sin test de sensibilidad no nula en el render.
+4. Un crítico en revisión se lista dos veces bajo discrepancias.
+5. El e2e no borra su directorio temporal.
+6. Sin e2e para "el servidor levantado no arranca" (ruta verificada a mano: sale con 2).
+7. `x-api-key` viaja en claro si `SEED_API_URL` es http remoto (nota para F052).
+8. Pequeña carrera en `freePort` (el puerto puede ocuparse entre cerrar la sonda y arrancar).

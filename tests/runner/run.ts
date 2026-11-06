@@ -26,7 +26,11 @@ async function waitHealthy(base: string, child: ChildProcess) {
   child.once("exit", () => {
     exited = true;
   });
-  for (let i = 0; i < 100 && !exited; i++) {
+  child.once("error", () => {
+    exited = true;
+  });
+  const deadline = Date.now() + 10_000;
+  while (!exited && Date.now() < deadline) {
     try {
       const res = await fetch(`${base}/health`, {
         signal: AbortSignal.timeout(1000),
@@ -49,9 +53,14 @@ async function main(): Promise<number> {
     ),
   ) as SeedFile;
   if (!seeds || !Array.isArray(seeds.cases)) throw new Error("bad seeds");
+  if (
+    seeds.cases.length === 0 ||
+    new Set(seeds.cases.map((c) => c.id)).size !== seeds.cases.length
+  )
+    throw new Error("bad seeds");
 
   const external = process.env.SEED_API_URL;
-  const tau = process.env.CERTAINTY_TAU ?? "0.5";
+  const envTau = process.env.CERTAINTY_TAU;
   let child: ChildProcess | undefined;
   try {
     let base: string;
@@ -66,11 +75,12 @@ async function main(): Promise<number> {
         MAPPINGS_DIR: _m,
         ...inherited
       } = process.env;
-      child = spawn("node", [serverPath], {
+      child = spawn(process.execPath, [serverPath], {
         env: {
           ...inherited,
           PORT: String(port),
-          CERTAINTY_TAU: tau,
+          ...(envTau ? { CERTAINTY_TAU: envTau } : {}),
+          API_HOST: "127.0.0.1",
           ALLOWED_SOURCES: "sim-1",
         },
         stdio: "ignore",
@@ -103,14 +113,16 @@ async function main(): Promise<number> {
     const obj = (v: unknown): Record<string, unknown> =>
       v && typeof v === "object" ? (v as Record<string, unknown>) : {};
     const results = first?.results;
+    const certainty = obj(
+      obj(Array.isArray(results) ? results[0] : null).certainty,
+    );
     const header: ReportHeader = {
-      tau: external ? `${UNKNOWN} (servidor externo)` : tau,
+      tau:
+        certainty.tau !== undefined ? String(certainty.tau) : envTau || UNKNOWN,
       policy_version: str(obj(first?.policy).version),
       rule_set_version: str(obj(first?.rule_set).version),
       rule_set_approval: str(obj(first?.rule_set).approval),
-      certainty_version: str(
-        obj(obj(Array.isArray(results) ? results[0] : null).certainty).version,
-      ),
+      certainty_version: str(certainty.version),
       labeling: str(seeds.labeling),
       labelers: [
         seeds.labelers?.a,

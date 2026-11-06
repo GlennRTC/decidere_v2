@@ -122,3 +122,48 @@ test("result line", () => {
     renderReport(failing, header).trimEnd().endsWith("Resultado: FALLA"),
   );
 });
+
+test("conformity breakdown with digits and consistency caveat", () => {
+  const text = renderReport(failing, header);
+  assert.match(
+    text,
+    /Conformidad: 1\/4 coinciden; 1 derivadas a revisión por certeza \(no penalizadas, ADR-016\); 2 discrepancias sin explicar\n/,
+  );
+  assert.match(
+    text,
+    /miden consistencia con la política provisional y no son evidencia de validez clínica/,
+  );
+});
+
+test("synthetic and provisional tau notice has its own line", () => {
+  const text = renderReport(passing, header);
+  assert.match(text, /τ = 0\.7\n/);
+  assert.match(
+    text,
+    /\nDatos sintéticos; no aprobado para uso clínico\. τ provisional, no validado \(ADR-015\)\.\n/,
+  );
+});
+
+test("lists missed criticals separately from discrepancies", () => {
+  const missed = out("syn-006", {
+    expected: "critical",
+    observed: obs("sin alerta"),
+    verdict: "discrepancy",
+    critical: "missed",
+  });
+  const r: Report = {
+    ...base([missed]),
+    sensitivity: { detected: 0, expected: 1 },
+    discrepancies: [missed],
+    criticals_missed: [missed],
+    failed: true,
+  };
+  assert.match(
+    renderReport(r, header),
+    /Críticos esperados no detectados \(1\): syn-006\n/,
+  );
+  assert.match(
+    renderReport(passing, header),
+    /Críticos esperados no detectados \(0\): ninguno\n/,
+  );
+});

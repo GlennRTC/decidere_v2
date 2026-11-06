@@ -69,11 +69,11 @@ Los seeds `boundary` cercanos al umbral (FR 21, TAS 101-104, etc.) se etiquetan 
 `npm run seeds:run [archivo]` (por defecto `seeds/cases.json`) levanta la API, envía cada seed a `POST /v1/messages` y imprime el reporte (cobertura, sensibilidad de crítico, conformidad con criterios publicados, divergencias por certeza). Estado: provisional.
 
 Variables de entorno:
-- `SEED_API_URL`: si existe, no se levanta servidor y se usa esa URL; τ se imprime como `desconocido (servidor externo)`.
+- `SEED_API_URL`: si existe, no se levanta servidor y se usa esa URL; τ se imprime desde la respuesta del servidor y, si no viene, como `desconocido` (servidor externo).
 - `SEED_API_KEY`: se envía en la cabecera `x-api-key` (nombre provisional; la API no la verifica hasta F052). Nunca se imprime.
-- `CERTAINTY_TAU`: τ del servidor levantado (por defecto `0.5`).
+- `CERTAINTY_TAU`: τ del servidor levantado; solo se pasa si está definida y no vacía (si no, el servidor usa su valor por defecto, `0.5`). El encabezado imprime el τ que informa la respuesta.
 
-Códigos de salida: `0` todo cubierto, ningún crítico esperado fuera de `crítico` y sin discrepancias sin explicar; `1` un crítico esperado devolvió otra clase (incluida `revisión clínica`), cobertura menor a 100% o una discrepancia sin explicar; `2` el runner no pudo correr (servidor no arranca, URL inalcanzable, archivo de seeds ilegible), con un mensaje fijo y sin payloads. El modo continuo (F021) no está construido.
+Códigos de salida: `0` todo cubierto, ningún crítico esperado fuera de `crítico` y sin discrepancias sin explicar; `1` un crítico esperado devolvió otra clase (incluida `revisión clínica`), cobertura menor a 100% o una discrepancia sin explicar; `2` el runner no pudo correr (servidor no arranca, URL inalcanzable, archivo de seeds ilegible, vacío o con ids repetidos), con un mensaje fijo y sin payloads. El modo continuo (F021) no está construido.
 
 ## Fuera de alcance
 
