@@ -75,6 +75,15 @@ Variables de entorno:
 
 Códigos de salida: `0` todo cubierto, ningún crítico esperado fuera de `crítico` y sin discrepancias sin explicar; `1` un crítico esperado devolvió otra clase (incluida `revisión clínica`), cobertura menor a 100% o una discrepancia sin explicar; `2` el runner no pudo correr (servidor no arranca, URL inalcanzable, archivo de seeds ilegible, vacío o con ids repetidos), con un mensaje fijo y sin payloads. El modo continuo (F021) no está construido.
 
+## Barrido de τ (calibración, no validación)
+
+`npm run seeds:tau [archivo]` (por defecto `seeds/cases.json`) levanta un proceso de la API por cada τ de la rejilla 0.1 a 1.0 en pasos de 0.1 y reporta la curva "% a revisión frente a τ" con la seguridad de los críticos. Es calibración, no validación; τ provisional, no validado. Resultados y decisiones abiertas: `docs/adr/ADR-017-barrido-de-tau-con-seeds.md`.
+
+- `--candidate <τ>`: τ a evaluar con la regla provisional de estabilidad (por defecto `TAU_PROVISIONAL`, 0.5).
+- `--held-out`: lee el subconjunto reservado. Se lee UNA vez, después de elegir τ con el usuario y un clínico.
+- Regla de partición: hash del id del caso, cerca de 30 % reservado, determinística; los ids reservados nunca se imprimen por defecto.
+- Códigos de salida: `0` sin problemas; `1` un crítico no detectado o un caso sin cobertura en algún τ: señal binaria sobre TODOS los seeds, incluidos los reservados (no indica en cuál subconjunto); `2` no pudo correr.
+
 ## Fuera de alcance
 
 Seeds SIRS (la regla está inactiva), seeds temporales de peor valor frente al último (pendiente, ADR-010 pregunta 8), doble etiquetado real y kappa (F019/F051). Ver `docs/adr/ADR-016-seeds-sinteticos-provisionales.md`.
