@@ -50,7 +50,7 @@ test("splitSeeds holds out 8 to 20 of the real seeds", () => {
     readFileSync(new URL("../seeds/cases.json", import.meta.url), "utf8"),
   ) as { cases: SeedCase[] };
   const { held_out } = splitSeeds(file.cases);
-  // actual held-out count on the 46 provisional seeds: 10
+  // measured 10 held out of 46 when written; the range tolerates seed edits
   assert.equal(file.cases.length, 46);
   assert.ok(
     held_out.length >= 8 && held_out.length <= 20,
@@ -184,4 +184,60 @@ test("assessStability: no neighbour rows gives null delta and not stable", () =>
   assert.equal(s.max_delta, null);
   assert.equal(s.stable, false);
   assert.ok(s.reason.length > 0);
+});
+
+test("summarizeTau ignores requires_confirmation on non-critical cases", () => {
+  const observed = new Map([
+    ["a", obs("vigilancia", { requires_confirmation: true })],
+  ]);
+  const r = summarizeTau([mk("a", "watch")], observed, 0.5);
+  assert.equal(r.criticals.requires_confirmation, 0);
+});
+
+test("assessStability: a neighbour with a missed critical is unsafe", () => {
+  const rows = new Map([
+    [0.5, row(0.2, { missed: 1, detected: 1 })],
+    [0.6, row(0.2)],
+  ]);
+  const s = assessStability(rows, 0.6, 0.1);
+  assert.equal(s.safe, false);
+  assert.equal(s.stable, false);
+});
+
+test("assessStability: float noise at the boundary does not flip stability", () => {
+  const at = assessStability(
+    new Map([
+      [0.4, row(0.4)],
+      [0.5, row(0.3)],
+    ]),
+    0.4,
+    0.1,
+  );
+  assert.equal(at.stable, true);
+  const below = assessStability(
+    new Map([
+      [0.4, row(0.5)],
+      [0.5, row(0.4)],
+    ]),
+    0.4,
+    0.1,
+  );
+  assert.equal(below.stable, true);
+  const above = assessStability(
+    new Map([
+      [0.4, row(0.42)],
+      [0.5, row(0.3)],
+    ]),
+    0.4,
+    0.1,
+  );
+  assert.equal(above.stable, false);
+  assert.match(above.reason, /variación/);
+});
+
+test("assessStability: a missing candidate row has its own reason", () => {
+  const s = assessStability(new Map([[0.5, row(0.2)]]), 0.6, 0.1);
+  assert.equal(s.stable, false);
+  assert.match(s.reason, /candidato/);
+  assert.doesNotMatch(s.reason, /crítico/);
 });

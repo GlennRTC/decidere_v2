@@ -104,13 +104,15 @@ export function assessStability(
     ? present.map((r) => Math.abs(r.routed_share - own.routed_share))
     : [];
   const max_delta = deltas.length ? Math.max(...deltas) : null;
-  const stable = safe && max_delta !== null && max_delta <= maxDelta;
+  const stable = safe && max_delta !== null && max_delta <= maxDelta + 1e-9; // tolerance: 0.4 - 0.3 is 0.10000000000000003 in floats
   const reason = stable
     ? "Estable: sin críticos en revisión ni perdidos y variación dentro del límite."
-    : !safe
-      ? "No seguro: hay un crítico en revisión clínica o no detectado en el candidato o un vecino."
-      : max_delta === null
-        ? "Sin vecinos evaluados: no se puede medir la variación."
-        : "Inestable: la variación de casos derivados entre vecinos supera el límite.";
+    : own === null
+      ? "Sin datos del candidato: no se puede evaluar su estabilidad."
+      : !safe
+        ? "No seguro: hay un crítico en revisión clínica o no detectado en el candidato o un vecino."
+        : max_delta === null
+          ? "Sin vecinos evaluados: no se puede medir la variación."
+          : "Inestable: la variación de casos derivados entre vecinos supera el límite.";
   return { candidate, neighbours, safe, max_delta, stable, reason };
 }
