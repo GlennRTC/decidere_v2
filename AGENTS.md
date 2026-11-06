@@ -195,6 +195,7 @@ npm run lint         # lint (Biome)
 npm run build        # build
 npm run verify       # verificación única: lint + typecheck + tests + build
 npm run scan:phi     # escaneo PHI de archivos versionados (también en CI)
+npm run seeds:run    # ejecuta los seeds contra la API y reporta métricas (provisional)
 ```
 
 ## Equipo de subagentes especializados
