@@ -1,46 +1,11 @@
-import { type ChildProcess, spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { createServer } from "node:net";
 import { fileURLToPath } from "node:url";
-import { buildMessage, type SeedFile } from "../../seeds/build.ts";
-import { evaluateSeeds, type Observed, observe } from "./metrics.ts";
+import type { SeedFile } from "../../seeds/build.ts";
+import { evaluateSeeds } from "./metrics.ts";
 import { type ReportHeader, renderReport } from "./render.ts";
+import { postSeeds, startApi } from "./server.ts";
 
-const serverPath = fileURLToPath(
-  new URL("../../apps/api/src/server.ts", import.meta.url),
-);
 const UNKNOWN = "desconocido";
-
-const freePort = (): Promise<number> =>
-  new Promise((resolve, reject) => {
-    const probe = createServer();
-    probe.once("error", reject);
-    probe.listen(0, "127.0.0.1", () => {
-      const { port } = probe.address() as { port: number };
-      probe.close(() => resolve(port));
-    });
-  });
-
-async function waitHealthy(base: string, child: ChildProcess) {
-  let exited = false;
-  child.once("exit", () => {
-    exited = true;
-  });
-  child.once("error", () => {
-    exited = true;
-  });
-  const deadline = Date.now() + 10_000;
-  while (!exited && Date.now() < deadline) {
-    try {
-      const res = await fetch(`${base}/health`, {
-        signal: AbortSignal.timeout(1000),
-      });
-      if (res.ok) return;
-    } catch {}
-    await new Promise((r) => setTimeout(r, 100));
-  }
-  throw new Error("not healthy");
-}
 
 const str = (v: unknown): string => (typeof v === "string" ? v : UNKNOWN);
 
@@ -61,54 +26,13 @@ async function main(): Promise<number> {
 
   const external = process.env.SEED_API_URL;
   const envTau = process.env.CERTAINTY_TAU;
-  let child: ChildProcess | undefined;
+  const { base, stop } = await startApi({ tau: envTau, external });
   try {
-    let base: string;
-    if (external) {
-      base = external.replace(/\/$/, "");
-    } else {
-      const port = await freePort();
-      // The developer's own ALLOWED_SOURCES / RULES_DIR / MAPPINGS_DIR must not change the result.
-      const {
-        ALLOWED_SOURCES: _a,
-        RULES_DIR: _r,
-        MAPPINGS_DIR: _m,
-        ...inherited
-      } = process.env;
-      child = spawn(process.execPath, [serverPath], {
-        env: {
-          ...inherited,
-          PORT: String(port),
-          ...(envTau ? { CERTAINTY_TAU: envTau } : {}),
-          API_HOST: "127.0.0.1",
-          ALLOWED_SOURCES: "sim-1",
-        },
-        stdio: "ignore",
-      });
-      base = `http://127.0.0.1:${port}`;
-      await waitHealthy(base, child);
-    }
-
-    const headers: Record<string, string> = {
-      "content-type": "application/json",
-    };
-    if (process.env.SEED_API_KEY)
-      headers["x-api-key"] = process.env.SEED_API_KEY;
-
-    const observed = new Map<string, Observed>();
-    let first: Record<string, unknown> | undefined;
-    for (const c of seeds.cases) {
-      const res = await fetch(`${base}/v1/messages`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(buildMessage(c)),
-        signal: AbortSignal.timeout(5000),
-      });
-      const body: unknown = await res.json().catch(() => null);
-      observed.set(c.id, observe(res.status, body));
-      if (res.status === 200 && !first && body && typeof body === "object")
-        first = body as Record<string, unknown>;
-    }
+    const { observed, first } = await postSeeds(
+      base,
+      seeds.cases,
+      process.env.SEED_API_KEY,
+    );
 
     const obj = (v: unknown): Record<string, unknown> =>
       v && typeof v === "object" ? (v as Record<string, unknown>) : {};
@@ -138,7 +62,7 @@ async function main(): Promise<number> {
     process.stdout.write(renderReport(report, header));
     return report.failed ? 1 : 0;
   } finally {
-    child?.kill("SIGKILL");
+    stop();
   }
 }
 
