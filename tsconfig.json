@@ -4,6 +4,7 @@
     "tests/**/*.ts",
     "apps/**/*.ts",
     "packages/**/*.ts",
-    "engine/**/*.ts"
+    "engine/**/*.ts",
+    "seeds/**/*.ts"
   ]
 }

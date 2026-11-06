@@ -1,0 +1,1316 @@
+{
+  "labeling": "provisional",
+  "labelers": {
+    "a": "placeholder-A",
+    "b": "placeholder-B",
+    "adjudicator": null
+  },
+  "clinical_approval": {
+    "status": "pending",
+    "approver": null
+  },
+  "cases": [
+    {
+      "id": "pos-rr-sbp-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: RR and SBP true",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 28,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 88,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-rr-gcs-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: RR and GCS true",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 26,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 118,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 13,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-sbp-gcs-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: SBP and GCS true",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 18,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 92,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 12,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-all-three-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: three criteria true",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 30,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 85,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 10,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-all-three-02",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: three criteria true",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 32,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 96,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 14,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-extreme-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: extreme values, three criteria true",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 34,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 70,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 9,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-sbp-kpa-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: RR and SBP true, SBP 9.5 kPa is about 71 mm[Hg]",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 24,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 9.5,
+              "unit": "kPa"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-rr-offset-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: RR and SBP true, RR measured 5 min earlier",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 25,
+              "unit": "/min",
+              "t_offset_min": -5
+            },
+            {
+              "code": "SBP",
+              "value": 90,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pos-offsets-mixed-01",
+      "category": "clear_positive",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: three criteria true at different offsets",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 23,
+              "unit": "/min",
+              "t_offset_min": -10
+            },
+            {
+              "code": "SBP",
+              "value": 95,
+              "unit": "mm[Hg]",
+              "t_offset_min": -4
+            },
+            {
+              "code": "GCS",
+              "value": 13,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-normal-01",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: normal vitals",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 14,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 122,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-normal-02",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: normal vitals",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 118,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-normal-03",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: normal vitals",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 18,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 130,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-normal-04",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: normal vitals",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 12,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 110,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-normal-05",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: normal vitals",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 20,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 105,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-sbp-kpa-01",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: SBP 16 kPa is about 120 mm[Hg]",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 16,
+              "unit": "kPa"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-normal-06",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: normal vitals",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 15,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 140,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neg-offsets-01",
+      "category": "clear_negative",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: normal vitals at different offsets",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 19,
+              "unit": "/min",
+              "t_offset_min": -8
+            },
+            {
+              "code": "SBP",
+              "value": 125,
+              "unit": "mm[Hg]",
+              "t_offset_min": -3
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-rr-21-01",
+      "category": "boundary",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: RR 21 is below 22",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 21,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-rr-22-01",
+      "category": "boundary",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: RR 22 meets the threshold",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 22,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-sbp-101-01",
+      "category": "boundary",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: SBP 101 is above 100",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 101,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-sbp-100-01",
+      "category": "boundary",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: SBP 100 meets the threshold",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 100,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-gcs-15-01",
+      "category": "boundary",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: GCS 15 is not below 15",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-gcs-14-01",
+      "category": "boundary",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: GCS 14 is below 15",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 14,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-rr22-sbp100-01",
+      "category": "boundary",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: RR 22 and SBP 100 both meet thresholds",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 22,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 100,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-21-101-15-01",
+      "category": "boundary",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: all three just outside thresholds",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 21,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 101,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-22-101-15-01",
+      "category": "boundary",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: only RR 22 meets the threshold",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 22,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 101,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-21-100-14-01",
+      "category": "boundary",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: SBP 100 and GCS 14 meet thresholds",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 21,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 100,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 14,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-21-101-14-01",
+      "category": "boundary",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: only GCS 14 meets the threshold",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 21,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 101,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 14,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-22-100-14-01",
+      "category": "boundary",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: three criteria at their thresholds",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 22,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 100,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 14,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bnd-21-100-15-01",
+      "category": "boundary",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: only SBP 100 meets the threshold",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 21,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 100,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-gcs-absent-crit-01",
+      "category": "missing_data",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: RR and SBP true, GCS absent cannot lower the count",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 26,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 90,
+              "unit": "mm[Hg]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-gcs-absent-rr-01",
+      "category": "missing_data",
+      "expected_class": "review",
+      "criterion": "qSOFA unknown criteria (Singer 2016, Box 4); class per ADR-010 table: RR true, SBP normal, GCS absent",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 26,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-all-absent-01",
+      "category": "missing_data",
+      "expected_class": "review",
+      "criterion": "qSOFA unknown criteria (Singer 2016, Box 4); class per ADR-010 table: no criterion measured",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": []
+        }
+      ]
+    },
+    {
+      "id": "miss-rr-null-01",
+      "category": "missing_data",
+      "expected_class": "review",
+      "criterion": "qSOFA unknown criteria (Singer 2016, Box 4); class per ADR-010 table: RR null, others normal",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": null,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-sbp-absent-01",
+      "category": "missing_data",
+      "expected_class": "review",
+      "criterion": "qSOFA unknown criteria (Singer 2016, Box 4); class per ADR-010 table: SBP absent, others normal",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-two-absent-01",
+      "category": "missing_data",
+      "expected_class": "review",
+      "criterion": "qSOFA unknown criteria (Singer 2016, Box 4); class per ADR-010 table: RR and SBP absent, GCS normal",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-gcs-null-01",
+      "category": "missing_data",
+      "expected_class": "review",
+      "criterion": "qSOFA unknown criteria (Singer 2016, Box 4); class per ADR-010 table: GCS null, RR and SBP normal",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 118,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": null,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-one-absent-crit-01",
+      "category": "missing_data",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: SBP and GCS true, RR absent",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "SBP",
+              "value": 88,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 12,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss-two-null-01",
+      "category": "missing_data",
+      "expected_class": "review",
+      "criterion": "qSOFA unknown criteria (Singer 2016, Box 4); class per ADR-010 table: RR and SBP null, GCS normal",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": null,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": null,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "con-rr-high-01",
+      "category": "contradictory",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: RR high, SBP normal, GCS 15",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 24,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "con-sbp-low-01",
+      "category": "contradictory",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: SBP low, RR and GCS normal",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 98,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "con-rr-sbp-01",
+      "category": "contradictory",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: RR high and SBP low, GCS 15",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 24,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 96,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "con-hist-severe-01",
+      "category": "contradictory",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: only the current instance counts; historical severe values ignored",
+      "instances": [
+        {
+          "kind": "historical",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 32,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 70,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 9,
+              "unit": "{score}"
+            }
+          ]
+        },
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "con-hist-normal-01",
+      "category": "contradictory",
+      "expected_class": "critical",
+      "criterion": "qSOFA >= 2 (Singer 2016, Box 4); class per ADR-010 table: only the current instance counts; historical normal values ignored",
+      "instances": [
+        {
+          "kind": "historical",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        },
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 28,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 88,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 13,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "con-latest-wins-01",
+      "category": "contradictory",
+      "expected_class": "no_alert",
+      "criterion": "qSOFA = 0, all criteria known (Singer 2016, Box 4); class per ADR-010 table: latest RR (16) replaces the earlier 26",
+      "note": "latest measurement wins (provisional, ADR-010 question 8)",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 26,
+              "unit": "/min",
+              "t_offset_min": -20
+            },
+            {
+              "code": "RR",
+              "value": 16,
+              "unit": "/min",
+              "t_offset_min": -2
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "con-latest-null-01",
+      "category": "contradictory",
+      "expected_class": "watch",
+      "criterion": "qSOFA = 1, all criteria known (Singer 2016, Box 4); class per ADR-010 table: a null later RR does not replace the earlier 26",
+      "note": "latest non-null measurement wins (provisional, ADR-010 question 8)",
+      "instances": [
+        {
+          "kind": "current",
+          "vitals": [
+            {
+              "code": "RR",
+              "value": 26,
+              "unit": "/min",
+              "t_offset_min": -20
+            },
+            {
+              "code": "RR",
+              "value": null,
+              "unit": "/min"
+            },
+            {
+              "code": "SBP",
+              "value": 120,
+              "unit": "mm[Hg]"
+            },
+            {
+              "code": "GCS",
+              "value": 15,
+              "unit": "{score}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
