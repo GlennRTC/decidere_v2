@@ -19,7 +19,7 @@ export function renderSweep(i: SweepInput): string {
     "Datos sintéticos; no aprobado para uso clínico. τ provisional, no validado (ADR-015).",
     `Seeds: ${i.seed_count}; subconjunto mostrado: ${i.subset_count}; reservado: ${i.held_out_count}`,
     "Con menos de 100 seeds los porcentajes no son una cifra estadística.",
-    "Cobertura de criterios: conformidad con criterios publicados; validación clínica pendiente.",
+    "Conformidad con criterios publicados; validación clínica pendiente.",
   ];
   if (held)
     lines.push(

@@ -95,5 +95,11 @@ test("a critical in review is visible in its row", () => {
     rows: [bad],
     stability: null,
   });
-  assert.match(out, /^\| 0\.3 \|.*\| 1 \|/m);
+  const cells = out
+    .split("\n")
+    .find((l) => l.startsWith("| 0.3 |"))
+    ?.split("|")
+    .map((s) => s.trim());
+  assert.equal(cells?.[7], "1"); // en revisión
+  assert.equal(cells?.[8], "0"); // no detectados
 });

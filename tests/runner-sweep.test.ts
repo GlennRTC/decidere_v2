@@ -166,6 +166,7 @@ test("assessStability: edges give null neighbours without crashing", () => {
   assert.equal(low.neighbours[0]?.tau, 0);
   assert.equal(low.neighbours[0]?.row, null);
   assert.equal(low.stable, true);
+  assert.match(low.reason, /un solo vecino/);
   const high = assessStability(
     new Map([
       [0.9, row(0.2)],

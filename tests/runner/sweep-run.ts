@@ -21,6 +21,7 @@ function parseArgs(argv: string[]) {
   let candidate = DEFAULT_CANDIDATE;
   let heldOut = false;
   let file: string | undefined;
+  let candidateGiven = false;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i] as string;
     if (a === "--held-out") heldOut = true;
@@ -28,9 +29,12 @@ function parseArgs(argv: string[]) {
       const v = argv[++i];
       if (v === undefined || !CANDIDATE.test(v)) throw new Error("bad args");
       candidate = Number(v);
+      candidateGiven = true;
     } else if (!a.startsWith("--") && file === undefined) file = a;
     else throw new Error("bad args");
   }
+  // The held-out read is not used to pick tau, so a candidate makes no sense there.
+  if (heldOut && candidateGiven) throw new Error("bad args");
   return { candidate, heldOut, file };
 }
 

@@ -81,8 +81,9 @@ Códigos de salida: `0` todo cubierto, ningún crítico esperado fuera de `crít
 
 - `--candidate <τ>`: τ a evaluar con la regla provisional de estabilidad (por defecto `TAU_PROVISIONAL`, 0.5).
 - `--held-out`: lee el subconjunto reservado. Se lee UNA vez, después de elegir τ con el usuario y un clínico.
-- Regla de partición: hash del id del caso, cerca de 30 % reservado, determinística; los ids reservados nunca se imprimen por defecto.
-- Códigos de salida: `0` sin problemas; `1` un crítico no detectado o un caso sin cobertura en algún τ: señal binaria sobre TODOS los seeds, incluidos los reservados (no indica en cuál subconjunto); `2` no pudo correr.
+- `seeds:tau` ignora `SEED_API_URL` y sobrescribe `CERTAINTY_TAU` en cada proceso que levanta.
+- Regla de partición: hash del id del caso, 10 de 46 (21.7 %) reservados, determinística (el criterio "cerca de 30%" se cumple solo de forma aproximada; decide el usuario); los ids reservados nunca se imprimen por defecto.
+- Códigos de salida: `0` sin problemas; `1` un crítico no detectado o un caso sin cobertura en algún τ: señal binaria sobre TODOS los seeds, incluidos los reservados (un bit más la línea genérica "Falla fuera del subconjunto mostrado" cuando solo falla el reservado, sin ids ni τ); `2` no pudo correr.
 
 ## Fuera de alcance
 

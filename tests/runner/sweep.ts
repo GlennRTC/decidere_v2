@@ -106,7 +106,7 @@ export function assessStability(
   const max_delta = deltas.length ? Math.max(...deltas) : null;
   const stable = safe && max_delta !== null && max_delta <= maxDelta + 1e-9; // tolerance: 0.4 - 0.3 is 0.10000000000000003 in floats
   const reason = stable
-    ? "Estable: sin críticos en revisión ni perdidos y variación dentro del límite."
+    ? `Estable: sin críticos en revisión ni perdidos y variación dentro del límite${present.length === 1 ? " (un solo vecino: el candidato está en el borde de la cuadrícula)" : ""}.`
     : own === null
       ? "Sin datos del candidato: no se puede evaluar su estabilidad."
       : !safe
